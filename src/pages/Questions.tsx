@@ -97,6 +97,12 @@ const Questions = () => {
 
     setIsAnalyzing(true);
     try {
+      console.log('Sending analysis request with:', {
+        question: questions[currentStep - 1],
+        answer: answer,
+        jobTitle: job,
+      });
+
       const { data, error } = await supabase.functions.invoke('analyze-response', {
         body: {
           question: questions[currentStep - 1],
@@ -105,10 +111,19 @@ const Questions = () => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Analysis error:', error);
+        throw error;
+      }
 
+      if (!data) {
+        throw new Error('Aucune donnée reçue de l\'analyse');
+      }
+
+      console.log('Analysis response:', data);
       setFeedback(data.feedback);
       setSampleResponse(data.sample_response);
+      setShowFeedback(true); // Ouvrir automatiquement le feedback
       
       toast({
         title: "Analyse terminée",
