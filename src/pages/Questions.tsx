@@ -3,13 +3,24 @@ import { useState } from "react";
 import { useLocation, Navigate } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Mic, Square } from "lucide-react";
+import { useReactMediaRecorder } from "react-media-recorder";
+import { useToast } from "@/components/ui/use-toast";
 
 const Questions = () => {
   const location = useLocation();
   const { job, description } = location.state || {};
   const [answer, setAnswer] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const { toast } = useToast();
+
+  const { status, startRecording, stopRecording, mediaBlobUrl } = useReactMediaRecorder({
+    audio: true,
+    onStop: async (blobUrl, blob) => {
+      await handleTranscription(blob);
+    }
+  });
 
   if (!description) {
     return <Navigate to="/" replace />;
@@ -24,6 +35,42 @@ const Questions = () => {
 
   const handleAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAnswer(e.target.value);
+  };
+
+  const handleTranscription = async (audioBlob: Blob) => {
+    setIsTranscribing(true);
+    const formData = new FormData();
+    formData.append("file", audioBlob, "audio.wav");
+    formData.append("model", "whisper-1");
+
+    try {
+      const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la transcription");
+      }
+
+      const data = await response.json();
+      setAnswer(data.text);
+      toast({
+        title: "Transcription réussie",
+        description: "Votre réponse vocale a été transcrite avec succès.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur de transcription",
+        description: "Impossible de transcrire l'audio. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTranscribing(false);
+    }
   };
 
   return (
@@ -55,14 +102,38 @@ const Questions = () => {
             {questions[currentStep - 1]}
           </h2>
 
-          {/* Zone de réponse */}
-          <div className="space-y-2">
-            <Textarea
-              value={answer}
-              onChange={handleAnswerChange}
-              placeholder="Tapez votre réponse"
-              className="min-h-[200px] p-4 text-base"
-            />
+          {/* Zone de réponse avec bouton d'enregistrement */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-4">
+              <Textarea
+                value={answer}
+                onChange={handleAnswerChange}
+                placeholder="Tapez votre réponse ou utilisez l'enregistrement vocal"
+                className="min-h-[200px] p-4 text-base flex-1"
+                disabled={isTranscribing}
+              />
+              <div className="flex flex-col items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className={`rounded-full w-12 h-12 ${
+                    status === "recording" ? "bg-red-50 text-red-500 border-red-500" : ""
+                  }`}
+                  onClick={status === "recording" ? stopRecording : startRecording}
+                  disabled={isTranscribing}
+                >
+                  {status === "recording" ? (
+                    <Square className="h-5 w-5" />
+                  ) : (
+                    <Mic className="h-5 w-5" />
+                  )}
+                </Button>
+                <span className="text-xs text-gray-500">
+                  {status === "recording" ? "Stop" : "Enregistrer"}
+                </span>
+              </div>
+            </div>
             <div className="text-right text-sm text-gray-500">
               {5000 - answer.length} caractères restants
             </div>
@@ -73,6 +144,7 @@ const Questions = () => {
             <Button 
               variant="secondary"
               className="bg-gray-800 text-white hover:bg-gray-700 px-6 py-2"
+              disabled={isTranscribing}
             >
               Soumettre pour feedback IA
             </Button>
