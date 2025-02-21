@@ -10,75 +10,77 @@ import { Textarea } from "@/components/ui/textarea";
 const Index = () => {
   const [selectedJob, setSelectedJob] = useState<string>("");
   const [jobDescription, setJobDescription] = useState<string>("");
+  const [showCustomInput, setShowCustomInput] = useState<boolean>(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const jobs = {
-    "Business Analyst": `Role Summary: We are looking for a Business Analyst to join our team. This role is perfect for those who are early in their careers and are eager to dive into analyzing business needs and delivering data-driven solutions.
+    "Analyste Business": `Description du poste : Nous recherchons un(e) Analyste Business pour rejoindre notre équipe. Ce rôle est parfait pour ceux qui débutent leur carrière et sont désireux d'analyser les besoins commerciaux et de proposer des solutions basées sur les données.
 
-Responsibilities:
-- Work closely with business units and stakeholders to understand and analyze business requirements.
-- Translate business needs into functional specifications and system design plans.
-- Conduct thorough data analysis using a variety of techniques.`,
-    "Product Manager": `Role Summary: We're seeking a Product Manager to lead product development initiatives.
+Responsabilités :
+- Travailler en étroite collaboration avec les unités commerciales pour comprendre et analyser les besoins
+- Traduire les besoins en spécifications fonctionnelles
+- Réaliser des analyses de données approfondies`,
+    "Chef de Produit": `Description du poste : Nous recherchons un(e) Chef de Produit pour diriger nos initiatives de développement produit.
 
-Responsibilities:
-- Define product vision and strategy
-- Work with engineering teams to deliver features
-- Conduct market research and user interviews`,
-    "Data Analyst": `Role Summary: Looking for a Data Analyst to transform data into insights.
+Responsabilités :
+- Définir la vision et la stratégie produit
+- Collaborer avec les équipes techniques
+- Réaliser des études de marché et des entretiens utilisateurs`,
+    "Analyste de Données": `Description du poste : Nous recherchons un(e) Analyste de Données pour transformer les données en insights.
 
-Responsibilities:
-- Analyze complex data sets
-- Create dashboards and reports
-- Present findings to stakeholders`,
-    "UX/UI Designer": `Role Summary: Join us as a UX/UI Designer to create exceptional user experiences.
+Responsabilités :
+- Analyser des ensembles de données complexes
+- Créer des tableaux de bord et des rapports
+- Présenter les résultats aux parties prenantes`,
+    "Designer UX/UI": `Description du poste : Rejoignez-nous en tant que Designer UX/UI pour créer des expériences utilisateur exceptionnelles.
 
-Responsibilities:
-- Design user interfaces
-- Conduct user research
-- Create wireframes and prototypes`,
-    "Software Engineer": `Role Summary: We're looking for a Software Engineer to build amazing products.
+Responsabilités :
+- Concevoir des interfaces utilisateur
+- Mener des recherches utilisateurs
+- Créer des wireframes et des prototypes`,
+    "Développeur": `Description du poste : Nous recherchons un(e) Développeur pour construire des produits exceptionnels.
 
-Responsibilities:
-- Write clean, maintainable code
-- Work with cross-functional teams
-- Design and implement new features`,
-    "QA Engineer": `Role Summary: Join our QA team to ensure product quality.
+Responsabilités :
+- Écrire du code propre et maintenable
+- Travailler avec des équipes pluridisciplinaires
+- Concevoir et implémenter de nouvelles fonctionnalités`,
+    "Ingénieur QA": `Description du poste : Rejoignez notre équipe QA pour assurer la qualité des produits.
 
-Responsibilities:
-- Develop and execute test cases
-- Perform manual and automated testing
-- Report and track bugs`,
-    "Marketing Specialist": `Role Summary: Looking for a Marketing Specialist to drive growth.
+Responsabilités :
+- Développer et exécuter des cas de test
+- Effectuer des tests manuels et automatisés
+- Signaler et suivre les bugs`,
+    "Spécialiste Marketing": `Description du poste : Nous recherchons un(e) Spécialiste Marketing pour stimuler la croissance.
 
-Responsibilities:
-- Plan and execute marketing campaigns
-- Analyze marketing metrics
-- Create content strategies`,
-    "Customer Service Representative": `Role Summary: Join our support team to help customers succeed.
+Responsabilités :
+- Planifier et exécuter des campagnes marketing
+- Analyser les métriques marketing
+- Créer des stratégies de contenu`,
+    "Chargé(e) de Support Client": `Description du poste : Rejoignez notre équipe support pour aider nos clients à réussir.
 
-Responsibilities:
-- Respond to customer inquiries
-- Resolve customer issues
-- Maintain customer satisfaction`,
-    "Sales Representative": `Role Summary: We need a Sales Representative to grow our business.
+Responsabilités :
+- Répondre aux demandes des clients
+- Résoudre les problèmes clients
+- Maintenir la satisfaction client`,
+    "Commercial(e)": `Description du poste : Nous recherchons un(e) Commercial(e) pour développer notre activité.
 
-Responsibilities:
-- Identify and pursue sales opportunities
-- Build client relationships
-- Meet sales targets`,
-    "Human Resources Specialist": `Role Summary: Join our HR team to support our growing organization.
+Responsabilités :
+- Identifier et poursuivre les opportunités de vente
+- Construire des relations clients
+- Atteindre les objectifs de vente`,
+    "Responsable RH": `Description du poste : Rejoignez notre équipe RH pour soutenir notre organisation en croissance.
 
-Responsibilities:
-- Manage recruitment process
-- Handle employee relations
-- Maintain HR policies and procedures`
+Responsabilités :
+- Gérer le processus de recrutement
+- Gérer les relations avec les employés
+- Maintenir les politiques et procédures RH`
   };
 
   const handleJobSelection = (job: string) => {
     setSelectedJob(job);
     setJobDescription(jobs[job as keyof typeof jobs] || "");
+    setShowCustomInput(false);
   };
 
   const handleJobDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -86,6 +88,12 @@ Responsibilities:
     if (selectedJob && e.target.value !== jobs[selectedJob as keyof typeof jobs]) {
       setSelectedJob("");
     }
+  };
+
+  const handleCustomClick = () => {
+    setShowCustomInput(true);
+    setSelectedJob("");
+    setJobDescription("");
   };
 
   const handleStart = () => {
@@ -100,7 +108,7 @@ Responsibilities:
 
     navigate(`/questions`, { 
       state: { 
-        job: selectedJob || "Custom",
+        job: selectedJob || "Personnalisé",
         description: jobDescription 
       } 
     });
@@ -110,7 +118,7 @@ Responsibilities:
     <div className="min-h-screen flex flex-col items-center justify-center p-4 space-y-8 animate-fade-in">
       <div className="text-center space-y-4 max-w-2xl mx-auto">
         <h1 className="text-4xl font-bold tracking-tight">
-          Select a job description
+          Sélectionne ton métier
         </h1>
       </div>
 
@@ -124,24 +132,30 @@ Responsibilities:
             {job}
           </button>
         ))}
+        <button
+          onClick={handleCustomClick}
+          className={`job-button ${showCustomInput ? "selected" : ""}`}
+        >
+          Rédiger ma propre description
+        </button>
       </div>
 
       <div className="w-full max-w-3xl mx-auto space-y-4">
         <Textarea
-          placeholder="Select a job role above or paste your own description here"
+          placeholder={showCustomInput ? "Rédigez ou collez la description de votre poste ici" : "Sélectionnez un métier ci-dessus ou rédigez votre propre description"}
           value={jobDescription}
           onChange={handleJobDescriptionChange}
           className="min-h-[200px] p-4 text-base"
         />
         <div className="text-right text-sm text-gray-500">
-          {5000 - jobDescription.length} chars left
+          {5000 - jobDescription.length} caractères restants
         </div>
 
         <Button
           onClick={handleStart}
           className="w-full flex items-center justify-center space-x-2 py-6 text-lg bg-gray-900 hover:bg-gray-800 text-white transition-all duration-300"
         >
-          <span>Generate Questions</span>
+          <span>Générer les questions</span>
           <ArrowRight className="w-5 h-5" />
         </Button>
       </div>
