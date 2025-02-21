@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, Mic, Square } from "lucide-react";
 import { useReactMediaRecorder } from "react-media-recorder";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Questions = () => {
   const location = useLocation();
@@ -39,30 +40,32 @@ const Questions = () => {
 
   const handleTranscription = async (audioBlob: Blob) => {
     setIsTranscribing(true);
-    const formData = new FormData();
-    formData.append("file", audioBlob, "audio.wav");
-    formData.append("model", "whisper-1");
-
     try {
-      const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        },
-        body: formData,
+      // Convert Blob to base64
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve) => {
+        reader.onloadend = () => {
+          const base64Audio = reader.result as string;
+          // Remove the data URL prefix
+          resolve(base64Audio.split(',')[1]);
+        };
+      });
+      reader.readAsDataURL(audioBlob);
+      const base64Audio = await base64Promise;
+
+      const { data, error } = await supabase.functions.invoke('transcribe-audio', {
+        body: { audioBlob: base64Audio }
       });
 
-      if (!response.ok) {
-        throw new Error("Erreur lors de la transcription");
-      }
+      if (error) throw error;
 
-      const data = await response.json();
       setAnswer(data.text);
       toast({
         title: "Transcription réussie",
         description: "Votre réponse vocale a été transcrite avec succès.",
       });
     } catch (error) {
+      console.error('Transcription error:', error);
       toast({
         title: "Erreur de transcription",
         description: "Impossible de transcrire l'audio. Veuillez réessayer.",
