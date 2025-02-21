@@ -3,9 +3,9 @@ import { useLocation, Navigate } from "react-router-dom";
 
 const Questions = () => {
   const location = useLocation();
-  const job = location.state?.job;
+  const { job, description } = location.state || {};
 
-  if (!job) {
+  if (!description) {
     return <Navigate to="/" replace />;
   }
 
