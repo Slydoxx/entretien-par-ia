@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useLocation, Navigate } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
@@ -96,6 +95,11 @@ const Questions = () => {
     }
 
     setIsAnalyzing(true);
+    setShowFeedback(false);
+    setShowSampleResponse(false);
+    setFeedback("");
+    setSampleResponse("");
+
     try {
       console.log('Sending analysis request with:', {
         question: questions[currentStep - 1],
@@ -123,7 +127,8 @@ const Questions = () => {
       console.log('Analysis response:', data);
       setFeedback(data.feedback);
       setSampleResponse(data.sample_response);
-      setShowFeedback(true); // Ouvrir automatiquement le feedback
+      setShowFeedback(true);
+      setShowSampleResponse(true);
       
       toast({
         title: "Analyse terminée",
@@ -144,7 +149,6 @@ const Questions = () => {
   return (
     <div className="min-h-screen flex flex-col justify-center">
       <div className="max-w-4xl mx-auto p-4 w-full">
-        {/* Header avec navigation */}
         <div className="flex items-center justify-between mb-8">
           <button 
             onClick={() => window.history.back()}
@@ -163,14 +167,11 @@ const Questions = () => {
           </div>
         </div>
 
-        {/* Card principale */}
         <div className="bg-white rounded-lg shadow-sm border p-8 space-y-6">
-          {/* Question */}
           <h2 className="text-xl font-semibold text-gray-900">
             {questions[currentStep - 1]}
           </h2>
 
-          {/* Zone de réponse avec bouton d'enregistrement */}
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-4">
               <Textarea
@@ -207,7 +208,6 @@ const Questions = () => {
             </div>
           </div>
 
-          {/* Bouton de soumission */}
           <div className="text-center">
             <Button 
               variant="secondary"
@@ -219,7 +219,6 @@ const Questions = () => {
             </Button>
           </div>
 
-          {/* Options supplémentaires */}
           <div className="space-y-2 mt-6">
             <button 
               onClick={() => setShowFeedback(!showFeedback)}
@@ -228,7 +227,15 @@ const Questions = () => {
               Feedback
               <ChevronRight className={`w-5 h-5 transform transition-transform ${showFeedback ? 'rotate-90' : ''}`} />
             </button>
-            {showFeedback && feedback && (
+            {isAnalyzing && !feedback ? (
+              <div className="px-4 py-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
+              </div>
+            ) : showFeedback && feedback && (
               <div className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700 whitespace-pre-wrap">
                 {feedback}
               </div>
@@ -241,7 +248,15 @@ const Questions = () => {
               Exemple de réponse
               <ChevronRight className={`w-5 h-5 transform transition-transform ${showSampleResponse ? 'rotate-90' : ''}`} />
             </button>
-            {showSampleResponse && sampleResponse && (
+            {isAnalyzing && !sampleResponse ? (
+              <div className="px-4 py-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
+              </div>
+            ) : showSampleResponse && sampleResponse && (
               <div className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700 whitespace-pre-wrap">
                 {sampleResponse}
               </div>
