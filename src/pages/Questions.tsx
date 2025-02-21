@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useLocation, Navigate } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Mic, Square } from "lucide-react";
+import { ChevronLeft, ChevronRight, Mic, Square } from "lucide-react";
 import { useReactMediaRecorder } from "react-media-recorder";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +14,11 @@ const Questions = () => {
   const [answer, setAnswer] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const [sampleResponse, setSampleResponse] = useState("");
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [showSampleResponse, setShowSampleResponse] = useState(false);
   const { toast } = useToast();
 
   const { status, startRecording, stopRecording, mediaBlobUrl } = useReactMediaRecorder({
@@ -31,7 +36,6 @@ const Questions = () => {
     "Pouvez-vous me décrire un projet où vous avez dû interpréter des ensembles de données complexes et en tirer des insights pertinents ?",
     "Comment gérez-vous les situations de conflit au sein d'une équipe ?",
     "Quelle a été votre plus grande réussite professionnelle ?",
-    // Ajoutez d'autres questions pertinentes ici
   ];
 
   const handleAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -41,12 +45,10 @@ const Questions = () => {
   const handleTranscription = async (audioBlob: Blob) => {
     setIsTranscribing(true);
     try {
-      // Convert Blob to base64
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve) => {
         reader.onloadend = () => {
           const base64Audio = reader.result as string;
-          // Remove the data URL prefix
           resolve(base64Audio.split(',')[1]);
         };
       });
@@ -80,6 +82,47 @@ const Questions = () => {
       });
     } finally {
       setIsTranscribing(false);
+    }
+  };
+
+  const handleAnalyzeResponse = async () => {
+    if (!answer.trim()) {
+      toast({
+        title: "Réponse requise",
+        description: "Veuillez fournir une réponse avant de demander une analyse.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-response', {
+        body: {
+          question: questions[currentStep - 1],
+          answer: answer,
+          jobTitle: job,
+        }
+      });
+
+      if (error) throw error;
+
+      setFeedback(data.feedback);
+      setSampleResponse(data.sample_response);
+      
+      toast({
+        title: "Analyse terminée",
+        description: "Votre réponse a été analysée avec succès.",
+      });
+    } catch (error) {
+      console.error('Analysis error:', error);
+      toast({
+        title: "Erreur d'analyse",
+        description: "Impossible d'analyser votre réponse. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -154,22 +197,40 @@ const Questions = () => {
             <Button 
               variant="secondary"
               className="bg-gray-800 text-white hover:bg-gray-700 px-6 py-2"
-              disabled={isTranscribing}
+              onClick={handleAnalyzeResponse}
+              disabled={isAnalyzing || isTranscribing}
             >
-              Soumettre pour feedback IA
+              {isAnalyzing ? "Analyse en cours..." : "Soumettre pour feedback IA"}
             </Button>
           </div>
 
           {/* Options supplémentaires */}
           <div className="space-y-2 mt-6">
-            <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between text-gray-500">
+            <button 
+              onClick={() => setShowFeedback(!showFeedback)}
+              className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between text-gray-500"
+            >
               Feedback
-              <ChevronLeft className="w-5 h-5 transform rotate-180" />
+              <ChevronRight className={`w-5 h-5 transform transition-transform ${showFeedback ? 'rotate-90' : ''}`} />
             </button>
-            <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between text-gray-500">
+            {showFeedback && feedback && (
+              <div className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700 whitespace-pre-wrap">
+                {feedback}
+              </div>
+            )}
+            
+            <button 
+              onClick={() => setShowSampleResponse(!showSampleResponse)}
+              className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between text-gray-500"
+            >
               Exemple de réponse
-              <ChevronLeft className="w-5 h-5 transform rotate-180" />
+              <ChevronRight className={`w-5 h-5 transform transition-transform ${showSampleResponse ? 'rotate-90' : ''}`} />
             </button>
+            {showSampleResponse && sampleResponse && (
+              <div className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700 whitespace-pre-wrap">
+                {sampleResponse}
+              </div>
+            )}
           </div>
         </div>
       </div>
