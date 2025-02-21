@@ -57,7 +57,14 @@ const Questions = () => {
         body: { audioBlob: base64Audio }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
+
+      if (!data?.text) {
+        throw new Error('Aucun texte n\'a été transcrit');
+      }
 
       setAnswer(data.text);
       toast({
