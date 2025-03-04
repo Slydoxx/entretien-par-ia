@@ -117,7 +117,7 @@ Responsabilités :
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 space-y-8 animate-fade-in">
       <div className="text-center space-y-4 max-w-2xl mx-auto">
-        <h1 className="text-4xl font-bold tracking-tight">
+        <h1 className="text-4xl font-bold tracking-tight text-prepera-darkBlue">
           Sélectionne ton métier
         </h1>
       </div>
@@ -153,7 +153,7 @@ Responsabilités :
 
         <Button
           onClick={handleStart}
-          className="w-full flex items-center justify-center space-x-2 py-6 text-lg bg-gray-900 hover:bg-gray-800 text-white transition-all duration-300"
+          className="w-full flex items-center justify-center space-x-2 py-6 text-lg bg-prepera-blue hover:bg-prepera-darkBlue text-white transition-all duration-300"
         >
           <span>Générer les questions</span>
           <ArrowRight className="w-5 h-5" />

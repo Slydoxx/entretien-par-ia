@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useLocation, Navigate } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
@@ -168,7 +169,7 @@ const Questions = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border p-8 space-y-6">
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-semibold text-prepera-darkBlue">
             {questions[currentStep - 1]}
           </h2>
 
@@ -211,7 +212,7 @@ const Questions = () => {
           <div className="text-center">
             <Button 
               variant="secondary"
-              className="bg-gray-800 text-white hover:bg-gray-700 px-6 py-2"
+              className="bg-prepera-blue text-white hover:bg-prepera-darkBlue px-6 py-2"
               onClick={handleAnalyzeResponse}
               disabled={isAnalyzing || isTranscribing}
             >
@@ -222,7 +223,7 @@ const Questions = () => {
           <div className="space-y-2 mt-6">
             <button 
               onClick={() => setShowFeedback(!showFeedback)}
-              className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between text-gray-500"
+              className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between text-prepera-darkBlue"
             >
               Feedback
               <ChevronRight className={`w-5 h-5 transform transition-transform ${showFeedback ? 'rotate-90' : ''}`} />
@@ -230,9 +231,9 @@ const Questions = () => {
             {isAnalyzing && !feedback ? (
               <div className="px-4 py-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center justify-center space-x-2">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  <div className="w-2 h-2 bg-prepera-blue rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-prepera-blue rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-prepera-blue rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                 </div>
               </div>
             ) : showFeedback && feedback && (
@@ -243,7 +244,7 @@ const Questions = () => {
             
             <button 
               onClick={() => setShowSampleResponse(!showSampleResponse)}
-              className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between text-gray-500"
+              className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between text-prepera-darkBlue"
             >
               Exemple de réponse
               <ChevronRight className={`w-5 h-5 transform transition-transform ${showSampleResponse ? 'rotate-90' : ''}`} />
@@ -251,9 +252,9 @@ const Questions = () => {
             {isAnalyzing && !sampleResponse ? (
               <div className="px-4 py-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center justify-center space-x-2">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  <div className="w-2 h-2 bg-prepera-blue rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-prepera-blue rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-prepera-blue rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                 </div>
               </div>
             ) : showSampleResponse && sampleResponse && (
