@@ -15,7 +15,7 @@ const SelectQuestions = () => {
   const { toast } = useToast();
   
   const { 
-    generatedQuestions, 
+    questionThemes, 
     isLoading, 
     generateQuestions 
   } = useQuestionGeneration(job, description);
@@ -75,7 +75,7 @@ const SelectQuestions = () => {
           </h2>
           
           <QuestionList 
-            questions={generatedQuestions}
+            questionThemes={questionThemes}
             selectedQuestions={selectedQuestions}
             toggleSelection={toggleQuestionSelection}
             isLoading={isLoading}

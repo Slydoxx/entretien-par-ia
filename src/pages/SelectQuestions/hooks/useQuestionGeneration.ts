@@ -3,9 +3,15 @@ import { useState, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+export type QuestionTheme = {
+  name: string;
+  questions: string[];
+};
+
 const useQuestionGeneration = (job?: string, description?: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const [generatedQuestions, setGeneratedQuestions] = useState<string[]>([]);
+  const [questionThemes, setQuestionThemes] = useState<QuestionTheme[]>([]);
   const { toast } = useToast();
 
   const generateQuestions = useCallback(async () => {
@@ -29,11 +35,25 @@ const useQuestionGeneration = (job?: string, description?: string) => {
         throw new Error('Format de réponse invalide');
       }
 
+      // Set the flat list of questions for backward compatibility
       setGeneratedQuestions(data.questions);
+      
+      // Set the themed questions if available
+      if (data.themes && Array.isArray(data.themes)) {
+        setQuestionThemes(data.themes);
+      } else {
+        // Fallback in case themes aren't returned
+        setQuestionThemes([
+          { name: "Compétences techniques", questions: data.questions.slice(0, 5) },
+          { name: "Expérience professionnelle", questions: data.questions.slice(5, 10) },
+          { name: "Soft skills", questions: data.questions.slice(10, 15) },
+          { name: "Motivation", questions: data.questions.slice(15, 20) }
+        ]);
+      }
     } catch (error) {
       console.error('Error generating questions:', error);
       // Provide some fallback questions in case of API failure
-      setGeneratedQuestions([
+      const fallbackQuestions = [
         "Pouvez-vous me parler de votre parcours professionnel ?",
         "Quelles sont vos principales compétences techniques ?",
         "Comment gérez-vous les situations de stress au travail ?",
@@ -54,6 +74,16 @@ const useQuestionGeneration = (job?: string, description?: string) => {
         "Quelle est votre expérience avec [compétence spécifique au poste] ?",
         "Comment réagissez-vous face à la critique ?",
         "Avez-vous des questions à me poser sur le poste ou l'entreprise ?",
+      ];
+      
+      setGeneratedQuestions(fallbackQuestions);
+      
+      // Create fallback themes
+      setQuestionThemes([
+        { name: "Compétences techniques", questions: fallbackQuestions.slice(0, 5) },
+        { name: "Expérience professionnelle", questions: fallbackQuestions.slice(5, 10) },
+        { name: "Soft skills", questions: fallbackQuestions.slice(10, 15) },
+        { name: "Motivation", questions: fallbackQuestions.slice(15, 20) }
       ]);
       
       toast({
@@ -66,7 +96,7 @@ const useQuestionGeneration = (job?: string, description?: string) => {
     }
   }, [job, description, toast]);
 
-  return { generatedQuestions, isLoading, generateQuestions };
+  return { generatedQuestions, questionThemes, isLoading, generateQuestions };
 };
 
 export default useQuestionGeneration;
