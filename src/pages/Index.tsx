@@ -106,7 +106,7 @@ Responsabilités :
       return;
     }
 
-    navigate(`/questions`, { 
+    navigate(`/select-questions`, { 
       state: { 
         job: selectedJob || "Personnalisé",
         description: jobDescription 

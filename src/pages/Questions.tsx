@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useLocation, Navigate } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Questions = () => {
   const location = useLocation();
-  const { job, description } = location.state || {};
+  const { job, description, questions: selectedQuestions = [] } = location.state || {};
   const [answer, setAnswer] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -28,15 +27,17 @@ const Questions = () => {
     }
   });
 
-  if (!description) {
-    return <Navigate to="/" replace />;
+  if (!selectedQuestions || selectedQuestions.length === 0) {
+    return <Navigate to="/select-questions" replace />;
   }
 
-  const questions = [
-    "Pouvez-vous me décrire un projet où vous avez dû interpréter des ensembles de données complexes et en tirer des insights pertinents ?",
-    "Comment gérez-vous les situations de conflit au sein d'une équipe ?",
-    "Quelle a été votre plus grande réussite professionnelle ?",
-  ];
+  const questions = selectedQuestions.length > 0
+    ? selectedQuestions
+    : [
+        "Pouvez-vous me décrire un projet où vous avez dû interpréter des ensembles de données complexes et en tirer des insights pertinents ?",
+        "Comment gérez-vous les situations de conflit au sein d'une équipe ?",
+        "Quelle a été votre plus grande réussite professionnelle ?",
+      ];
 
   const handleAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAnswer(e.target.value);
@@ -147,6 +148,28 @@ const Questions = () => {
     }
   };
 
+  const handleNextQuestion = () => {
+    if (currentStep < questions.length) {
+      setCurrentStep(currentStep + 1);
+      setAnswer("");
+      setFeedback("");
+      setSampleResponse("");
+      setShowFeedback(false);
+      setShowSampleResponse(false);
+    }
+  };
+
+  const handlePreviousQuestion = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+      setAnswer("");
+      setFeedback("");
+      setSampleResponse("");
+      setShowFeedback(false);
+      setShowSampleResponse(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col justify-center">
       <div className="max-w-4xl mx-auto p-4 w-full">
@@ -160,7 +183,7 @@ const Questions = () => {
           </button>
           <div className="flex items-center space-x-4">
             <span className="px-4 py-2 rounded-full bg-white border">
-              Question {currentStep}
+              Question {currentStep}/{questions.length}
             </span>
             <button className="px-4 py-2 rounded-full bg-gray-100 text-gray-500">
               Terminer
@@ -209,7 +232,16 @@ const Questions = () => {
             </div>
           </div>
 
-          <div className="text-center">
+          <div className="flex justify-between">
+            <Button 
+              variant="outline"
+              className="px-4"
+              onClick={handlePreviousQuestion}
+              disabled={currentStep === 1}
+            >
+              <ChevronLeft className="mr-2 h-4 w-4" /> Question précédente
+            </Button>
+
             <Button 
               variant="secondary"
               className="bg-prepera-blue text-white hover:bg-prepera-darkBlue px-6 py-2"
@@ -217,6 +249,15 @@ const Questions = () => {
               disabled={isAnalyzing || isTranscribing}
             >
               {isAnalyzing ? "Analyse en cours..." : "Soumettre pour feedback IA"}
+            </Button>
+
+            <Button 
+              variant="outline"
+              className="px-4"
+              onClick={handleNextQuestion}
+              disabled={currentStep === questions.length}
+            >
+              Question suivante <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
 
