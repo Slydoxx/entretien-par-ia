@@ -21,35 +21,35 @@ const generatePDF = async (data: PDFData) => {
   element.style.width = "595px"; // A4 width in pixels at 72 dpi
   element.style.fontFamily = "Arial, sans-serif";
   
-  // Format the content
+  // Format the content with the correct blue color (#2A3F54)
   element.innerHTML = `
     <div style="text-align: center; margin-bottom: 20px;">
-      <h1 style="color: #2563eb; font-size: 24px; margin-bottom: 10px;">Prepera - Entrainement d'entretien</h1>
+      <h1 style="color: #2A3F54; font-size: 24px; margin-bottom: 10px;">Entretien par IA - Entrainement d'entretien</h1>
       <p style="color: #666; font-size: 16px;">Poste: ${job || 'Non spécifié'}</p>
     </div>
     
     <div style="margin-bottom: 20px;">
-      <h2 style="color: #1e40af; font-size: 18px; margin-bottom: 10px;">Question:</h2>
+      <h2 style="color: #2A3F54; font-size: 18px; margin-bottom: 10px;">Question:</h2>
       <p style="font-size: 14px; margin-left: 10px;">${question}</p>
     </div>
     
     <div style="margin-bottom: 20px;">
-      <h2 style="color: #1e40af; font-size: 18px; margin-bottom: 10px;">Votre réponse:</h2>
+      <h2 style="color: #2A3F54; font-size: 18px; margin-bottom: 10px;">Votre réponse:</h2>
       <p style="font-size: 14px; margin-left: 10px;">${answer.replace(/\n/g, '<br>')}</p>
     </div>
     
     <div style="margin-bottom: 20px;">
-      <h2 style="color: #1e40af; font-size: 18px; margin-bottom: 10px;">Feedback IA:</h2>
+      <h2 style="color: #2A3F54; font-size: 18px; margin-bottom: 10px;">Feedback IA:</h2>
       <p style="font-size: 14px; margin-left: 10px;">${feedback.replace(/\n/g, '<br>')}</p>
     </div>
     
     <div style="margin-bottom: 20px;">
-      <h2 style="color: #1e40af; font-size: 18px; margin-bottom: 10px;">Exemple de réponse:</h2>
+      <h2 style="color: #2A3F54; font-size: 18px; margin-bottom: 10px;">Exemple de réponse:</h2>
       <p style="font-size: 14px; margin-left: 10px;">${sampleResponse.replace(/\n/g, '<br>')}</p>
     </div>
     
     <div style="text-align: center; margin-top: 30px; color: #666; font-size: 12px;">
-      <p>Document généré par Prepera - ${new Date().toLocaleDateString()}</p>
+      <p>Document généré par Entretien par IA - ${new Date().toLocaleDateString()}</p>
     </div>
   `;
   
@@ -87,8 +87,8 @@ const generatePDF = async (data: PDFData) => {
       heightLeft -= pdfHeight;
     }
     
-    // Download the PDF
-    pdf.save(`Prepera_Entretien_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`);
+    // Download the PDF with updated app name
+    pdf.save(`Entretien_IA_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`);
   } finally {
     // Clean up
     document.body.removeChild(element);
