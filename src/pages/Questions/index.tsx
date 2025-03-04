@@ -7,6 +7,12 @@ import QuestionCard from "./QuestionCard";
 import useAudioTranscription from "./hooks/useAudioTranscription";
 import useResponseAnalysis from "./hooks/useResponseAnalysis";
 
+interface ResponseData {
+  answer: string;
+  feedback: string;
+  sampleResponse: string;
+}
+
 const Questions = () => {
   const location = useLocation();
   const { job, description, questions: selectedQuestions = [] } = location.state || {};
@@ -15,11 +21,7 @@ const Questions = () => {
   const { isTranscribing, handleTranscription } = useAudioTranscription(setAnswer);
   
   // Track responses, feedback and sample responses for each question
-  const [responses, setResponses] = useState<{[key: number]: {
-    answer: string,
-    feedback: string,
-    sampleResponse: string
-  }>>({}); 
+  const [responses, setResponses] = useState<Record<number, ResponseData>>({});
 
   // Use a new instance of the response analysis hook for the current question
   const { 
