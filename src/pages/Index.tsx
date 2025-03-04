@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -114,111 +115,49 @@ Responsabilités :
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Sidebar */}
-      <div className="w-64 bg-mentorgoal-darkBlue text-white">
-        <div className="p-4 border-b border-gray-700 flex items-center">
-          <span className="text-sm font-medium">MENTOR GOAL</span>
-        </div>
-        <nav className="p-4">
-          <ul className="space-y-4">
-            <li className="py-2">Mon dashboard</li>
-            <li className="py-2">Mes candidatures</li>
-            <li className="py-2 font-medium text-mentorgoal-orange">Génération par IA</li>
-            <li className="py-2">Candidatures spontanées</li>
-            <li className="py-2 flex items-center justify-between">
-              Jobthèque
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </li>
-            <li className="py-2 flex items-center justify-between">
-              Mes ressources
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </li>
-            <li className="py-2">Événements</li>
-            <li className="py-2 bg-gray-600 px-2 rounded">Préparer mon entretien</li>
-            <li className="py-2 mt-8">Aide</li>
-            <li className="py-2">Vos suggestions</li>
-          </ul>
-        </nav>
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 space-y-8 animate-fade-in">
+      <div className="text-center space-y-4 max-w-2xl mx-auto">
+        <h1 className="text-4xl font-bold tracking-tight text-prepera-darkBlue">
+          Sélectionne ton métier
+        </h1>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 p-6 overflow-auto">
-        <div className="max-w-4xl">
-          <h1 className="text-2xl font-bold mb-8 text-mentorgoal-darkBlue">
-            Préparation aux entretiens
-          </h1>
+      <div className="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto">
+        {Object.keys(jobs).map((job) => (
+          <button
+            key={job}
+            onClick={() => handleJobSelection(job)}
+            className={`job-button ${selectedJob === job ? "selected" : ""}`}
+          >
+            {job}
+          </button>
+        ))}
+        <button
+          onClick={handleCustomClick}
+          className={`job-button ${showCustomInput ? "selected" : ""}`}
+        >
+          Rédiger ma propre description
+        </button>
+      </div>
 
-          <section className="mb-12">
-            <h2 className="text-lg font-semibold text-mentorgoal-orange mb-3">Qu'est-ce que Prepera ?</h2>
-            <p className="text-gray-700 mb-4">
-              Prepera est une plateforme partenaire de Mentor Goal, qui te permettra de préparer tes futurs entretiens d'embauche. Tu seras guidé.e en fonction de tes besoins, de ton métier et de ton expérience.
-            </p>
-            <button className="text-mentorgoal-orange font-medium">En savoir plus</button>
-          </section>
-
-          <section className="mb-12">
-            <h2 className="text-lg font-semibold text-mentorgoal-orange mb-3">Comment ça marche ?</h2>
-            <p className="text-gray-700 mb-4">
-              C'est simple d'utilisation : cet outil te permettra de structurer ta préparation et de t'entraîner aux questions des recruteurs !
-            </p>
-          </section>
-
-          <section className="mb-12">
-            <h2 className="text-lg font-semibold text-mentorgoal-orange mb-3">Que te propose ce partenaire ?</h2>
-            <p className="text-gray-700 mb-4">
-              Une expérience avec de multiples entretiens vidéos auprès d'experts : pitch, entretien RH, entretien technique...
-            </p>
-          </section>
-
-          <div className="mt-8 space-y-6">
-            <div className="flex flex-wrap gap-2">
-              {Object.keys(jobs).map((job) => (
-                <button
-                  key={job}
-                  onClick={() => handleJobSelection(job)}
-                  className={`job-button ${selectedJob === job ? "selected" : ""}`}
-                >
-                  {job}
-                </button>
-              ))}
-              <button
-                onClick={handleCustomClick}
-                className={`job-button ${showCustomInput ? "selected" : ""}`}
-              >
-                Rédiger ma propre description
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <Textarea
-                placeholder={showCustomInput ? "Rédigez ou collez la description de votre poste ici" : "Sélectionnez un métier ci-dessus ou rédigez votre propre description"}
-                value={jobDescription}
-                onChange={handleJobDescriptionChange}
-                className="min-h-[200px] p-4 text-base"
-              />
-              <div className="text-right text-sm text-gray-500">
-                {5000 - jobDescription.length} caractères restants
-              </div>
-
-              <Button
-                onClick={handleStart}
-                className="w-full flex items-center justify-center space-x-2 py-6 text-lg bg-mentorgoal-orange hover:bg-mentorgoal-orange/90 text-white transition-all duration-300"
-              >
-                <span>Générer les questions</span>
-                <ArrowRight className="w-5 h-5" />
-              </Button>
-            </div>
-
-            <div className="text-sm text-gray-500 p-4 border border-gray-200 rounded bg-gray-50">
-              En cliquant sur ce bouton, vous serez redirigé(e) vers un site tiers et vos données personnelles ne seront pas conservées une fois que vous aurez quitté notre plateforme.
-            </div>
-          </div>
+      <div className="w-full max-w-3xl mx-auto space-y-4">
+        <Textarea
+          placeholder={showCustomInput ? "Rédigez ou collez la description de votre poste ici" : "Sélectionnez un métier ci-dessus ou rédigez votre propre description"}
+          value={jobDescription}
+          onChange={handleJobDescriptionChange}
+          className="min-h-[200px] p-4 text-base"
+        />
+        <div className="text-right text-sm text-gray-500">
+          {5000 - jobDescription.length} caractères restants
         </div>
+
+        <Button
+          onClick={handleStart}
+          className="w-full flex items-center justify-center space-x-2 py-6 text-lg bg-prepera-blue hover:bg-prepera-darkBlue text-white transition-all duration-300"
+        >
+          <span>Générer les questions</span>
+          <ArrowRight className="w-5 h-5" />
+        </Button>
       </div>
     </div>
   );

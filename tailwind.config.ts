@@ -56,10 +56,9 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        mentorgoal: {
-          darkBlue: "#2A3547",
-          orange: "#F76B1C",
+        prepera: {
           blue: "#2563eb",
+          darkBlue: "#1d4ed8",
           lightBlue: "#3b82f6",
         },
       },
