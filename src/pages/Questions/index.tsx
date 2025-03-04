@@ -5,6 +5,7 @@ import { useReactMediaRecorder } from "react-media-recorder";
 import QuestionHeader from "./components/QuestionHeader";
 import QuestionCard from "./QuestionCard";
 import useAudioTranscription from "./hooks/useAudioTranscription";
+import useResponseAnalysis from "./hooks/useResponseAnalysis";
 
 const Questions = () => {
   const location = useLocation();
@@ -12,6 +13,7 @@ const Questions = () => {
   const [answer, setAnswer] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
   const { isTranscribing, handleTranscription } = useAudioTranscription(setAnswer);
+  const { resetFeedback } = useResponseAnalysis();
 
   const { status, startRecording, stopRecording, mediaBlobUrl } = useReactMediaRecorder({
     audio: true,
@@ -40,6 +42,7 @@ const Questions = () => {
     if (currentStep < questions.length) {
       setCurrentStep(currentStep + 1);
       setAnswer("");
+      resetFeedback();
     }
   };
 
@@ -47,6 +50,7 @@ const Questions = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
       setAnswer("");
+      resetFeedback();
     }
   };
 

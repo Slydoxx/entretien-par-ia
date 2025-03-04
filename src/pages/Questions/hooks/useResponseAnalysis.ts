@@ -11,6 +11,13 @@ const useResponseAnalysis = () => {
   const [showSampleResponse, setShowSampleResponse] = useState(false);
   const { toast } = useToast();
 
+  const resetFeedback = () => {
+    setFeedback("");
+    setSampleResponse("");
+    setShowFeedback(false);
+    setShowSampleResponse(false);
+  };
+
   const analyzeResponse = async (question: string, answer: string, job: string) => {
     if (!answer.trim()) {
       toast({
@@ -81,7 +88,8 @@ const useResponseAnalysis = () => {
     showSampleResponse, 
     setShowFeedback, 
     setShowSampleResponse, 
-    analyzeResponse 
+    analyzeResponse,
+    resetFeedback 
   };
 };
 
