@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useLocation, Navigate } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
@@ -148,120 +147,152 @@ const Questions = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center">
-      <div className="max-w-4xl mx-auto p-4 w-full">
-        <div className="flex items-center justify-between mb-8">
-          <button 
-            onClick={() => window.history.back()}
-            className="flex items-center text-gray-600 hover:text-gray-900"
-          >
-            <ChevronLeft className="w-5 h-5 mr-1" />
-            Retour
-          </button>
-          <div className="flex items-center space-x-4">
-            <span className="px-4 py-2 rounded-full bg-white border">
-              Question {currentStep}
-            </span>
-            <button className="px-4 py-2 rounded-full bg-gray-100 text-gray-500">
-              Terminer
-            </button>
-          </div>
+    <div className="min-h-screen flex">
+      <div className="w-64 bg-mentorgoal-darkBlue text-white">
+        <div className="p-4 border-b border-gray-700 flex items-center">
+          <span className="text-sm font-medium">MENTOR GOAL</span>
         </div>
+        <nav className="p-4">
+          <ul className="space-y-4">
+            <li className="py-2">Mon dashboard</li>
+            <li className="py-2">Mes candidatures</li>
+            <li className="py-2 font-medium text-mentorgoal-orange">Génération par IA</li>
+            <li className="py-2">Candidatures spontanées</li>
+            <li className="py-2 flex items-center justify-between">
+              Jobthèque
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </li>
+            <li className="py-2 flex items-center justify-between">
+              Mes ressources
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </li>
+            <li className="py-2">Événements</li>
+            <li className="py-2 bg-gray-600 px-2 rounded">Préparer mon entretien</li>
+            <li className="py-2 mt-8">Aide</li>
+            <li className="py-2">Vos suggestions</li>
+          </ul>
+        </nav>
+      </div>
 
-        <div className="bg-white rounded-lg shadow-sm border p-8 space-y-6">
-          <h2 className="text-xl font-semibold text-prepera-darkBlue">
-            {questions[currentStep - 1]}
-          </h2>
+      <div className="flex-1 p-6 overflow-auto">
+        <div className="max-w-4xl">
+          <div className="flex items-center justify-between mb-8">
+            <button 
+              onClick={() => window.history.back()}
+              className="flex items-center text-gray-600 hover:text-gray-900"
+            >
+              <ChevronLeft className="w-5 h-5 mr-1" />
+              Retour
+            </button>
+            <div className="flex items-center space-x-4">
+              <span className="px-4 py-2 rounded-full bg-white border">
+                Question {currentStep}
+              </span>
+              <button className="px-4 py-2 rounded-full bg-gray-100 text-gray-500">
+                Terminer
+              </button>
+            </div>
+          </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between gap-4">
-              <Textarea
-                value={answer}
-                onChange={handleAnswerChange}
-                placeholder="Tapez votre réponse ou utilisez l'enregistrement vocal"
-                className="min-h-[200px] p-4 text-base flex-1"
-                disabled={isTranscribing}
-              />
-              <div className="flex flex-col items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className={`rounded-full w-12 h-12 ${
-                    status === "recording" ? "bg-red-50 text-red-500 border-red-500" : ""
-                  }`}
-                  onClick={status === "recording" ? stopRecording : startRecording}
+          <div className="bg-white rounded-lg shadow-sm border p-8 space-y-6">
+            <h2 className="text-xl font-semibold text-mentorgoal-darkBlue">
+              {questions[currentStep - 1]}
+            </h2>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <Textarea
+                  value={answer}
+                  onChange={handleAnswerChange}
+                  placeholder="Tapez votre réponse ou utilisez l'enregistrement vocal"
+                  className="min-h-[200px] p-4 text-base flex-1"
                   disabled={isTranscribing}
-                >
-                  {status === "recording" ? (
-                    <Square className="h-5 w-5" />
-                  ) : (
-                    <Mic className="h-5 w-5" />
-                  )}
-                </Button>
-                <span className="text-xs text-gray-500">
-                  {status === "recording" ? "Stop" : "Enregistrer"}
-                </span>
-              </div>
-            </div>
-            <div className="text-right text-sm text-gray-500">
-              {5000 - answer.length} caractères restants
-            </div>
-          </div>
-
-          <div className="text-center">
-            <Button 
-              variant="secondary"
-              className="bg-prepera-blue text-white hover:bg-prepera-darkBlue px-6 py-2"
-              onClick={handleAnalyzeResponse}
-              disabled={isAnalyzing || isTranscribing}
-            >
-              {isAnalyzing ? "Analyse en cours..." : "Soumettre pour feedback IA"}
-            </Button>
-          </div>
-
-          <div className="space-y-2 mt-6">
-            <button 
-              onClick={() => setShowFeedback(!showFeedback)}
-              className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between text-prepera-darkBlue"
-            >
-              Feedback
-              <ChevronRight className={`w-5 h-5 transform transition-transform ${showFeedback ? 'rotate-90' : ''}`} />
-            </button>
-            {isAnalyzing && !feedback ? (
-              <div className="px-4 py-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="w-2 h-2 bg-prepera-blue rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 bg-prepera-blue rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-2 h-2 bg-prepera-blue rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                />
+                <div className="flex flex-col items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className={`rounded-full w-12 h-12 ${
+                      status === "recording" ? "bg-red-50 text-red-500 border-red-500" : ""
+                    }`}
+                    onClick={status === "recording" ? stopRecording : startRecording}
+                    disabled={isTranscribing}
+                  >
+                    {status === "recording" ? (
+                      <Square className="h-5 w-5" />
+                    ) : (
+                      <Mic className="h-5 w-5" />
+                    )}
+                  </Button>
+                  <span className="text-xs text-gray-500">
+                    {status === "recording" ? "Stop" : "Enregistrer"}
+                  </span>
                 </div>
               </div>
-            ) : showFeedback && feedback && (
-              <div className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700 whitespace-pre-wrap">
-                {feedback}
+              <div className="text-right text-sm text-gray-500">
+                {5000 - answer.length} caractères restants
               </div>
-            )}
-            
-            <button 
-              onClick={() => setShowSampleResponse(!showSampleResponse)}
-              className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between text-prepera-darkBlue"
-            >
-              Exemple de réponse
-              <ChevronRight className={`w-5 h-5 transform transition-transform ${showSampleResponse ? 'rotate-90' : ''}`} />
-            </button>
-            {isAnalyzing && !sampleResponse ? (
-              <div className="px-4 py-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="w-2 h-2 bg-prepera-blue rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 bg-prepera-blue rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-2 h-2 bg-prepera-blue rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            </div>
+
+            <div className="text-center">
+              <Button 
+                variant="secondary"
+                className="bg-mentorgoal-orange text-white hover:bg-mentorgoal-orange/90 px-6 py-2"
+                onClick={handleAnalyzeResponse}
+                disabled={isAnalyzing || isTranscribing}
+              >
+                {isAnalyzing ? "Analyse en cours..." : "Soumettre pour feedback IA"}
+              </Button>
+            </div>
+
+            <div className="space-y-2 mt-6">
+              <button 
+                onClick={() => setShowFeedback(!showFeedback)}
+                className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between text-mentorgoal-darkBlue"
+              >
+                Feedback
+                <ChevronRight className={`w-5 h-5 transform transition-transform ${showFeedback ? 'rotate-90' : ''}`} />
+              </button>
+              {isAnalyzing && !feedback ? (
+                <div className="px-4 py-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-2 h-2 bg-mentorgoal-orange rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-mentorgoal-orange rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-mentorgoal-orange rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
                 </div>
-              </div>
-            ) : showSampleResponse && sampleResponse && (
-              <div className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700 whitespace-pre-wrap">
-                {sampleResponse}
-              </div>
-            )}
+              ) : showFeedback && feedback && (
+                <div className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700 whitespace-pre-wrap">
+                  {feedback}
+                </div>
+              )}
+              
+              <button 
+                onClick={() => setShowSampleResponse(!showSampleResponse)}
+                className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between text-mentorgoal-darkBlue"
+              >
+                Exemple de réponse
+                <ChevronRight className={`w-5 h-5 transform transition-transform ${showSampleResponse ? 'rotate-90' : ''}`} />
+              </button>
+              {isAnalyzing && !sampleResponse ? (
+                <div className="px-4 py-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-2 h-2 bg-mentorgoal-orange rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-mentorgoal-orange rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-mentorgoal-orange rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
+              ) : showSampleResponse && sampleResponse && (
+                <div className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700 whitespace-pre-wrap">
+                  {sampleResponse}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
