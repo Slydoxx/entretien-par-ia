@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, Navigate } from "react-router-dom";
 import { useReactMediaRecorder } from "react-media-recorder";
 import QuestionHeader from "./components/QuestionHeader";
@@ -13,7 +13,38 @@ const Questions = () => {
   const [answer, setAnswer] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
   const { isTranscribing, handleTranscription } = useAudioTranscription(setAnswer);
-  const { resetFeedback } = useResponseAnalysis();
+  
+  // Track responses, feedback and sample responses for each question
+  const [responses, setResponses] = useState<{[key: number]: {
+    answer: string,
+    feedback: string,
+    sampleResponse: string
+  }>>({}); 
+
+  // Use a new instance of the response analysis hook for the current question
+  const { 
+    isAnalyzing, 
+    feedback, 
+    sampleResponse, 
+    showFeedback, 
+    showSampleResponse, 
+    setShowFeedback, 
+    setShowSampleResponse, 
+    analyzeResponse,
+    resetFeedback
+  } = useResponseAnalysis();
+
+  // When changing questions, save the current state
+  useEffect(() => {
+    if (responses[currentStep]?.answer) {
+      setAnswer(responses[currentStep].answer);
+    } else {
+      setAnswer("");
+    }
+    
+    // Reset feedback UI state when changing questions
+    resetFeedback();
+  }, [currentStep]);
 
   const { status, startRecording, stopRecording, mediaBlobUrl } = useReactMediaRecorder({
     audio: true,
@@ -36,22 +67,57 @@ const Questions = () => {
 
   const handleAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAnswer(e.target.value);
+    // Save answer in the responses object
+    setResponses(prev => ({
+      ...prev,
+      [currentStep]: {
+        ...prev[currentStep],
+        answer: e.target.value
+      }
+    }));
   };
 
   const handleNextQuestion = () => {
     if (currentStep < questions.length) {
+      // Save current state before moving to next question
+      setResponses(prev => ({
+        ...prev,
+        [currentStep]: {
+          answer,
+          feedback,
+          sampleResponse
+        }
+      }));
       setCurrentStep(currentStep + 1);
-      setAnswer("");
-      resetFeedback();
     }
   };
 
   const handlePreviousQuestion = () => {
     if (currentStep > 1) {
+      // Save current state before moving to previous question
+      setResponses(prev => ({
+        ...prev,
+        [currentStep]: {
+          answer,
+          feedback,
+          sampleResponse
+        }
+      }));
       setCurrentStep(currentStep - 1);
-      setAnswer("");
-      resetFeedback();
     }
+  };
+
+  const handleAnalyzeResponse = async () => {
+    await analyzeResponse(questions[currentStep - 1], answer, job);
+    // After analysis, update the responses state with the new feedback
+    setResponses(prev => ({
+      ...prev,
+      [currentStep]: {
+        answer,
+        feedback,
+        sampleResponse
+      }
+    }));
   };
 
   return (
@@ -75,6 +141,15 @@ const Questions = () => {
           status={status}
           startRecording={startRecording}
           stopRecording={stopRecording}
+          onAnalyzeResponse={handleAnalyzeResponse}
+          isAnalyzing={isAnalyzing}
+          feedback={feedback}
+          sampleResponse={sampleResponse}
+          showFeedback={showFeedback}
+          showSampleResponse={showSampleResponse}
+          setShowFeedback={setShowFeedback}
+          setShowSampleResponse={setShowSampleResponse}
+          responses={responses}
         />
       </div>
     </div>

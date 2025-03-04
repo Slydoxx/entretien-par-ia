@@ -1,9 +1,11 @@
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 import AnswerInput from "./components/AnswerInput";
 import FeedbackSection from "./components/FeedbackSection";
 import NavigationButtons from "./components/NavigationButtons";
-import useResponseAnalysis from "./hooks/useResponseAnalysis";
+import generatePDF from "./utils/generatePDF";
 
 type QuestionCardProps = {
   question: string;
@@ -13,11 +15,24 @@ type QuestionCardProps = {
   totalQuestions: number;
   onPreviousQuestion: () => void;
   onNextQuestion: () => void;
+  onAnalyzeResponse: () => void;
   job: string;
   isTranscribing: boolean;
+  isAnalyzing: boolean;
   status: string;
   startRecording: () => void;
   stopRecording: () => void;
+  feedback: string;
+  sampleResponse: string;
+  showFeedback: boolean;
+  showSampleResponse: boolean;
+  setShowFeedback: (show: boolean) => void;
+  setShowSampleResponse: (show: boolean) => void;
+  responses: {[key: number]: {
+    answer: string,
+    feedback: string,
+    sampleResponse: string
+  }};
 };
 
 const QuestionCard = ({
@@ -28,25 +43,32 @@ const QuestionCard = ({
   totalQuestions,
   onPreviousQuestion,
   onNextQuestion,
+  onAnalyzeResponse,
   job,
   isTranscribing,
   status,
   startRecording,
-  stopRecording
+  stopRecording,
+  isAnalyzing,
+  feedback,
+  sampleResponse,
+  showFeedback,
+  showSampleResponse,
+  setShowFeedback,
+  setShowSampleResponse,
+  responses
 }: QuestionCardProps) => {
-  const { 
-    isAnalyzing, 
-    feedback, 
-    sampleResponse, 
-    showFeedback, 
-    showSampleResponse, 
-    setShowFeedback, 
-    setShowSampleResponse, 
-    analyzeResponse 
-  } = useResponseAnalysis();
 
-  const handleAnalyzeResponse = () => {
-    analyzeResponse(question, answer, job);
+  const canDownloadPDF = feedback && !isAnalyzing;
+
+  const handleDownloadPDF = () => {
+    generatePDF({
+      question,
+      answer,
+      feedback,
+      sampleResponse,
+      job
+    });
   };
 
   return (
@@ -64,15 +86,29 @@ const QuestionCard = ({
         stopRecording={stopRecording}
       />
 
-      <NavigationButtons
-        currentStep={currentStep}
-        totalQuestions={totalQuestions}
-        handlePreviousQuestion={onPreviousQuestion}
-        handleNextQuestion={onNextQuestion}
-        handleAnalyzeResponse={handleAnalyzeResponse}
-        isAnalyzing={isAnalyzing}
-        isTranscribing={isTranscribing}
-      />
+      <div className="flex justify-between items-center">
+        <NavigationButtons
+          currentStep={currentStep}
+          totalQuestions={totalQuestions}
+          handlePreviousQuestion={onPreviousQuestion}
+          handleNextQuestion={onNextQuestion}
+          handleAnalyzeResponse={onAnalyzeResponse}
+          isAnalyzing={isAnalyzing}
+          isTranscribing={isTranscribing}
+        />
+
+        {canDownloadPDF && (
+          <Button
+            variant="outline"
+            className="ml-2"
+            onClick={handleDownloadPDF}
+            disabled={!canDownloadPDF}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Télécharger PDF
+          </Button>
+        )}
+      </div>
 
       <FeedbackSection
         showFeedback={showFeedback}
