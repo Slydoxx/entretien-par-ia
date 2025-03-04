@@ -57,9 +57,10 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         prepera: {
-          blue: "#2563eb",
-          darkBlue: "#1d4ed8",
-          lightBlue: "#3b82f6",
+          blue: "#2A3F54", // Remplacé par la couleur spécifiée
+          darkBlue: "#243748", // Version plus foncée
+          lightBlue: "#3B5169", // Version plus claire
+          orange: "#F37121", // Orange pour les accents
         },
       },
       borderRadius: {

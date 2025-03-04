@@ -117,7 +117,7 @@ Responsabilités :
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 space-y-8 animate-fade-in">
       <div className="text-center space-y-4 max-w-2xl mx-auto">
-        <h1 className="text-4xl font-bold tracking-tight text-prepera-darkBlue">
+        <h1 className="text-4xl font-bold tracking-tight text-prepera-blue">
           Sélectionne ton métier
         </h1>
       </div>
