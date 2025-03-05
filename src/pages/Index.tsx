@@ -17,6 +17,7 @@ const Index = () => {
   const { toast } = useToast();
 
   const jobs = {
+    // Développement
     "Développeur Web Front-End": `Description du poste : Nous recherchons un(e) Développeur Web Front-End en alternance pour rejoindre notre équipe tech. Vous participerez au développement de nos interfaces utilisateur.
 
 Responsabilités :
@@ -35,48 +36,68 @@ Responsabilités :
 - Développer des applications mobiles pour iOS et/ou Android
 - Assurer la compatibilité avec différents appareils
 - Optimiser les performances des applications`,
-    "Assistant(e) Marketing Digital": `Description du poste : Rejoignez notre équipe marketing en tant qu'Assistant(e) Marketing Digital en alternance.
+    "Développeur Full-Stack": `Description du poste : Nous recherchons un(e) Développeur Full-Stack en alternance pour participer au développement complet de nos applications.
 
 Responsabilités :
-- Gérer les réseaux sociaux et les campagnes digitales
-- Analyser les performances des actions marketing
-- Participer à la création de contenu multimédia`,
-    "Assistant(e) Communication": `Description du poste : Nous recherchons un(e) Assistant(e) Communication en alternance pour renforcer notre équipe.
+- Développer des fonctionnalités côté client et serveur
+- Collaborer avec l'équipe produit
+- Participer à l'amélioration continue de l'architecture technique`,
+    
+    // Systèmes et réseaux
+    "Technicien Systèmes et Réseaux": `Description du poste : Nous recherchons un(e) Technicien Systèmes et Réseaux en alternance pour assister notre équipe IT.
 
 Responsabilités :
-- Participer à l'élaboration de la stratégie de communication
-- Rédiger des contenus pour différents supports
-- Assister à l'organisation d'événements`,
+- Assurer le support technique et la maintenance du parc informatique
+- Participer à la gestion de l'infrastructure réseau
+- Contribuer à la sécurisation des systèmes d'information`,
+    "Administrateur Systèmes": `Description du poste : Nous recherchons un(e) Administrateur Systèmes en alternance pour rejoindre notre équipe infrastructure.
+
+Responsabilités :
+- Installer et configurer les serveurs et systèmes
+- Gérer les sauvegardes et la continuité de service
+- Participer aux projets d'évolution de l'infrastructure`,
+    
+    // Commerce
     "Assistant(e) Commercial(e)": `Description du poste : Rejoignez notre équipe commerciale en tant qu'Assistant(e) Commercial(e) en alternance.
 
 Responsabilités :
 - Prospecter et suivre une clientèle de professionnels
 - Participer aux rendez-vous commerciaux
 - Contribuer à l'élaboration des offres commerciales`,
-    "Chargé(e) de Projet Digital": `Description du poste : Nous recherchons un(e) Chargé(e) de Projet Digital en alternance pour coordonner nos projets web.
+    "Chargé(e) de Clientèle": `Description du poste : Nous recherchons un(e) Chargé(e) de Clientèle en alternance pour gérer et développer notre portefeuille clients.
 
 Responsabilités :
-- Coordonner les différentes phases des projets digitaux
-- Assurer le suivi du cahier des charges et des délais
-- Faire le lien entre les équipes techniques et clients`,
+- Accueillir et conseiller les clients
+- Analyser les besoins et proposer des solutions adaptées
+- Assurer le suivi des dossiers clients`,
+    
+    // Communication
+    "Assistant(e) Communication": `Description du poste : Nous recherchons un(e) Assistant(e) Communication en alternance pour renforcer notre équipe.
+
+Responsabilités :
+- Participer à l'élaboration de la stratégie de communication
+- Rédiger des contenus pour différents supports
+- Assister à l'organisation d'événements`,
     "Community Manager": `Description du poste : Devenez Community Manager en alternance et gérez notre présence sur les réseaux sociaux.
 
 Responsabilités :
 - Animer nos communautés sur les différentes plateformes
 - Créer et planifier du contenu engageant
 - Analyser les performances et proposer des améliorations`,
-    "Data Analyst Junior": `Description du poste : Nous recherchons un(e) Data Analyst Junior en alternance pour exploiter nos données.
+    
+    // Événementiel
+    "Assistant(e) Chef de Projet Événementiel": `Description du poste : Nous recherchons un(e) Assistant(e) Chef de Projet Événementiel en alternance pour rejoindre notre agence.
 
 Responsabilités :
-- Collecter et analyser des données
-- Créer des tableaux de bord et des visualisations
-- Formuler des recommandations basées sur les données`,
-    "UX/UI Designer Junior": `Description du poste : Rejoignez notre équipe design en tant que UX/UI Designer Junior en alternance.
+- Participer à la conception et à l'organisation d'événements
+- Coordonner les prestataires et fournisseurs
+- Assurer le suivi logistique et administratif des projets`,
+    "Chargé(e) de Production Événementielle": `Description du poste : Rejoignez notre équipe en tant que Chargé(e) de Production Événementielle en alternance.
 
 Responsabilités :
-- Concevoir des wireframes et des maquettes
-- Réaliser des tests utilisateurs
-- Collaborer avec l'équipe de développement`
+- Participer à la préparation technique des événements
+- Coordonner les équipes techniques sur le terrain
+- Assurer le bon déroulement logistique des manifestations`,
   };
 
   const handleJobSelection = (job: string) => {
@@ -125,7 +146,7 @@ Responsabilités :
     <div className="min-h-screen flex flex-col items-center justify-center p-4 space-y-8 animate-fade-in">
       <div className="text-center space-y-4 max-w-2xl mx-auto">
         <h1 className="text-4xl font-bold tracking-tight text-prepera-blue">
-          Sélectionne ton métier d'alternance
+          Sélectionne ton métier
         </h1>
       </div>
 

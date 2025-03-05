@@ -26,7 +26,7 @@ serve(async (req) => {
 Tu es un expert en recrutement spécialisé dans la préparation d'entretiens pour étudiants en alternance ou à la recherche de stages.
 Génère 20 questions d'entretien pertinentes pour un poste de ${jobTitle}.
 
-Ces questions doivent être adaptées au niveau d'un étudiant qui débute sa carrière professionnelle, tout en étant suffisamment exigeantes pour évaluer ses compétences.
+Ces questions doivent être spécifiquement adaptées au niveau d'un étudiant en alternance qui débute sa carrière professionnelle, tout en étant suffisamment exigeantes pour évaluer ses compétences et son potentiel d'apprentissage.
 
 Voici la description du poste:
 ${jobDescription}
@@ -48,10 +48,11 @@ Divise les questions en 4 thèmes principaux pertinents pour ce poste d'alternan
 - Motivation et projet professionnel (pourquoi cette entreprise, ce secteur, cette alternance)
 
 Pour chaque question:
-1. Assure-toi qu'elle soit adaptée à un profil junior/étudiant
-2. Formule-les de manière à ce que l'étudiant puisse valoriser son parcours académique
+1. Assure-toi qu'elle soit adaptée à un profil junior/étudiant en alternance
+2. Formule-les de manière à ce que l'étudiant puisse valoriser son parcours académique et ses projets d'études
 3. Évite les questions qui nécessitent une longue expérience professionnelle
-4. Intègre des questions sur la capacité à apprendre et à s'adapter
+4. Intègre des questions sur la capacité à apprendre et à s'adapter, essentielle en alternance
+5. Prends en compte le rythme alternance école/entreprise dans tes questions
 
 Renvoie tes résultats au format JSON structuré comme ceci:
 {
@@ -87,7 +88,7 @@ N'inclus aucun autre texte ou explication en dehors de ce JSON.
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'Tu es un assistant spécialisé dans les entretiens professionnels.' },
+          { role: 'system', content: 'Tu es un assistant spécialisé dans les entretiens professionnels pour étudiants en alternance.' },
           { role: 'user', content: promptContent }
         ],
         temperature: 0.7,
@@ -140,7 +141,7 @@ N'inclus aucun autre texte ou explication en dehors de ce JSON.
               questions: questions.slice(0, questionsPerTheme)
             },
             {
-              name: "Expérience professionnelle",
+              name: "Formation et projets académiques",
               questions: questions.slice(questionsPerTheme, questionsPerTheme * 2)
             },
             {
@@ -148,7 +149,7 @@ N'inclus aucun autre texte ou explication en dehors de ce JSON.
               questions: questions.slice(questionsPerTheme * 2, questionsPerTheme * 3)
             },
             {
-              name: "Motivation et culture d'entreprise",
+              name: "Motivation et projet professionnel",
               questions: questions.slice(questionsPerTheme * 3)
             }
           ]
@@ -158,9 +159,9 @@ N'inclus aucun autre texte ou explication en dehors de ce JSON.
         result = {
           themes: [
             { name: "Compétences techniques", questions: [] },
-            { name: "Expérience professionnelle", questions: [] },
+            { name: "Formation et projets académiques", questions: [] },
             { name: "Soft skills", questions: [] },
-            { name: "Motivation et culture d'entreprise", questions: [] }
+            { name: "Motivation et projet professionnel", questions: [] }
           ]
         };
       }
