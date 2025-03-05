@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import JobSearchInput from "./components/JobSearchInput";
 import JobDescriptionTabs from "./components/JobDescriptionTabs";
-import { jobsData } from "./data/jobsData";
+import { jobs } from "./data/jobs";
 
 const Index = () => {
   const [jobTitle, setJobTitle] = useState<string>("");
@@ -17,7 +17,7 @@ const Index = () => {
 
   const handleSelectJob = (job: string) => {
     setJobTitle(job);
-    setJobDescription(jobsData[job as keyof typeof jobsData]);
+    setJobDescription(jobs[job as keyof typeof jobs]);
   };
 
   const handleClearJob = () => {
@@ -54,8 +54,8 @@ const Index = () => {
 
   // When a job is selected from the list, set the description
   useEffect(() => {
-    if (jobTitle && jobsData[jobTitle as keyof typeof jobsData]) {
-      setJobDescription(jobsData[jobTitle as keyof typeof jobsData]);
+    if (jobTitle && jobs[jobTitle as keyof typeof jobs]) {
+      setJobDescription(jobs[jobTitle as keyof typeof jobs]);
     }
   }, [jobTitle]);
 
@@ -71,9 +71,9 @@ const Index = () => {
         <JobSearchInput 
           jobTitle={jobTitle}
           setJobTitle={setJobTitle}
-          jobs={jobsData}
+          jobs={jobs}
           onSelectJob={handleSelectJob}
-          onClear={handleClearJob}
+          onClearJob={handleClearJob}
         />
 
         <JobDescriptionTabs 
@@ -85,7 +85,7 @@ const Index = () => {
 
         <Button
           onClick={handleStart}
-          className="w-full flex items-center justify-center space-x-2 py-6 text-lg bg-prepera-blue hover:bg-prepera-darkBlue text-white transition-all duration-300 mt-6"
+          className="w-full flex items-center justify-center space-x-2 py-6 text-lg bg-prepera-blue hover:bg-prepera-darkBlue text-white transition-all duration-300"
         >
           <span>Générer les questions</span>
           <ArrowRight className="w-5 h-5" />
