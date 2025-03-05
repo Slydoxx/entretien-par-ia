@@ -58,6 +58,18 @@ Responsabilités :
 - Participer aux projets d'évolution de l'infrastructure`,
     
     // Commerce
+    "Business Developer": `Description du poste : Nous recherchons un(e) Business Developer en alternance pour contribuer au développement de notre activité.
+
+Responsabilités :
+- Identifier et démarcher de nouveaux clients potentiels
+- Construire et maintenir un réseau professionnel
+- Participer à l'élaboration de stratégies commerciales innovantes`,
+    "Commercial(e) B2B": `Description du poste : Nous recherchons un(e) Commercial(e) B2B en alternance pour développer notre portefeuille clients entreprises.
+
+Responsabilités :
+- Prospecter et développer un portefeuille de clients professionnels
+- Négocier et conclure des contrats commerciaux
+- Assurer le suivi et la fidélisation des clients professionnels`,
     "Assistant(e) Commercial(e)": `Description du poste : Rejoignez notre équipe commerciale en tant qu'Assistant(e) Commercial(e) en alternance.
 
 Responsabilités :
@@ -142,6 +154,34 @@ Responsabilités :
     });
   };
 
+  // Group jobs by category for better mobile organization
+  const jobCategories = {
+    "Développement": [
+      "Développeur Web Front-End",
+      "Développeur Web Back-End",
+      "Développeur Mobile",
+      "Développeur Full-Stack"
+    ],
+    "Systèmes et réseaux": [
+      "Technicien Systèmes et Réseaux",
+      "Administrateur Systèmes"
+    ],
+    "Commerce": [
+      "Business Developer",
+      "Commercial(e) B2B",
+      "Assistant(e) Commercial(e)",
+      "Chargé(e) de Clientèle"
+    ],
+    "Communication": [
+      "Assistant(e) Communication",
+      "Community Manager"
+    ],
+    "Événementiel": [
+      "Assistant(e) Chef de Projet Événementiel",
+      "Chargé(e) de Production Événementielle"
+    ]
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 space-y-8 animate-fade-in">
       <div className="text-center space-y-4 max-w-2xl mx-auto">
@@ -150,22 +190,35 @@ Responsabilités :
         </h1>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto">
-        {Object.keys(jobs).map((job) => (
+      <div className="w-full max-w-4xl mx-auto">
+        {/* Job categories for better mobile organization */}
+        <div className="space-y-6">
+          {Object.entries(jobCategories).map(([category, categoryJobs]) => (
+            <div key={category} className="space-y-2">
+              <h2 className="text-lg font-semibold text-prepera-blue">{category}</h2>
+              <div className="flex flex-wrap gap-2">
+                {categoryJobs.map((job) => (
+                  <button
+                    key={job}
+                    onClick={() => handleJobSelection(job)}
+                    className={`job-button text-sm md:text-base ${selectedJob === job ? "selected" : ""}`}
+                  >
+                    {job}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="mt-4">
           <button
-            key={job}
-            onClick={() => handleJobSelection(job)}
-            className={`job-button ${selectedJob === job ? "selected" : ""}`}
+            onClick={handleCustomClick}
+            className={`job-button w-full sm:w-auto text-sm md:text-base ${showCustomInput ? "selected" : ""}`}
           >
-            {job}
+            Rédiger ma propre description
           </button>
-        ))}
-        <button
-          onClick={handleCustomClick}
-          className={`job-button ${showCustomInput ? "selected" : ""}`}
-        >
-          Rédiger ma propre description
-        </button>
+        </div>
       </div>
 
       <div className="w-full max-w-3xl mx-auto space-y-4">
