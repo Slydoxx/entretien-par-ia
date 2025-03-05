@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,7 @@ const JobSearchInput = ({
       <div className="flex items-center border rounded-md focus-within:ring-2 focus-within:ring-prepera-blue focus-within:border-prepera-blue">
         <Search className="ml-3 h-5 w-5 text-gray-400" />
         <Input
-          placeholder="Entrez votre métier d'alternance..."
+          placeholder="Entrez le nom de votre métier"
           value={jobTitle}
           onChange={handleJobTitleChange}
           onFocus={() => setShowSuggestions(jobTitle.length > 0)}
