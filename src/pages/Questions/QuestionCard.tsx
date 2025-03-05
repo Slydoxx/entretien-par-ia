@@ -72,7 +72,7 @@ const QuestionCard = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-8 space-y-6">
+    <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-8 space-y-6">
       <h2 className="text-xl font-semibold text-prepera-darkBlue">
         {question}
       </h2>
@@ -86,7 +86,7 @@ const QuestionCard = ({
         stopRecording={stopRecording}
       />
 
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-3">
         <NavigationButtons
           currentStep={currentStep}
           totalQuestions={totalQuestions}
@@ -100,7 +100,7 @@ const QuestionCard = ({
         {canDownloadPDF && (
           <Button
             variant="outline"
-            className="ml-2"
+            className="w-full sm:w-auto self-center sm:self-end mt-2"
             onClick={handleDownloadPDF}
             disabled={!canDownloadPDF}
           >

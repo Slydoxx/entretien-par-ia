@@ -22,19 +22,19 @@ const NavigationButtons = ({
   isTranscribing 
 }: NavigationButtonsProps) => {
   return (
-    <div className="flex justify-between">
+    <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:justify-between">
       <Button 
         variant="outline"
-        className="px-4"
+        className="w-full sm:w-auto text-sm"
         onClick={handlePreviousQuestion}
         disabled={currentStep === 1}
       >
-        <ChevronLeft className="mr-2 h-4 w-4" /> Question précédente
+        <ChevronLeft className="h-4 w-4 mr-1" /> Question précédente
       </Button>
 
       <Button 
         variant="secondary"
-        className="bg-prepera-blue text-white hover:bg-prepera-darkBlue px-6 py-2"
+        className="bg-prepera-blue text-white hover:bg-prepera-darkBlue w-full sm:w-auto text-sm"
         onClick={handleAnalyzeResponse}
         disabled={isAnalyzing || isTranscribing}
       >
@@ -43,11 +43,11 @@ const NavigationButtons = ({
 
       <Button 
         variant="outline"
-        className="px-4"
+        className="w-full sm:w-auto text-sm"
         onClick={handleNextQuestion}
         disabled={currentStep === totalQuestions}
       >
-        Question suivante <ChevronRight className="ml-2 h-4 w-4" />
+        Question suivante <ChevronRight className="h-4 w-4 ml-1" />
       </Button>
     </div>
   );
