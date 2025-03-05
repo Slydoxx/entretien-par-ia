@@ -20,6 +20,11 @@ const Index = () => {
     setJobDescription(jobsData[job as keyof typeof jobsData]);
   };
 
+  const handleClearJob = () => {
+    setJobTitle("");
+    setJobDescription("");
+  };
+
   const handleJobDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setJobDescription(e.target.value);
   };
@@ -68,6 +73,7 @@ const Index = () => {
           setJobTitle={setJobTitle}
           jobs={jobsData}
           onSelectJob={handleSelectJob}
+          onClear={handleClearJob}
         />
 
         <JobDescriptionTabs 
@@ -79,7 +85,7 @@ const Index = () => {
 
         <Button
           onClick={handleStart}
-          className="w-full flex items-center justify-center space-x-2 py-6 text-lg bg-prepera-blue hover:bg-prepera-darkBlue text-white transition-all duration-300"
+          className="w-full flex items-center justify-center space-x-2 py-6 text-lg bg-prepera-blue hover:bg-prepera-darkBlue text-white transition-all duration-300 mt-6"
         >
           <span>Générer les questions</span>
           <ArrowRight className="w-5 h-5" />

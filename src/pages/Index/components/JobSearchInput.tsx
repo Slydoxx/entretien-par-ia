@@ -1,16 +1,24 @@
 
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, X } from "lucide-react";
 
 interface JobSearchInputProps {
   jobTitle: string;
   setJobTitle: (value: string) => void;
   jobs: Record<string, string>;
   onSelectJob: (job: string) => void;
+  onClear: () => void;
 }
 
-const JobSearchInput = ({ jobTitle, setJobTitle, jobs, onSelectJob }: JobSearchInputProps) => {
+const JobSearchInput = ({ 
+  jobTitle, 
+  setJobTitle, 
+  jobs, 
+  onSelectJob,
+  onClear
+}: JobSearchInputProps) => {
   const [filteredJobs, setFilteredJobs] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
 
@@ -36,7 +44,7 @@ const JobSearchInput = ({ jobTitle, setJobTitle, jobs, onSelectJob }: JobSearchI
   };
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <div className="flex items-center border rounded-md focus-within:ring-2 focus-within:ring-prepera-blue focus-within:border-prepera-blue">
         <Search className="ml-3 h-5 w-5 text-gray-400" />
         <Input
@@ -44,8 +52,19 @@ const JobSearchInput = ({ jobTitle, setJobTitle, jobs, onSelectJob }: JobSearchI
           value={jobTitle}
           onChange={handleJobTitleChange}
           onFocus={() => setShowSuggestions(jobTitle.length > 0)}
-          className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
         />
+        {jobTitle && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onClear}
+            className="mr-1 h-8 w-8"
+            aria-label="Effacer la sélection"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
       
       {showSuggestions && filteredJobs.length > 0 && (
@@ -54,8 +73,11 @@ const JobSearchInput = ({ jobTitle, setJobTitle, jobs, onSelectJob }: JobSearchI
             {filteredJobs.map((job) => (
               <li 
                 key={job}
-                className="px-4 py-2 cursor-pointer hover:bg-gray-100 text-left"
-                onClick={() => onSelectJob(job)}
+                className="px-4 py-3 cursor-pointer hover:bg-gray-100 text-left text-base touch-manipulation"
+                onClick={() => {
+                  onSelectJob(job);
+                  setShowSuggestions(false);
+                }}
               >
                 {job}
               </li>
