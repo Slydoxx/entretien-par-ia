@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useLocation, Navigate } from "react-router-dom";
+import { useLocation, Navigate, useNavigate } from "react-router-dom";
 import { useReactMediaRecorder } from "react-media-recorder";
 import QuestionHeader from "./components/QuestionHeader";
 import QuestionCard from "./QuestionCard";
@@ -15,13 +15,23 @@ interface ResponseData {
 
 const Questions = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { job, description, questions: selectedQuestions = [] } = location.state || {};
   const [answer, setAnswer] = useState("");
-  const [currentStep, setCurrentStep] = useState(1);
+  
+  // Get current step from sessionStorage if available, otherwise start at 1
+  const [currentStep, setCurrentStep] = useState(() => {
+    const savedStep = sessionStorage.getItem('currentQuestionStep');
+    return savedStep ? parseInt(savedStep, 10) : 1;
+  });
+  
   const { isTranscribing, handleTranscription } = useAudioTranscription(setAnswer);
   
   // Track responses, feedback and sample responses for each question
-  const [responses, setResponses] = useState<Record<number, ResponseData>>({});
+  const [responses, setResponses] = useState<Record<number, ResponseData>>(() => {
+    const savedResponses = sessionStorage.getItem('questionResponses');
+    return savedResponses ? JSON.parse(savedResponses) : {};
+  });
 
   // Use a new instance of the response analysis hook for the current question
   const { 
@@ -36,6 +46,12 @@ const Questions = () => {
     resetFeedback
   } = useResponseAnalysis();
 
+  // Save current state to sessionStorage whenever it changes
+  useEffect(() => {
+    sessionStorage.setItem('currentQuestionStep', currentStep.toString());
+    sessionStorage.setItem('questionResponses', JSON.stringify(responses));
+  }, [currentStep, responses]);
+
   // When changing questions, save the current state
   useEffect(() => {
     if (responses[currentStep]?.answer) {
@@ -47,6 +63,24 @@ const Questions = () => {
     // Reset feedback UI state when changing questions
     resetFeedback();
   }, [currentStep]);
+
+  // If no job data is found in location state, try to recover from sessionStorage
+  useEffect(() => {
+    if (!selectedQuestions || selectedQuestions.length === 0) {
+      const savedState = sessionStorage.getItem('questionPageState');
+      if (savedState) {
+        const state = JSON.parse(savedState);
+        navigate('/questions', { state, replace: true });
+      }
+    } else {
+      // Save the state to session storage for recovery
+      sessionStorage.setItem('questionPageState', JSON.stringify({
+        job,
+        description,
+        questions: selectedQuestions
+      }));
+    }
+  }, [job, description, selectedQuestions, navigate]);
 
   const { status, startRecording, stopRecording, mediaBlobUrl } = useReactMediaRecorder({
     audio: true,

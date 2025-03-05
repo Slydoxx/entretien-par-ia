@@ -1,6 +1,6 @@
 
 import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import PageContainer from "./components/PageContainer";
 import QuestionBox from "./components/QuestionBox";
 import QuestionList from "./components/QuestionList";
@@ -32,8 +32,15 @@ const SelectQuestions = () => {
       navigate("/", { replace: true });
     } else {
       generateQuestions();
+      
+      // Save state to session storage for recovery
+      sessionStorage.setItem('selectQuestionsState', JSON.stringify({
+        job,
+        description,
+        jobOffer
+      }));
     }
-  }, [description, navigate, generateQuestions]);
+  }, [description, navigate, generateQuestions, job, jobOffer]);
 
   const handleContinue = () => {
     if (!validateSelection()) return;
