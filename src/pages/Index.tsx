@@ -17,66 +17,66 @@ const Index = () => {
   const { toast } = useToast();
 
   const jobs = {
-    "Analyste Business": `Description du poste : Nous recherchons un(e) Analyste Business pour rejoindre notre équipe. Ce rôle est parfait pour ceux qui débutent leur carrière et sont désireux d'analyser les besoins commerciaux et de proposer des solutions basées sur les données.
+    "Développeur Web Front-End": `Description du poste : Nous recherchons un(e) Développeur Web Front-End en alternance pour rejoindre notre équipe tech. Vous participerez au développement de nos interfaces utilisateur.
 
 Responsabilités :
-- Travailler en étroite collaboration avec les unités commerciales pour comprendre et analyser les besoins
-- Traduire les besoins en spécifications fonctionnelles
-- Réaliser des analyses de données approfondies`,
-    "Chef de Produit": `Description du poste : Nous recherchons un(e) Chef de Produit pour diriger nos initiatives de développement produit.
+- Développer des interfaces utilisateur réactives et intuitives
+- Collaborer avec les designers UX/UI
+- Implémenter des fonctionnalités avec HTML, CSS et JavaScript/React/Vue`,
+    "Développeur Web Back-End": `Description du poste : Nous recherchons un(e) Développeur Web Back-End en alternance pour rejoindre notre équipe technique.
 
 Responsabilités :
-- Définir la vision et la stratégie produit
-- Collaborer avec les équipes techniques
-- Réaliser des études de marché et des entretiens utilisateurs`,
-    "Analyste de Données": `Description du poste : Nous recherchons un(e) Analyste de Données pour transformer les données en insights.
+- Concevoir et développer des API REST/GraphQL
+- Optimiser les performances des applications
+- Gérer les bases de données et l'architecture serveur`,
+    "Développeur Mobile": `Description du poste : Nous recherchons un(e) Développeur Mobile en alternance pour créer des applications natives ou hybrides.
 
 Responsabilités :
-- Analyser des ensembles de données complexes
-- Créer des tableaux de bord et des rapports
-- Présenter les résultats aux parties prenantes`,
-    "Designer UX/UI": `Description du poste : Rejoignez-nous en tant que Designer UX/UI pour créer des expériences utilisateur exceptionnelles.
+- Développer des applications mobiles pour iOS et/ou Android
+- Assurer la compatibilité avec différents appareils
+- Optimiser les performances des applications`,
+    "Assistant(e) Marketing Digital": `Description du poste : Rejoignez notre équipe marketing en tant qu'Assistant(e) Marketing Digital en alternance.
 
 Responsabilités :
-- Concevoir des interfaces utilisateur
-- Mener des recherches utilisateurs
-- Créer des wireframes et des prototypes`,
-    "Développeur": `Description du poste : Nous recherchons un(e) Développeur pour construire des produits exceptionnels.
+- Gérer les réseaux sociaux et les campagnes digitales
+- Analyser les performances des actions marketing
+- Participer à la création de contenu multimédia`,
+    "Assistant(e) Communication": `Description du poste : Nous recherchons un(e) Assistant(e) Communication en alternance pour renforcer notre équipe.
 
 Responsabilités :
-- Écrire du code propre et maintenable
-- Travailler avec des équipes pluridisciplinaires
-- Concevoir et implémenter de nouvelles fonctionnalités`,
-    "Ingénieur QA": `Description du poste : Rejoignez notre équipe QA pour assurer la qualité des produits.
+- Participer à l'élaboration de la stratégie de communication
+- Rédiger des contenus pour différents supports
+- Assister à l'organisation d'événements`,
+    "Assistant(e) Commercial(e)": `Description du poste : Rejoignez notre équipe commerciale en tant qu'Assistant(e) Commercial(e) en alternance.
 
 Responsabilités :
-- Développer et exécuter des cas de test
-- Effectuer des tests manuels et automatisés
-- Signaler et suivre les bugs`,
-    "Spécialiste Marketing": `Description du poste : Nous recherchons un(e) Spécialiste Marketing pour stimuler la croissance.
+- Prospecter et suivre une clientèle de professionnels
+- Participer aux rendez-vous commerciaux
+- Contribuer à l'élaboration des offres commerciales`,
+    "Chargé(e) de Projet Digital": `Description du poste : Nous recherchons un(e) Chargé(e) de Projet Digital en alternance pour coordonner nos projets web.
 
 Responsabilités :
-- Planifier et exécuter des campagnes marketing
-- Analyser les métriques marketing
-- Créer des stratégies de contenu`,
-    "Chargé(e) de Support Client": `Description du poste : Rejoignez notre équipe support pour aider nos clients à réussir.
+- Coordonner les différentes phases des projets digitaux
+- Assurer le suivi du cahier des charges et des délais
+- Faire le lien entre les équipes techniques et clients`,
+    "Community Manager": `Description du poste : Devenez Community Manager en alternance et gérez notre présence sur les réseaux sociaux.
 
 Responsabilités :
-- Répondre aux demandes des clients
-- Résoudre les problèmes clients
-- Maintenir la satisfaction client`,
-    "Commercial(e)": `Description du poste : Nous recherchons un(e) Commercial(e) pour développer notre activité.
+- Animer nos communautés sur les différentes plateformes
+- Créer et planifier du contenu engageant
+- Analyser les performances et proposer des améliorations`,
+    "Data Analyst Junior": `Description du poste : Nous recherchons un(e) Data Analyst Junior en alternance pour exploiter nos données.
 
 Responsabilités :
-- Identifier et poursuivre les opportunités de vente
-- Construire des relations clients
-- Atteindre les objectifs de vente`,
-    "Responsable RH": `Description du poste : Rejoignez notre équipe RH pour soutenir notre organisation en croissance.
+- Collecter et analyser des données
+- Créer des tableaux de bord et des visualisations
+- Formuler des recommandations basées sur les données`,
+    "UX/UI Designer Junior": `Description du poste : Rejoignez notre équipe design en tant que UX/UI Designer Junior en alternance.
 
 Responsabilités :
-- Gérer le processus de recrutement
-- Gérer les relations avec les employés
-- Maintenir les politiques et procédures RH`
+- Concevoir des wireframes et des maquettes
+- Réaliser des tests utilisateurs
+- Collaborer avec l'équipe de développement`
   };
 
   const handleJobSelection = (job: string) => {
@@ -125,7 +125,7 @@ Responsabilités :
     <div className="min-h-screen flex flex-col items-center justify-center p-4 space-y-8 animate-fade-in">
       <div className="text-center space-y-4 max-w-2xl mx-auto">
         <h1 className="text-4xl font-bold tracking-tight text-prepera-blue">
-          Sélectionne ton métier
+          Sélectionne ton métier d'alternance
         </h1>
       </div>
 

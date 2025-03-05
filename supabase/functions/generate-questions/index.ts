@@ -23,8 +23,10 @@ serve(async (req) => {
     }
 
     let promptContent = `
-Tu es un expert en recrutement spécialisé dans la création de questions d'entretien pertinentes et perspicaces. 
-Génère 20 questions d'entretien pour un poste de ${jobTitle}.
+Tu es un expert en recrutement spécialisé dans la préparation d'entretiens pour étudiants en alternance ou à la recherche de stages.
+Génère 20 questions d'entretien pertinentes pour un poste de ${jobTitle}.
+
+Ces questions doivent être adaptées au niveau d'un étudiant qui débute sa carrière professionnelle, tout en étant suffisamment exigeantes pour évaluer ses compétences.
 
 Voici la description du poste:
 ${jobDescription}
@@ -39,17 +41,17 @@ ${jobOffer}
     }
 
     promptContent += `
-Divise les questions en 4 thèmes principaux pertinents pour ce poste (5 questions par thème):
-- Compétences techniques (spécifiques au métier)
-- Expérience et réalisations
-- Soft skills et travail d'équipe
-- Motivation et adéquation avec le poste
+Divise les questions en 4 thèmes principaux pertinents pour ce poste d'alternance (5 questions par thème):
+- Compétences techniques (spécifiques au métier, adaptées au niveau étudiant)
+- Formation et projets académiques (mettant en valeur les compétences acquises en formation)
+- Soft skills et travail d'équipe (particulièrement importants pour les alternants)
+- Motivation et projet professionnel (pourquoi cette entreprise, ce secteur, cette alternance)
 
 Pour chaque question:
-1. Assure-toi qu'elle soit spécifique au poste et au secteur
-2. Sois précis et évite les questions trop génériques
-3. Formule les questions de manière professionnelle et directe
-4. Varie la difficulté et le type de questions pour chaque thème
+1. Assure-toi qu'elle soit adaptée à un profil junior/étudiant
+2. Formule-les de manière à ce que l'étudiant puisse valoriser son parcours académique
+3. Évite les questions qui nécessitent une longue expérience professionnelle
+4. Intègre des questions sur la capacité à apprendre et à s'adapter
 
 Renvoie tes résultats au format JSON structuré comme ceci:
 {
