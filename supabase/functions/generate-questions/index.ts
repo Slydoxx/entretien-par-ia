@@ -16,19 +16,29 @@ serve(async (req) => {
   }
 
   try {
-    const { jobTitle, jobDescription } = await req.json();
+    const { jobTitle, jobDescription, jobOffer } = await req.json();
 
     if (!jobTitle && !jobDescription) {
       throw new Error("Le titre du poste ou la description est requis");
     }
 
-    const prompt = `
+    let promptContent = `
 Tu es un expert en recrutement spécialisé dans la création de questions d'entretien pertinentes et perspicaces. 
 Génère 20 questions d'entretien pour un poste de ${jobTitle}.
 
 Voici la description du poste:
 ${jobDescription}
+`;
 
+    // Add job offer if provided
+    if (jobOffer && jobOffer.trim()) {
+      promptContent += `
+Voici également l'offre d'emploi complète qui contient des informations supplémentaires:
+${jobOffer}
+`;
+    }
+
+    promptContent += `
 Divise les questions en 4 thèmes principaux pertinents pour ce poste (5 questions par thème):
 - Compétences techniques (spécifiques au métier)
 - Expérience et réalisations
@@ -76,7 +86,7 @@ N'inclus aucun autre texte ou explication en dehors de ce JSON.
         model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: 'Tu es un assistant spécialisé dans les entretiens professionnels.' },
-          { role: 'user', content: prompt }
+          { role: 'user', content: promptContent }
         ],
         temperature: 0.7,
       }),

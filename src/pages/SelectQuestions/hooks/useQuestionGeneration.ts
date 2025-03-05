@@ -8,7 +8,7 @@ export type QuestionTheme = {
   questions: string[];
 };
 
-const useQuestionGeneration = (job?: string, description?: string) => {
+const useQuestionGeneration = (job?: string, description?: string, jobOffer?: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const [generatedQuestions, setGeneratedQuestions] = useState<string[]>([]);
   const [questionThemes, setQuestionThemes] = useState<QuestionTheme[]>([]);
@@ -23,6 +23,7 @@ const useQuestionGeneration = (job?: string, description?: string) => {
         body: {
           jobTitle: job,
           jobDescription: description,
+          jobOffer: jobOffer
         }
       });
 
@@ -94,7 +95,7 @@ const useQuestionGeneration = (job?: string, description?: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [job, description, toast]);
+  }, [job, description, jobOffer, toast]);
 
   return { generatedQuestions, questionThemes, isLoading, generateQuestions };
 };

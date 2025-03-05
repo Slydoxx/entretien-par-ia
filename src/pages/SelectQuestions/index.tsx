@@ -10,7 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 const SelectQuestions = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { job, description } = location.state || {};
+  const { job, description, jobOffer } = location.state || {};
   const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
   const { toast } = useToast();
   
@@ -18,7 +18,7 @@ const SelectQuestions = () => {
     questionThemes, 
     isLoading, 
     generateQuestions 
-  } = useQuestionGeneration(job, description);
+  } = useQuestionGeneration(job, description, jobOffer);
 
   // Redirect if no job description is provided
   useEffect(() => {

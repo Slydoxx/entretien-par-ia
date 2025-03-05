@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
   const [selectedJob, setSelectedJob] = useState<string>("");
   const [jobDescription, setJobDescription] = useState<string>("");
+  const [jobOffer, setJobOffer] = useState<string>("");
   const [showCustomInput, setShowCustomInput] = useState<boolean>(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -90,6 +92,10 @@ Responsabilités :
     }
   };
 
+  const handleJobOfferChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setJobOffer(e.target.value);
+  };
+
   const handleCustomClick = () => {
     setShowCustomInput(true);
     setSelectedJob("");
@@ -109,7 +115,8 @@ Responsabilités :
     navigate(`/select-questions`, { 
       state: { 
         job: selectedJob || "Personnalisé",
-        description: jobDescription 
+        description: jobDescription,
+        jobOffer: jobOffer.trim() || undefined
       } 
     });
   };
@@ -141,15 +148,36 @@ Responsabilités :
       </div>
 
       <div className="w-full max-w-3xl mx-auto space-y-4">
-        <Textarea
-          placeholder={showCustomInput ? "Rédigez ou collez la description de votre poste ici" : "Sélectionnez un métier ci-dessus ou rédigez votre propre description"}
-          value={jobDescription}
-          onChange={handleJobDescriptionChange}
-          className="min-h-[200px] p-4 text-base"
-        />
-        <div className="text-right text-sm text-gray-500">
-          {5000 - jobDescription.length} caractères restants
-        </div>
+        <Tabs defaultValue="description" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="description">Description du poste</TabsTrigger>
+            <TabsTrigger value="offer">Offre d'emploi (optionnel)</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="description">
+            <Textarea
+              placeholder={showCustomInput ? "Rédigez ou collez la description de votre poste ici" : "Sélectionnez un métier ci-dessus ou rédigez votre propre description"}
+              value={jobDescription}
+              onChange={handleJobDescriptionChange}
+              className="min-h-[200px] p-4 text-base"
+            />
+            <div className="text-right text-sm text-gray-500 mt-2">
+              {5000 - jobDescription.length} caractères restants
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="offer">
+            <Textarea
+              placeholder="Collez l'offre d'emploi complète ici pour obtenir des questions plus ciblées (optionnel)"
+              value={jobOffer}
+              onChange={handleJobOfferChange}
+              className="min-h-[200px] p-4 text-base"
+            />
+            <div className="text-right text-sm text-gray-500 mt-2">
+              {10000 - jobOffer.length} caractères restants
+            </div>
+          </TabsContent>
+        </Tabs>
 
         <Button
           onClick={handleStart}
