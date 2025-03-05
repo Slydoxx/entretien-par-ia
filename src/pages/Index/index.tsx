@@ -73,7 +73,7 @@ const Index = () => {
           setJobTitle={setJobTitle}
           jobs={jobs}
           onSelectJob={handleSelectJob}
-          onClearJob={handleClearJob}
+          onClear={handleClearJob}
         />
 
         <JobDescriptionTabs 
@@ -96,3 +96,4 @@ const Index = () => {
 };
 
 export default Index;
+
