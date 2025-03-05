@@ -1,18 +1,18 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
-  const [selectedJob, setSelectedJob] = useState<string>("");
+  const [jobTitle, setJobTitle] = useState<string>("");
   const [jobDescription, setJobDescription] = useState<string>("");
   const [jobOffer, setJobOffer] = useState<string>("");
-  const [showCustomInput, setShowCustomInput] = useState<boolean>(false);
+  const [filteredJobs, setFilteredJobs] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -112,34 +112,54 @@ Responsabilités :
 - Assurer le bon déroulement logistique des manifestations`,
   };
 
-  const handleJobSelection = (job: string) => {
-    setSelectedJob(job);
-    setJobDescription(jobs[job as keyof typeof jobs] || "");
-    setShowCustomInput(false);
+  useEffect(() => {
+    if (jobTitle === "") {
+      setFilteredJobs([]);
+      return;
+    }
+
+    const filtered = Object.keys(jobs).filter(job => 
+      job.toLowerCase().includes(jobTitle.toLowerCase())
+    );
+    
+    setFilteredJobs(filtered);
+  }, [jobTitle]);
+
+  const handleJobTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setJobTitle(value);
+    
+    // Show suggestions when typing
+    setShowSuggestions(value.length > 0);
+    
+    // If the job title doesn't match exactly a job in the list, clear the description
+    if (!Object.keys(jobs).includes(value)) {
+      // Keep the description if it was manually modified
+      if (jobs[value as keyof typeof jobs] === jobDescription) {
+        setJobDescription("");
+      }
+    }
+  };
+
+  const handleSelectJob = (job: string) => {
+    setJobTitle(job);
+    setJobDescription(jobs[job as keyof typeof jobs]);
+    setShowSuggestions(false);
   };
 
   const handleJobDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setJobDescription(e.target.value);
-    if (selectedJob && e.target.value !== jobs[selectedJob as keyof typeof jobs]) {
-      setSelectedJob("");
-    }
   };
 
   const handleJobOfferChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setJobOffer(e.target.value);
   };
 
-  const handleCustomClick = () => {
-    setShowCustomInput(true);
-    setSelectedJob("");
-    setJobDescription("");
-  };
-
   const handleStart = () => {
     if (!jobDescription.trim()) {
       toast({
         title: "Description requise",
-        description: "Veuillez sélectionner un métier ou saisir une description pour continuer.",
+        description: "Veuillez saisir une description pour continuer.",
         variant: "destructive",
       });
       return;
@@ -147,40 +167,19 @@ Responsabilités :
 
     navigate(`/select-questions`, { 
       state: { 
-        job: selectedJob || "Personnalisé",
+        job: jobTitle || "Personnalisé",
         description: jobDescription,
         jobOffer: jobOffer.trim() || undefined
       } 
     });
   };
 
-  // Group jobs by category for better mobile organization
-  const jobCategories = {
-    "Développement": [
-      "Développeur Web Front-End",
-      "Développeur Web Back-End",
-      "Développeur Mobile",
-      "Développeur Full-Stack"
-    ],
-    "Systèmes et réseaux": [
-      "Technicien Systèmes et Réseaux",
-      "Administrateur Systèmes"
-    ],
-    "Commerce": [
-      "Business Developer",
-      "Commercial(e) B2B",
-      "Assistant(e) Commercial(e)",
-      "Chargé(e) de Clientèle"
-    ],
-    "Communication": [
-      "Assistant(e) Communication",
-      "Community Manager"
-    ],
-    "Événementiel": [
-      "Assistant(e) Chef de Projet Événementiel",
-      "Chargé(e) de Production Événementielle"
-    ]
-  };
+  // When a job is selected from the list, set the description
+  useEffect(() => {
+    if (jobTitle && jobs[jobTitle as keyof typeof jobs]) {
+      setJobDescription(jobs[jobTitle as keyof typeof jobs]);
+    }
+  }, [jobTitle]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 space-y-8 animate-fade-in">
@@ -190,38 +189,36 @@ Responsabilités :
         </h1>
       </div>
 
-      <div className="w-full max-w-4xl mx-auto">
-        {/* Job categories for better mobile organization */}
-        <div className="space-y-6">
-          {Object.entries(jobCategories).map(([category, categoryJobs]) => (
-            <div key={category} className="space-y-2">
-              <h2 className="text-lg font-semibold text-prepera-blue">{category}</h2>
-              <div className="flex flex-wrap gap-2">
-                {categoryJobs.map((job) => (
-                  <button
+      <div className="w-full max-w-3xl mx-auto space-y-4">
+        <div className="relative">
+          <div className="flex items-center border rounded-md focus-within:ring-2 focus-within:ring-prepera-blue focus-within:border-prepera-blue">
+            <Search className="ml-3 h-5 w-5 text-gray-400" />
+            <Input
+              placeholder="Entrez votre métier d'alternance..."
+              value={jobTitle}
+              onChange={handleJobTitleChange}
+              onFocus={() => setShowSuggestions(jobTitle.length > 0)}
+              className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            />
+          </div>
+          
+          {showSuggestions && filteredJobs.length > 0 && (
+            <div className="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg max-h-60 overflow-auto">
+              <ul className="py-1 divide-y divide-gray-100">
+                {filteredJobs.map((job) => (
+                  <li 
                     key={job}
-                    onClick={() => handleJobSelection(job)}
-                    className={`job-button text-sm md:text-base ${selectedJob === job ? "selected" : ""}`}
+                    className="px-4 py-2 cursor-pointer hover:bg-gray-100 text-left"
+                    onClick={() => handleSelectJob(job)}
                   >
                     {job}
-                  </button>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
-          ))}
+          )}
         </div>
-        
-        <div className="mt-4">
-          <button
-            onClick={handleCustomClick}
-            className={`job-button w-full sm:w-auto text-sm md:text-base ${showCustomInput ? "selected" : ""}`}
-          >
-            Rédiger ma propre description
-          </button>
-        </div>
-      </div>
 
-      <div className="w-full max-w-3xl mx-auto space-y-4">
         <Tabs defaultValue="description" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="description">Description du poste</TabsTrigger>
@@ -230,7 +227,7 @@ Responsabilités :
           
           <TabsContent value="description">
             <Textarea
-              placeholder={showCustomInput ? "Rédigez ou collez la description de votre poste ici" : "Sélectionnez un métier ci-dessus ou rédigez votre propre description"}
+              placeholder="Description du poste - modifiez si nécessaire"
               value={jobDescription}
               onChange={handleJobDescriptionChange}
               className="min-h-[200px] p-4 text-base"
