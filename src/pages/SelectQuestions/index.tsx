@@ -24,7 +24,7 @@ const SelectQuestions = () => {
     selectedQuestions,
     toggleQuestionSelection,
     validateSelection
-  } = useQuestionSelection(5);
+  } = useQuestionSelection(3);
 
   // Redirect if no job description is provided
   useEffect(() => {
@@ -58,7 +58,7 @@ const SelectQuestions = () => {
     <PageContainer>
       <SelectionHeader job={job} onBack={() => navigate('/')} />
 
-      <QuestionBox title="Sélectionnez jusqu'à 5 questions d'entretien">
+      <QuestionBox title="Sélectionnez jusqu'à 3 questions d'entretien">
         <QuestionList 
           questionThemes={questionThemes}
           selectedQuestions={selectedQuestions}

@@ -24,7 +24,7 @@ serve(async (req) => {
 
     let promptContent = `
 Tu es un expert en recrutement spécialisé dans la préparation d'entretiens pour étudiants en alternance ou à la recherche de stages.
-Génère 20 questions d'entretien pertinentes pour un poste de ${jobTitle}.
+Génère 12 questions d'entretien pertinentes pour un poste de ${jobTitle}.
 
 Ces questions doivent être spécifiquement adaptées au niveau d'un étudiant en alternance qui débute sa carrière professionnelle, tout en étant suffisamment exigeantes pour évaluer ses compétences et son potentiel d'apprentissage.
 
@@ -41,7 +41,7 @@ ${jobOffer}
     }
 
     promptContent += `
-Divise les questions en 4 thèmes principaux pertinents pour ce poste d'alternance (5 questions par thème):
+Divise les questions en 4 thèmes principaux pertinents pour ce poste d'alternance (3 questions par thème):
 - Compétences techniques (spécifiques au métier, adaptées au niveau étudiant)
 - Formation et projets académiques (mettant en valeur les compétences acquises en formation)
 - Soft skills et travail d'équipe (particulièrement importants pour les alternants)
@@ -59,19 +59,19 @@ Renvoie tes résultats au format JSON structuré comme ceci:
   "themes": [
     {
       "name": "Nom du thème 1",
-      "questions": ["Question 1", "Question 2", "Question 3", "Question 4", "Question 5"]
+      "questions": ["Question 1", "Question 2", "Question 3"]
     },
     {
       "name": "Nom du thème 2",
-      "questions": ["Question 1", "Question 2", "Question 3", "Question 4", "Question 5"]
+      "questions": ["Question 1", "Question 2", "Question 3"]
     },
     {
       "name": "Nom du thème 3",
-      "questions": ["Question 1", "Question 2", "Question 3", "Question 4", "Question 5"]
+      "questions": ["Question 1", "Question 2", "Question 3"]
     },
     {
       "name": "Nom du thème 4",
-      "questions": ["Question 1", "Question 2", "Question 3", "Question 4", "Question 5"]
+      "questions": ["Question 1", "Question 2", "Question 3"]
     }
   ]
 }
@@ -167,11 +167,11 @@ N'inclus aucun autre texte ou explication en dehors de ce JSON.
       }
     }
 
-    // Ensure we have exactly 4 themes with 5 questions each
+    // Ensure we have exactly 4 themes with 3 questions each
     result.themes = result.themes.slice(0, 4).map(theme => {
-      // Ensure each theme has exactly 5 questions
-      if (theme.questions.length > 5) {
-        theme.questions = theme.questions.slice(0, 5);
+      // Ensure each theme has exactly 3 questions
+      if (theme.questions.length > 3) {
+        theme.questions = theme.questions.slice(0, 3);
       }
       return theme;
     });

@@ -45,10 +45,10 @@ const useQuestionGeneration = (job?: string, description?: string, jobOffer?: st
       } else {
         // Fallback in case themes aren't returned
         setQuestionThemes([
-          { name: "Compétences techniques", questions: data.questions.slice(0, 5) },
-          { name: "Expérience professionnelle", questions: data.questions.slice(5, 10) },
-          { name: "Soft skills", questions: data.questions.slice(10, 15) },
-          { name: "Motivation", questions: data.questions.slice(15, 20) }
+          { name: "Compétences techniques", questions: data.questions.slice(0, 3) },
+          { name: "Formation et projets académiques", questions: data.questions.slice(3, 6) },
+          { name: "Soft skills", questions: data.questions.slice(6, 9) },
+          { name: "Motivation", questions: data.questions.slice(9, 12) }
         ]);
       }
     } catch (error) {
@@ -66,25 +66,17 @@ const useQuestionGeneration = (job?: string, description?: string, jobOffer?: st
         "Comment vous tenez-vous informé des évolutions de votre domaine ?",
         "Où vous voyez-vous dans 5 ans ?",
         "Quelle a été votre plus grande réussite professionnelle ?",
-        "Comment gérez-vous les conflits au sein d'une équipe ?",
-        "Décrivez une situation où vous avez dû vous adapter rapidement.",
-        "Quelle est votre approche pour apprendre de nouvelles compétences ?",
-        "Comment établissez-vous vos priorités quand vous avez plusieurs tâches ?",
-        "Parlez-moi d'une erreur professionnelle et ce que vous en avez appris.",
-        "Comment communiquez-vous des informations techniques à des non-spécialistes ?",
-        "Quelle est votre expérience avec [compétence spécifique au poste] ?",
-        "Comment réagissez-vous face à la critique ?",
-        "Avez-vous des questions à me poser sur le poste ou l'entreprise ?",
+        "Comment gérez-vous les conflits au sein d'une équipe ?"
       ];
       
       setGeneratedQuestions(fallbackQuestions);
       
       // Create fallback themes
       setQuestionThemes([
-        { name: "Compétences techniques", questions: fallbackQuestions.slice(0, 5) },
-        { name: "Expérience professionnelle", questions: fallbackQuestions.slice(5, 10) },
-        { name: "Soft skills", questions: fallbackQuestions.slice(10, 15) },
-        { name: "Motivation", questions: fallbackQuestions.slice(15, 20) }
+        { name: "Compétences techniques", questions: fallbackQuestions.slice(0, 3) },
+        { name: "Formation et projets académiques", questions: fallbackQuestions.slice(3, 6) },
+        { name: "Soft skills", questions: fallbackQuestions.slice(6, 9) },
+        { name: "Motivation", questions: fallbackQuestions.slice(9, 12) }
       ]);
       
       toast({

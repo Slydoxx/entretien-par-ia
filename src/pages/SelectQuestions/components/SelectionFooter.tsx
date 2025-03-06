@@ -11,7 +11,7 @@ const SelectionFooter = ({ selectedCount, onContinue }: SelectionFooterProps) =>
   return (
     <div className="flex justify-between items-center pt-4">
       <div className="text-sm text-gray-500">
-        {selectedCount} / 5 questions sélectionnées
+        {selectedCount} / 3 questions sélectionnées
       </div>
       <Button
         onClick={onContinue}

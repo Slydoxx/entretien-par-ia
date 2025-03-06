@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
-export const useQuestionSelection = (maxQuestions = 5) => {
+export const useQuestionSelection = (maxQuestions = 3) => {
   const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
   const { toast } = useToast();
 
