@@ -39,54 +39,29 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
       
       console.log("Audio successfully converted to base64, length:", base64Audio.length);
       
-      // Call Supabase function to transcribe audio with extended timeout and retries
+      // Call Supabase function to transcribe audio with extended timeout
       console.log("Calling transcribe-audio function...");
-      
-      // Add retry logic
-      const maxRetries = 2;
-      let lastError = null;
-      
-      for (let attempt = 0; attempt <= maxRetries; attempt++) {
-        try {
-          if (attempt > 0) {
-            console.log(`Retry attempt ${attempt}/${maxRetries}...`);
-            // Short delay before retry
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-          
-          const { data, error } = await supabase.functions.invoke('transcribe-audio', {
-            body: { audioBlob: base64Audio }
-          });
+      const { data, error } = await supabase.functions.invoke('transcribe-audio', {
+        body: { audioBlob: base64Audio }
+      });
 
-          if (error) {
-            console.error('Supabase function error:', error);
-            lastError = error;
-            continue; // Try again
-          }
-
-          console.log("Transcribe function response:", data);
-
-          if (!data?.text) {
-            lastError = new Error(data?.error || 'Aucun texte n\'a été transcrit');
-            continue; // Try again
-          }
-
-          console.log("Transcription successful:", data.text);
-          setAnswer(data.text);
-          toast({
-            title: "Transcription réussie",
-            description: "Votre réponse vocale a été transcrite avec succès.",
-          });
-          return; // Success, exit the function
-        } catch (err) {
-          console.error(`Attempt ${attempt} failed:`, err);
-          lastError = err;
-        }
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(`Erreur du serveur: ${error.message}`);
       }
-      
-      // If we got here, all retries failed
-      throw lastError || new Error("Échec de la transcription après plusieurs tentatives");
-      
+
+      console.log("Transcribe function response:", data);
+
+      if (!data?.text) {
+        throw new Error(data?.error || 'Aucun texte n\'a été transcrit');
+      }
+
+      console.log("Transcription successful:", data.text);
+      setAnswer(data.text);
+      toast({
+        title: "Transcription réussie",
+        description: "Votre réponse vocale a été transcrite avec succès.",
+      });
     } catch (error) {
       console.error('Transcription error:', error);
       toast({

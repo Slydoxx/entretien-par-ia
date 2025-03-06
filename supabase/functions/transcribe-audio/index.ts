@@ -86,47 +86,31 @@ serve(async (req) => {
     // Get the OpenAI API key
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openaiApiKey) {
-      console.error("OPENAI_API_KEY not found in environment variables");
       throw new Error('OpenAI API key not found in environment variables');
     }
     
-    // Send to OpenAI with extended timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-    
-    try {
-      const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openaiApiKey}`,
-        },
-        body: formData,
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('OpenAI API Error:', response.status, errorText);
-        throw new Error(`OpenAI API error: ${response.status} ${errorText}`);
-      }
+    // Send to OpenAI
+    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+      },
+      body: formData,
+    });
 
-      const result = await response.json();
-      console.log("Transcription received:", result.text);
-
-      return new Response(
-        JSON.stringify({ text: result.text }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    } catch (error) {
-      clearTimeout(timeoutId);
-      if (error.name === 'AbortError') {
-        console.error('Request timed out');
-        throw new Error('La requête a expiré. Veuillez réessayer avec un enregistrement plus court.');
-      }
-      throw error;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenAI API Error:', errorText);
+      throw new Error(`OpenAI API error: ${response.status} ${errorText}`);
     }
+
+    const result = await response.json();
+    console.log("Transcription received:", result.text);
+
+    return new Response(
+      JSON.stringify({ text: result.text }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
 
   } catch (error) {
     console.error('Error in transcribe-audio function:', error);
