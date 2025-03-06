@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { useLocation, Navigate, useNavigate } from "react-router-dom";
 import { useReactMediaRecorder } from "react-media-recorder";
+import { useToast } from "@/components/ui/use-toast";
 import QuestionHeader from "./components/QuestionHeader";
 import QuestionCard from "./QuestionCard";
 import useAudioTranscription from "./hooks/useAudioTranscription";
@@ -18,8 +18,8 @@ const Questions = () => {
   const navigate = useNavigate();
   const { job, description, questions: selectedQuestions = [] } = location.state || {};
   const [answer, setAnswer] = useState("");
+  const { toast } = useToast();
   
-  // Get current step from sessionStorage if available, otherwise start at 1
   const [currentStep, setCurrentStep] = useState(() => {
     const savedStep = sessionStorage.getItem('currentQuestionStep');
     return savedStep ? parseInt(savedStep, 10) : 1;
@@ -27,13 +27,11 @@ const Questions = () => {
   
   const { isTranscribing, handleTranscription } = useAudioTranscription(setAnswer);
   
-  // Track responses, feedback and sample responses for each question
   const [responses, setResponses] = useState<Record<number, ResponseData>>(() => {
     const savedResponses = sessionStorage.getItem('questionResponses');
     return savedResponses ? JSON.parse(savedResponses) : {};
   });
 
-  // Use a new instance of the response analysis hook for the current question
   const { 
     isAnalyzing, 
     feedback, 
@@ -46,13 +44,11 @@ const Questions = () => {
     resetFeedback
   } = useResponseAnalysis();
 
-  // Save current state to sessionStorage whenever it changes
   useEffect(() => {
     sessionStorage.setItem('currentQuestionStep', currentStep.toString());
     sessionStorage.setItem('questionResponses', JSON.stringify(responses));
   }, [currentStep, responses]);
 
-  // When changing questions, save the current state
   useEffect(() => {
     if (responses[currentStep]?.answer) {
       setAnswer(responses[currentStep].answer);
@@ -60,11 +56,9 @@ const Questions = () => {
       setAnswer("");
     }
     
-    // Reset feedback UI state when changing questions
     resetFeedback();
   }, [currentStep]);
 
-  // If no job data is found in location state, try to recover from sessionStorage
   useEffect(() => {
     if (!selectedQuestions || selectedQuestions.length === 0) {
       const savedState = sessionStorage.getItem('questionPageState');
@@ -73,7 +67,6 @@ const Questions = () => {
         navigate('/questions', { state, replace: true });
       }
     } else {
-      // Save the state to session storage for recovery
       sessionStorage.setItem('questionPageState', JSON.stringify({
         job,
         description,
@@ -82,10 +75,30 @@ const Questions = () => {
     }
   }, [job, description, selectedQuestions, navigate]);
 
+  useEffect(() => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      console.error("getUserMedia is not supported in this browser");
+      toast({
+        title: "Fonctionnalité non supportée",
+        description: "L'enregistrement audio n'est pas supporté par votre navigateur.",
+        variant: "destructive",
+      });
+    }
+  }, []);
+
   const { status, startRecording, stopRecording, mediaBlobUrl } = useReactMediaRecorder({
     audio: true,
     onStop: async (blobUrl, blob) => {
+      console.log("Recording stopped, blob URL:", blobUrl);
       await handleTranscription(blob);
+    },
+    onError: (error) => {
+      console.error("Media recorder error:", error);
+      toast({
+        title: "Erreur d'enregistrement",
+        description: "Impossible d'accéder au microphone. Vérifiez les permissions de votre navigateur.",
+        variant: "destructive",
+      });
     }
   });
 
@@ -103,7 +116,6 @@ const Questions = () => {
 
   const handleAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAnswer(e.target.value);
-    // Save answer in the responses object
     setResponses(prev => ({
       ...prev,
       [currentStep]: {
@@ -115,7 +127,6 @@ const Questions = () => {
 
   const handleNextQuestion = () => {
     if (currentStep < questions.length) {
-      // Save current state before moving to next question
       setResponses(prev => ({
         ...prev,
         [currentStep]: {
@@ -130,7 +141,6 @@ const Questions = () => {
 
   const handlePreviousQuestion = () => {
     if (currentStep > 1) {
-      // Save current state before moving to previous question
       setResponses(prev => ({
         ...prev,
         [currentStep]: {
@@ -145,7 +155,6 @@ const Questions = () => {
 
   const handleAnalyzeResponse = async () => {
     await analyzeResponse(questions[currentStep - 1], answer, job);
-    // After analysis, update the responses state with the new feedback
     setResponses(prev => ({
       ...prev,
       [currentStep]: {
