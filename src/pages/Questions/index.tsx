@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useLocation, Navigate, useNavigate } from "react-router-dom";
 import { useReactMediaRecorder } from "react-media-recorder";
@@ -86,21 +87,26 @@ const Questions = () => {
     }
   }, []);
 
+  // Removed onError and will handle errors through error checking in the component
   const { status, startRecording, stopRecording, mediaBlobUrl } = useReactMediaRecorder({
     audio: true,
     onStop: async (blobUrl, blob) => {
       console.log("Recording stopped, blob URL:", blobUrl);
       await handleTranscription(blob);
-    },
-    onError: (error) => {
-      console.error("Media recorder error:", error);
+    }
+  });
+
+  // Add error checking for recording status
+  useEffect(() => {
+    if (status === "acquiring_media" || status === "permission_denied") {
+      console.error("Media recorder permission issue:", status);
       toast({
         title: "Erreur d'enregistrement",
         description: "Impossible d'accéder au microphone. Vérifiez les permissions de votre navigateur.",
         variant: "destructive",
       });
     }
-  });
+  }, [status, toast]);
 
   if (!selectedQuestions || selectedQuestions.length === 0) {
     return <Navigate to="/select-questions" replace />;
