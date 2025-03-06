@@ -1,11 +1,19 @@
 
-import { useState } from "react";
+import { useReactMediaRecorder } from "react-media-recorder";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import AnswerInput from "./components/AnswerInput";
 import FeedbackSection from "./components/FeedbackSection";
 import NavigationButtons from "./components/NavigationButtons";
 import generatePDF from "./utils/generatePDF";
+import { useToast } from "@/components/ui/use-toast";
+import { useEffect } from "react";
+
+interface ResponseData {
+  answer: string;
+  feedback: string;
+  sampleResponse: string;
+}
 
 type QuestionCardProps = {
   question: string;
@@ -18,21 +26,15 @@ type QuestionCardProps = {
   onAnalyzeResponse: () => void;
   job: string;
   isTranscribing: boolean;
+  handleTranscription: (blob: Blob) => Promise<void>;
   isAnalyzing: boolean;
-  status: string;
-  startRecording: () => void;
-  stopRecording: () => void;
   feedback: string;
   sampleResponse: string;
   showFeedback: boolean;
   showSampleResponse: boolean;
   setShowFeedback: (show: boolean) => void;
   setShowSampleResponse: (show: boolean) => void;
-  responses: {[key: number]: {
-    answer: string,
-    feedback: string,
-    sampleResponse: string
-  }};
+  responses: Record<number, ResponseData>;
 };
 
 const QuestionCard = ({
@@ -46,9 +48,7 @@ const QuestionCard = ({
   onAnalyzeResponse,
   job,
   isTranscribing,
-  status,
-  startRecording,
-  stopRecording,
+  handleTranscription,
   isAnalyzing,
   feedback,
   sampleResponse,
@@ -58,8 +58,29 @@ const QuestionCard = ({
   setShowSampleResponse,
   responses
 }: QuestionCardProps) => {
-
+  const { toast } = useToast();
   const canDownloadPDF = feedback && !isAnalyzing;
+
+  // Media recorder setup
+  const { status, startRecording, stopRecording } = useReactMediaRecorder({
+    audio: true,
+    onStop: async (blobUrl, blob) => {
+      console.log("Recording stopped, blob URL:", blobUrl);
+      await handleTranscription(blob);
+    }
+  });
+
+  // Add error checking for recording status
+  useEffect(() => {
+    if (status === "acquiring_media" || status === "permission_denied") {
+      console.error("Media recorder permission issue:", status);
+      toast({
+        title: "Pensez à bien autoriser l'accès à votre micro",
+        description: "Cette autorisation est nécessaire pour l'enregistrement vocal.",
+        variant: "default",
+      });
+    }
+  }, [status, toast]);
 
   const handleDownloadPDF = () => {
     generatePDF({
