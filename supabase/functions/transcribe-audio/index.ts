@@ -10,6 +10,7 @@ const corsHeaders = {
 // Process base64 in chunks to prevent memory issues
 function processBase64Chunks(base64String: string, chunkSize = 32768) {
   try {
+    console.log("Starting base64 processing, length:", base64String.length);
     const chunks: Uint8Array[] = [];
     let position = 0;
     
@@ -35,6 +36,7 @@ function processBase64Chunks(base64String: string, chunkSize = 32768) {
       offset += chunk.length;
     }
 
+    console.log("Finished base64 processing, total size:", result.length, "bytes");
     return result;
   } catch (error) {
     console.error("Error processing base64 chunks:", error);
@@ -43,15 +45,18 @@ function processBase64Chunks(base64String: string, chunkSize = 32768) {
 }
 
 serve(async (req) => {
+  // CORS handling for preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
+    console.log("Transcription request received");
     const reqBody = await req.json();
     const { audioBlob } = reqBody;
     
     if (!audioBlob) {
+      console.error("No audio data provided");
       throw new Error('No audio data provided');
     }
 
@@ -65,8 +70,10 @@ serve(async (req) => {
       throw new Error('Processed audio has zero length');
     }
     
-    // Determine audio type (most mobile browsers use audio/webm)
+    // Determine audio type based on browser/device characteristics
+    // Most mobile browsers use audio/webm
     const audioType = 'audio/webm';
+    console.log("Using audio type:", audioType);
     
     // Prepare form data
     const formData = new FormData();
@@ -76,11 +83,17 @@ serve(async (req) => {
 
     console.log("Sending request to OpenAI...");
     
+    // Get the OpenAI API key
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openaiApiKey) {
+      throw new Error('OpenAI API key not found in environment variables');
+    }
+    
     // Send to OpenAI
     const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'Authorization': `Bearer ${openaiApiKey}`,
       },
       body: formData,
     });
@@ -88,7 +101,7 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('OpenAI API Error:', errorText);
-      throw new Error(`OpenAI API error: ${errorText}`);
+      throw new Error(`OpenAI API error: ${response.status} ${errorText}`);
     }
 
     const result = await response.json();

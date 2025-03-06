@@ -20,8 +20,14 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
         reader.onloadend = () => {
-          const base64Audio = reader.result as string;
-          resolve(base64Audio.split(',')[1]);
+          try {
+            const base64Audio = reader.result as string;
+            const base64Data = base64Audio.split(',')[1];
+            console.log("Audio converted to base64, starting with:", base64Data.substring(0, 20) + "...");
+            resolve(base64Data);
+          } catch (err) {
+            reject(new Error("Erreur lors du traitement de l'audio"));
+          }
         };
         reader.onerror = () => {
           reject(new Error("Erreur lors de la conversion de l'audio"));
@@ -31,20 +37,23 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
       reader.readAsDataURL(audioBlob);
       const base64Audio = await base64Promise;
       
-      console.log("Audio successfully converted to base64");
+      console.log("Audio successfully converted to base64, length:", base64Audio.length);
       
-      // Call Supabase function to transcribe audio
+      // Call Supabase function to transcribe audio with extended timeout
+      console.log("Calling transcribe-audio function...");
       const { data, error } = await supabase.functions.invoke('transcribe-audio', {
         body: { audioBlob: base64Audio }
       });
 
       if (error) {
         console.error('Supabase function error:', error);
-        throw error;
+        throw new Error(`Erreur du serveur: ${error.message}`);
       }
 
+      console.log("Transcribe function response:", data);
+
       if (!data?.text) {
-        throw new Error('Aucun texte n\'a été transcrit');
+        throw new Error(data?.error || 'Aucun texte n\'a été transcrit');
       }
 
       console.log("Transcription successful:", data.text);
