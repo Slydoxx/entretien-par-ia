@@ -1,5 +1,7 @@
 
 import { ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ArrowDown } from "lucide-react";
 
 type FeedbackSectionProps = {
   showFeedback: boolean;
@@ -9,6 +11,15 @@ type FeedbackSectionProps = {
   feedback: string;
   sampleResponse: string;
   isAnalyzing: boolean;
+  // Ajouter les props pour les boutons de navigation
+  currentStep: number;
+  totalQuestions: number;
+  handlePreviousQuestion: () => void;
+  handleNextQuestion: () => void;
+  handleAnalyzeResponse: () => void;
+  isTranscribing: boolean;
+  canDownloadPDF: boolean;
+  handleDownloadPDF: () => void;
 };
 
 const FeedbackSection = ({ 
@@ -18,8 +29,20 @@ const FeedbackSection = ({
   setShowSampleResponse, 
   feedback, 
   sampleResponse, 
-  isAnalyzing 
+  isAnalyzing,
+  // Utiliser les nouvelles props
+  currentStep,
+  totalQuestions,
+  handlePreviousQuestion,
+  handleNextQuestion,
+  handleAnalyzeResponse,
+  isTranscribing,
+  canDownloadPDF,
+  handleDownloadPDF
 }: FeedbackSectionProps) => {
+  // Détermine si des feedbacks sont ouverts et ont du contenu
+  const hasFeedbackContent = (showFeedback && feedback) || (showSampleResponse && sampleResponse);
+
   return (
     <div className="space-y-2 mt-6">
       <button 
@@ -49,6 +72,51 @@ const FeedbackSection = ({
       ) : showSampleResponse && sampleResponse && (
         <div className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700 whitespace-pre-wrap">
           {sampleResponse}
+        </div>
+      )}
+      
+      {/* Boutons de navigation en bas, uniquement affichés si des feedbacks sont ouverts */}
+      {hasFeedbackContent && (
+        <div className="mt-6 space-y-2">
+          <div className="flex flex-col gap-2">
+            <Button 
+              variant="outline"
+              className="w-full text-sm"
+              onClick={handlePreviousQuestion}
+              disabled={currentStep === 1}
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" /> Question précédente
+            </Button>
+
+            <Button 
+              variant="secondary"
+              className="bg-prepera-blue text-white hover:bg-prepera-darkBlue w-full text-sm"
+              onClick={handleAnalyzeResponse}
+              disabled={isAnalyzing || isTranscribing}
+            >
+              {isAnalyzing ? "Analyse en cours..." : "Soumettre pour feedback IA"}
+            </Button>
+
+            <Button 
+              variant="outline"
+              className="w-full text-sm"
+              onClick={handleNextQuestion}
+              disabled={currentStep === totalQuestions}
+            >
+              Question suivante <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+            
+            {canDownloadPDF && (
+              <Button
+                variant="outline"
+                className="w-full text-sm"
+                onClick={handleDownloadPDF}
+              >
+                <ArrowDown className="h-4 w-4 mr-2" />
+                Télécharger PDF
+              </Button>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -1,7 +1,7 @@
 
 import { useReactMediaRecorder } from "react-media-recorder";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, ArrowDown } from "lucide-react";
 import AnswerInput from "./components/AnswerInput";
 import FeedbackSection from "./components/FeedbackSection";
 import NavigationButtons from "./components/NavigationButtons";
@@ -139,6 +139,15 @@ const QuestionCard = ({
         feedback={feedback}
         sampleResponse={sampleResponse}
         isAnalyzing={isAnalyzing}
+        // Passer les props supplémentaires pour les boutons de navigation
+        currentStep={currentStep}
+        totalQuestions={totalQuestions}
+        handlePreviousQuestion={onPreviousQuestion}
+        handleNextQuestion={onNextQuestion}
+        handleAnalyzeResponse={onAnalyzeResponse}
+        isTranscribing={isTranscribing}
+        canDownloadPDF={canDownloadPDF}
+        handleDownloadPDF={handleDownloadPDF}
       />
     </div>
   );
