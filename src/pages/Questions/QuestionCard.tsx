@@ -70,17 +70,12 @@ const QuestionCard = ({
     }
   });
 
-  // Add error checking for recording status
+  // Remove the permission notification toast
   useEffect(() => {
-    if (status === "acquiring_media" || status === "permission_denied") {
+    if (status === "permission_denied") {
       console.error("Media recorder permission issue:", status);
-      toast({
-        title: "Pensez à bien autoriser l'accès à votre micro",
-        description: "Cette autorisation est nécessaire pour l'enregistrement vocal.",
-        variant: "default",
-      });
     }
-  }, [status, toast]);
+  }, [status]);
 
   const handleDownloadPDF = () => {
     generatePDF({
