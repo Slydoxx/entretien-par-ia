@@ -42,6 +42,11 @@ const QuestionsContainer = () => {
     resetFeedback
   } = useResponseAnalysis();
 
+  // Reset feedback when changing questions
+  useEffect(() => {
+    resetFeedback();
+  }, [currentStep]);
+
   // Redirect if no questions
   useEffect(() => {
     if (!selectedQuestions || selectedQuestions.length === 0) {
@@ -100,8 +105,12 @@ const QuestionsContainer = () => {
           onAnswerChange={handleAnswerChange}
           currentStep={Math.min(currentStep, selectedQuestions.length)}
           totalQuestions={selectedQuestions.length}
-          onPreviousQuestion={handlePreviousQuestion}
-          onNextQuestion={handleNextQuestion}
+          onPreviousQuestion={() => {
+            handlePreviousQuestion();
+          }}
+          onNextQuestion={() => {
+            handleNextQuestion();
+          }}
           job={job}
           isTranscribing={isTranscribing}
           handleTranscription={handleTranscription}
