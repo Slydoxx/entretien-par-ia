@@ -16,7 +16,7 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
         throw new Error("Aucun audio enregistré");
       }
 
-      // Ensure we have the correct mime type
+      // Ensure we have the correct mime type and normalize for mobile if needed
       const mimeType = audioBlob.type || 'audio/webm';
       console.log("Using MIME type:", mimeType);
 

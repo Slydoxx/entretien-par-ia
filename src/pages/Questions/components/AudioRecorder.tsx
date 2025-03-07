@@ -34,10 +34,14 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
     // Cleanup function for media stream
     return () => {
       if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach(track => {
-          track.stop();
-          console.log("Audio track stopped on cleanup");
-        });
+        try {
+          mediaStreamRef.current.getTracks().forEach(track => {
+            track.stop();
+            console.log("Audio track stopped on cleanup");
+          });
+        } catch (err) {
+          console.error("Error stopping audio tracks:", err);
+        }
         mediaStreamRef.current = null;
       }
     };
@@ -47,13 +51,14 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
     try {
       setErrorMessage(null);
       
-      // Check for microphone permission first
+      // Check for microphone permission first with explicit constraints for mobile
       console.log("Requesting microphone access...");
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true
+          autoGainControl: true,
+          sampleRate: 44100 // Standardize sample rate
         } 
       });
       
@@ -78,10 +83,14 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
     
     // Clean up the stream after stopping
     if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach(track => {
-        track.stop();
-        console.log("Audio track stopped after recording");
-      });
+      try {
+        mediaStreamRef.current.getTracks().forEach(track => {
+          track.stop();
+          console.log("Audio track stopped after recording");
+        });
+      } catch (err) {
+        console.error("Error stopping audio tracks after recording:", err);
+      }
       mediaStreamRef.current = null;
     }
   };
