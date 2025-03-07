@@ -13,7 +13,7 @@ const LoadingState = () => (
   <div className="flex flex-col items-center justify-center py-12">
     <Loader2 className="w-8 h-8 text-prepera-blue animate-spin mb-4" />
     <p className="text-gray-600">Génération des questions en cours...</p>
-    <p className="text-gray-500 text-sm mt-1">Cela peut prendre jusqu'à 20 secondes</p>
+    <p className="text-gray-500 text-sm mt-1 px-4 text-center">Cela peut prendre jusqu'à 20 secondes</p>
   </div>
 );
 
