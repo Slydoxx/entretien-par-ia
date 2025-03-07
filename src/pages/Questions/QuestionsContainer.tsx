@@ -1,5 +1,6 @@
 
-import { useLocation, Navigate, useNavigate, useEffect } from "react-router-dom";
+import { useLocation, Navigate, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import QuestionHeader from "./components/QuestionHeader";
 import QuestionCard from "./QuestionCard";
 import { useQuestionsPageState } from "./hooks/useQuestionsPageState";
