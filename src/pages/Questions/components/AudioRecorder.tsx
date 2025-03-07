@@ -48,7 +48,13 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
       console.log("Microphone permission granted, starting recording");
       
       // Keep the stream active to prevent permission issues on some mobile devices
+      // Mobile fix: explicitly close the stream after starting recording to prevent conflicts
       startRecording();
+      
+      // Clean up the temporary stream to avoid duplication with what react-media-recorder will create
+      setTimeout(() => {
+        stream.getTracks().forEach(track => track.stop());
+      }, 500);
     } catch (err) {
       console.error("Microphone permission error:", err);
       setPermissionDenied(true);

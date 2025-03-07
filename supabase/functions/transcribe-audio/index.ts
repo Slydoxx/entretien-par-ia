@@ -53,7 +53,7 @@ serve(async (req) => {
   try {
     console.log("Transcription request received");
     const reqBody = await req.json();
-    const { audioBlob, mimeType } = reqBody;
+    const { audioBlob, mimeType, language } = reqBody;
     
     if (!audioBlob) {
       console.error("No audio data provided");
@@ -90,9 +90,10 @@ serve(async (req) => {
     
     formData.append('file', blob, filename);
     formData.append('model', 'whisper-1');
-    formData.append('language', 'fr'); // Specify French language for better accuracy
+    // Always specify French language for better accuracy
+    formData.append('language', language || 'fr');
 
-    console.log("Sending request to OpenAI with filename:", filename);
+    console.log("Sending request to OpenAI with filename:", filename, "and language:", language || 'fr');
     
     // Get the OpenAI API key
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY');

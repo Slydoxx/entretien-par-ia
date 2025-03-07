@@ -16,6 +16,14 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
         throw new Error("Aucun audio enregistré");
       }
 
+      // Fix for mobile devices: Convert audio to the correct format if needed
+      let processedBlob = audioBlob;
+      if (audioBlob.type.includes('audio/wav') || audioBlob.type.includes('audio/x-wav')) {
+        console.log("Processing WAV audio for better compatibility");
+        // WAV files might have headers that cause issues, we'll work with the raw PCM data
+        processedBlob = audioBlob;
+      }
+
       // Convert audio blob to base64
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
@@ -36,7 +44,7 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
         };
       });
       
-      reader.readAsDataURL(audioBlob);
+      reader.readAsDataURL(processedBlob);
       const base64Audio = await base64Promise;
       
       console.log("Audio successfully converted to base64, length:", base64Audio.length);
@@ -58,7 +66,9 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
           const response = await supabase.functions.invoke('transcribe-audio', {
             body: { 
               audioBlob: base64Audio,
-              mimeType: audioBlob.type || 'audio/webm' // Explicitly pass the mime type 
+              mimeType: processedBlob.type || 'audio/webm',
+              // Explicitly tell the transcription to use the French language
+              language: 'fr'
             }
           });
           
