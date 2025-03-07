@@ -42,10 +42,24 @@ const QuestionsContainer = () => {
     resetFeedback
   } = useResponseAnalysis();
 
-  // Reset feedback when changing questions
+  // Set feedback and sample response from stored responses when changing questions
   useEffect(() => {
-    resetFeedback();
-  }, [currentStep]);
+    if (responses[currentStep]) {
+      if (responses[currentStep].feedback) {
+        setShowFeedback(true);
+      } else {
+        setShowFeedback(false);
+      }
+      
+      if (responses[currentStep].sampleResponse) {
+        setShowSampleResponse(true);
+      } else {
+        setShowSampleResponse(false);
+      }
+    } else {
+      resetFeedback();
+    }
+  }, [currentStep, responses, setShowFeedback, setShowSampleResponse, resetFeedback]);
 
   // Redirect if no questions
   useEffect(() => {
@@ -116,8 +130,8 @@ const QuestionsContainer = () => {
           handleTranscription={handleTranscription}
           onAnalyzeResponse={handleAnalyzeResponse}
           isAnalyzing={isAnalyzing}
-          feedback={feedback}
-          sampleResponse={sampleResponse}
+          feedback={responses[currentStep]?.feedback || feedback}
+          sampleResponse={responses[currentStep]?.sampleResponse || sampleResponse}
           showFeedback={showFeedback}
           showSampleResponse={showSampleResponse}
           setShowFeedback={setShowFeedback}
