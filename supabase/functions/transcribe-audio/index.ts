@@ -52,15 +52,25 @@ serve(async (req) => {
 
   try {
     console.log("Transcription request received");
-    const reqBody = await req.json();
+    const reqBody = await req.json().catch(err => {
+      console.error("Error parsing request JSON:", err);
+      throw new Error("Invalid JSON in request");
+    });
+    
+    console.log("Request parsed successfully");
     const { audioBlob, mimeType, fileExtension, language, isMobile, browser, userAgent } = reqBody;
     
     console.log("Device info - Mobile:", isMobile, "Browser:", browser);
-    console.log("User agent:", userAgent);
+    console.log("User agent:", userAgent || "Not provided");
     
     if (!audioBlob) {
       console.error("No audio data provided");
       throw new Error('No audio data provided');
+    }
+
+    if (typeof audioBlob !== 'string') {
+      console.error("Audio data is not in the expected format (string)");
+      throw new Error('Audio data must be a base64 string');
     }
 
     console.log("Received audio data, processing...");
@@ -76,21 +86,30 @@ serve(async (req) => {
     
     // Normalize the mime type for better compatibility
     let audioType = mimeType || 'audio/webm';
-    console.log("Using audio type:", audioType);
+    let filename = `audio.${fileExtension || 'webm'}`;
+    
+    // Adjust format based on device/browser for better compatibility
+    if (isMobile) {
+      if (browser?.toLowerCase().includes('safari') || userAgent?.includes('iPhone') || userAgent?.includes('iPad')) {
+        audioType = 'audio/mp4';
+        filename = 'audio.m4a';
+      } else if (browser?.toLowerCase().includes('firefox')) {
+        audioType = 'audio/ogg';
+        filename = 'audio.ogg';
+      }
+    }
+    
+    console.log("Using audio type:", audioType, "with filename:", filename);
     
     // Prepare form data
     const formData = new FormData();
     const blob = new Blob([binaryAudio], { type: audioType });
     
-    // Explicitly set the filename with the right extension based on the mime type
-    let filename = `audio.${fileExtension || 'webm'}`;
-    
     console.log("Creating audio file with name:", filename);
     formData.append('file', blob, filename);
     formData.append('model', 'whisper-1');
     
-    // Improved prompt with strict guidance for French transcription
-    // Using much more explicit prompt to avoid default placeholders
+    // Set language explicitly and add prompt to avoid default placeholders
     formData.append('language', 'fr'); 
     formData.append('prompt', 'Ce qui suit est une transcription en français. Transcrire uniquement et exactement le discours oral en texte précis. Ne jamais générer de phrases par défaut comme "Sous-titrage Société Radio-Canada", "Amara.org", ou autres contenus génériques. Transcrire seulement ce qui est dit dans l\'audio et rien d\'autre.');
     formData.append('response_format', 'json');
@@ -108,25 +127,34 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openaiApiKey}`,
-        'User-Agent': `TranscriptionApp/${isMobile ? 'Mobile' : 'Desktop'}-${browser}`,
+        'User-Agent': `TranscriptionApp/${isMobile ? 'Mobile' : 'Desktop'}-${browser || 'Unknown'}`,
       },
       body: formData,
+    }).catch(err => {
+      console.error("Fetch to OpenAI failed:", err);
+      throw new Error(`Failed to connect to OpenAI API: ${err.message}`);
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('OpenAI API Error:', errorText);
-      throw new Error(`OpenAI API error: ${response.status} ${errorText}`);
+      const errorText = await response.text().catch(() => "Could not read error response");
+      const statusCode = response.status;
+      console.error(`OpenAI API Error (${statusCode}):`, errorText);
+      throw new Error(`OpenAI API error: ${statusCode} - ${errorText}`);
     }
 
-    const result = await response.json();
+    const result = await response.json().catch(err => {
+      console.error("Failed to parse OpenAI response:", err);
+      throw new Error("Invalid response from OpenAI");
+    });
+    
     console.log("Transcription received:", result.text);
     
     // Add additional validation to filter out common placeholder responses
-    if (result.text.includes("Sous-titrage") || 
-        result.text.includes("Radio-Canada") ||
-        result.text.includes("Amara.org") ||
-        result.text.includes("soustiteur")) {
+    if (result.text && 
+        (result.text.toLowerCase().includes("sous-titrage") || 
+        result.text.toLowerCase().includes("radio-canada") ||
+        result.text.toLowerCase().includes("amara.org") ||
+        result.text.toLowerCase().includes("soustiteur"))) {
       console.error("Detected placeholder text:", result.text);
       throw new Error("La transcription a généré un texte par défaut incorrect. Veuillez réessayer.");
     }

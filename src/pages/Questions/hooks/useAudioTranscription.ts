@@ -62,6 +62,14 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
       
       console.log("Using MIME type for processing:", mimeType, "File extension:", fileExtension);
 
+      // Show toast for large files
+      if (audioBlob.size > 500000) { // > 500KB
+        toast({
+          title: "Traitement en cours...",
+          description: "Fichier audio volumineux, le traitement peut prendre quelques instants",
+        });
+      }
+
       // Convert audio blob to base64 for Supabase function
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
@@ -70,7 +78,13 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
             const base64Audio = reader.result as string;
             // Extract the base64 data part (remove the data URL prefix)
             const base64Data = base64Audio.split(',')[1];
-            console.log("Audio converted to base64, length:", base64Data.length);
+            console.log("Audio converted to base64, length:", base64Data?.length || 0);
+            
+            if (!base64Data || base64Data.length === 0) {
+              reject(new Error("Échec de conversion de l'audio"));
+              return;
+            }
+            
             resolve(base64Data);
           } catch (err) {
             console.error("Error in base64 conversion:", err);
@@ -81,21 +95,15 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
           console.error("FileReader error");
           reject(new Error("Erreur lors de la conversion de l'audio"));
         };
+
+        // Start reading the blob as a data URL
+        reader.readAsDataURL(audioBlob);
       });
       
-      reader.readAsDataURL(audioBlob);
       const base64Audio = await base64Promise;
       
       // Call Supabase function with detailed device information
       console.log("Calling transcribe-audio function with explicit parameters...");
-      
-      // If audio file is large, inform the user that it may take longer
-      if (audioBlob.size > 1000000) { // > 1MB
-        toast({
-          title: "Fichier audio volumineux",
-          description: "La transcription peut prendre plus de temps...",
-        });
-      }
       
       const { data, error } = await supabase.functions.invoke('transcribe-audio', {
         body: { 
