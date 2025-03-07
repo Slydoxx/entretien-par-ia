@@ -90,10 +90,10 @@ serve(async (req) => {
     
     formData.append('file', blob, filename);
     formData.append('model', 'whisper-1');
-    // Always specify French language for better accuracy
-    formData.append('language', language || 'fr');
-
-    console.log("Sending request to OpenAI with filename:", filename, "and language:", language || 'fr');
+    // Force French language for better accuracy
+    formData.append('language', 'fr');
+    
+    console.log("Sending request to OpenAI with filename:", filename, "and language: fr");
     
     // Get the OpenAI API key
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY');

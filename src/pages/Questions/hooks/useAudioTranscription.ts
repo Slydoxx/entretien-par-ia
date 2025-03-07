@@ -16,22 +16,23 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
         throw new Error("Aucun audio enregistré");
       }
 
-      // Fix for mobile devices: Convert audio to the correct format if needed
-      let processedBlob = audioBlob;
-      if (audioBlob.type.includes('audio/wav') || audioBlob.type.includes('audio/x-wav')) {
-        console.log("Processing WAV audio for better compatibility");
-        // WAV files might have headers that cause issues, we'll work with the raw PCM data
-        processedBlob = audioBlob;
+      // Create a FormData object directly to avoid complex base64 processing
+      const formData = new FormData();
+      formData.append('file', audioBlob, 'audio.webm');
+      
+      // Double check if we have data
+      if (formData.get('file') === null) {
+        throw new Error("Erreur lors de la préparation de l'audio");
       }
 
-      // Convert audio blob to base64
+      // Convert audio blob to base64 for Supabase function
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
         reader.onloadend = () => {
           try {
             const base64Audio = reader.result as string;
             const base64Data = base64Audio.split(',')[1];
-            console.log("Audio converted to base64, starting with:", base64Data.substring(0, 20) + "...");
+            console.log("Audio converted to base64, length:", base64Data.length);
             resolve(base64Data);
           } catch (err) {
             console.error("Error in base64 conversion:", err);
@@ -44,53 +45,22 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
         };
       });
       
-      reader.readAsDataURL(processedBlob);
+      reader.readAsDataURL(audioBlob);
       const base64Audio = await base64Promise;
       
-      console.log("Audio successfully converted to base64, length:", base64Audio.length);
-      
-      // Call Supabase function to transcribe audio with extended timeout
+      // Call Supabase function to transcribe audio with explicit language setting
       console.log("Calling transcribe-audio function...");
       
-      // Add retries for stability
-      let attempts = 0;
-      const maxAttempts = 2;
-      let success = false;
-      let data, error;
-      
-      while (attempts < maxAttempts && !success) {
-        attempts++;
-        console.log(`Attempt ${attempts} to transcribe audio...`);
-        
-        try {
-          const response = await supabase.functions.invoke('transcribe-audio', {
-            body: { 
-              audioBlob: base64Audio,
-              mimeType: processedBlob.type || 'audio/webm',
-              // Explicitly tell the transcription to use the French language
-              language: 'fr'
-            }
-          });
-          
-          data = response.data;
-          error = response.error;
-          
-          if (!error) {
-            success = true;
-          } else {
-            console.error(`Attempt ${attempts} failed:`, error);
-            // Short delay before retry
-            if (attempts < maxAttempts) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-          }
-        } catch (e) {
-          console.error(`Exception on attempt ${attempts}:`, e);
+      const { data, error } = await supabase.functions.invoke('transcribe-audio', {
+        body: { 
+          audioBlob: base64Audio,
+          mimeType: audioBlob.type || 'audio/webm',
+          language: 'fr'  // Always use French
         }
-      }
+      });
 
       if (error) {
-        console.error('Supabase function error after all attempts:', error);
+        console.error('Supabase function error:', error);
         throw new Error(`Erreur du serveur: ${error.message || 'Problème de connexion avec le serveur'}`);
       }
 

@@ -1,6 +1,7 @@
+
 import { Button } from "@/components/ui/button";
 import { Mic, Square } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 type AudioRecorderProps = {
   status: string;
@@ -13,6 +14,7 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [isSecureContext, setIsSecureContext] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     // Check if we're in a secure context (required for getUserMedia on mobile)
@@ -28,6 +30,14 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
       setPermissionDenied(false);
       setErrorMessage(null);
     }
+
+    // Cleanup function for media stream
+    return () => {
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach(track => track.stop());
+        mediaStreamRef.current = null;
+      }
+    };
   }, [status]);
 
   const handleStartRecording = async () => {
@@ -44,21 +54,28 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
         } 
       });
       
+      // Store the stream in the ref for later cleanup
+      mediaStreamRef.current = stream;
+      
       // If we got here, permission was granted
       console.log("Microphone permission granted, starting recording");
       
-      // Keep the stream active to prevent permission issues on some mobile devices
-      // Mobile fix: explicitly close the stream after starting recording to prevent conflicts
+      // Start recording
       startRecording();
-      
-      // Clean up the temporary stream to avoid duplication with what react-media-recorder will create
-      setTimeout(() => {
-        stream.getTracks().forEach(track => track.stop());
-      }, 500);
     } catch (err) {
       console.error("Microphone permission error:", err);
       setPermissionDenied(true);
       setErrorMessage("Accès au microphone refusé. Vérifiez les permissions de votre navigateur.");
+    }
+  };
+
+  const handleStopRecording = () => {
+    stopRecording();
+    
+    // Clean up the stream after stopping
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach(track => track.stop());
+      mediaStreamRef.current = null;
     }
   };
 
@@ -89,7 +106,7 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
         className={`rounded-full w-12 h-12 ${
           status === "recording" ? "bg-red-50 text-red-500 border-red-500" : ""
         }`}
-        onClick={status === "recording" ? stopRecording : handleStartRecording}
+        onClick={status === "recording" ? handleStopRecording : handleStartRecording}
         disabled={isTranscribing || permissionDenied || !isSecureContext}
       >
         {status === "recording" ? (
