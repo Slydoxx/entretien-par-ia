@@ -16,14 +16,9 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
         throw new Error("Aucun audio enregistré");
       }
 
-      // Create a FormData object directly to avoid complex base64 processing
-      const formData = new FormData();
-      formData.append('file', audioBlob, 'audio.webm');
-      
-      // Double check if we have data
-      if (formData.get('file') === null) {
-        throw new Error("Erreur lors de la préparation de l'audio");
-      }
+      // Ensure we have the correct mime type
+      const mimeType = audioBlob.type || 'audio/webm';
+      console.log("Using MIME type:", mimeType);
 
       // Convert audio blob to base64 for Supabase function
       const reader = new FileReader();
@@ -31,6 +26,7 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
         reader.onloadend = () => {
           try {
             const base64Audio = reader.result as string;
+            // Extract the base64 data part (remove the data URL prefix)
             const base64Data = base64Audio.split(',')[1];
             console.log("Audio converted to base64, length:", base64Data.length);
             resolve(base64Data);
@@ -49,12 +45,12 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
       const base64Audio = await base64Promise;
       
       // Call Supabase function to transcribe audio with explicit language setting
-      console.log("Calling transcribe-audio function...");
+      console.log("Calling transcribe-audio function with explicit French language...");
       
       const { data, error } = await supabase.functions.invoke('transcribe-audio', {
         body: { 
           audioBlob: base64Audio,
-          mimeType: audioBlob.type || 'audio/webm',
+          mimeType: mimeType,
           language: 'fr'  // Always use French
         }
       });

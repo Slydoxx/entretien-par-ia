@@ -34,7 +34,10 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
     // Cleanup function for media stream
     return () => {
       if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach(track => track.stop());
+        mediaStreamRef.current.getTracks().forEach(track => {
+          track.stop();
+          console.log("Audio track stopped on cleanup");
+        });
         mediaStreamRef.current = null;
       }
     };
@@ -70,11 +73,15 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
   };
 
   const handleStopRecording = () => {
+    console.log("Stopping recording...");
     stopRecording();
     
     // Clean up the stream after stopping
     if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach(track => track.stop());
+      mediaStreamRef.current.getTracks().forEach(track => {
+        track.stop();
+        console.log("Audio track stopped after recording");
+      });
       mediaStreamRef.current = null;
     }
   };
