@@ -1,5 +1,6 @@
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ChevronUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type FeedbackSectionProps = {
   showFeedback: boolean;
@@ -20,6 +21,13 @@ const FeedbackSection = ({
   sampleResponse, 
   isAnalyzing 
 }: FeedbackSectionProps) => {
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   return (
     <div className="space-y-2 mt-6">
       <button 
@@ -34,6 +42,17 @@ const FeedbackSection = ({
       ) : showFeedback && feedback && (
         <div className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700 whitespace-pre-wrap">
           {feedback}
+          <div className="flex justify-center mt-4">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={scrollToTop}
+              className="flex items-center text-prepera-darkBlue"
+            >
+              <ChevronUp className="w-4 h-4 mr-1" />
+              Retour en haut
+            </Button>
+          </div>
         </div>
       )}
       
@@ -49,6 +68,17 @@ const FeedbackSection = ({
       ) : showSampleResponse && sampleResponse && (
         <div className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700 whitespace-pre-wrap">
           {sampleResponse}
+          <div className="flex justify-center mt-4">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={scrollToTop}
+              className="flex items-center text-prepera-darkBlue"
+            >
+              <ChevronUp className="w-4 h-4 mr-1" />
+              Retour en haut
+            </Button>
+          </div>
         </div>
       )}
     </div>
