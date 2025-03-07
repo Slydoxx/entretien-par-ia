@@ -12,9 +12,13 @@ export const useQuestionsPageState = (selectedQuestions: string[] = []) => {
   const [answer, setAnswer] = useState("");
   const { toast } = useToast();
   
+  // Initialize current step with validation
   const [currentStep, setCurrentStep] = useState(() => {
     const savedStep = sessionStorage.getItem('currentQuestionStep');
-    return savedStep ? parseInt(savedStep, 10) : 1;
+    const parsedStep = savedStep ? parseInt(savedStep, 10) : 1;
+    // Make sure step is never greater than questions count
+    return selectedQuestions.length > 0 ? 
+      Math.min(parsedStep, selectedQuestions.length) : 1;
   });
   
   const [responses, setResponses] = useState<Record<number, ResponseData>>(() => {
@@ -24,9 +28,10 @@ export const useQuestionsPageState = (selectedQuestions: string[] = []) => {
 
   // Save state to session storage
   useEffect(() => {
-    sessionStorage.setItem('currentQuestionStep', currentStep.toString());
+    const validStep = Math.min(currentStep, selectedQuestions.length || 1);
+    sessionStorage.setItem('currentQuestionStep', validStep.toString());
     sessionStorage.setItem('questionResponses', JSON.stringify(responses));
-  }, [currentStep, responses]);
+  }, [currentStep, responses, selectedQuestions.length]);
 
   // Load saved answer when changing questions
   useEffect(() => {

@@ -1,6 +1,6 @@
 
 import { useEffect } from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import PageContainer from "./components/PageContainer";
 import QuestionBox from "./components/QuestionBox";
 import QuestionList from "./components/QuestionList";
@@ -45,6 +45,10 @@ const SelectQuestions = () => {
   const handleContinue = () => {
     if (!validateSelection()) return;
 
+    // Clear question responses when starting a new session
+    sessionStorage.removeItem('questionResponses');
+    sessionStorage.setItem('currentQuestionStep', '1');
+    
     navigate('/questions', {
       state: {
         job,

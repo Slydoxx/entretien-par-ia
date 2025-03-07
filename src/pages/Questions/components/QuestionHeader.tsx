@@ -17,7 +17,7 @@ const QuestionHeader = ({ currentStep, totalQuestions }: QuestionHeaderProps) =>
     <div className="flex items-center justify-between mb-8">
       <div className="flex-1 flex justify-center">
         <span className="px-4 py-2 rounded-full bg-white border whitespace-nowrap">
-          Question {currentStep}/{totalQuestions}
+          Question {Math.min(currentStep, totalQuestions)}/{totalQuestions}
         </span>
       </div>
       <button 
