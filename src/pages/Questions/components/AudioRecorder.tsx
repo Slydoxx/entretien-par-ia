@@ -15,11 +15,18 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
   const [isSecureContext, setIsSecureContext] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     // Check if we're in a secure context (required for getUserMedia on mobile)
     const secure = window.isSecureContext;
     setIsSecureContext(secure);
+    
+    // Detect mobile device
+    const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    setIsMobile(mobile);
+    console.log("Device detection - Mobile:", mobile);
+    console.log("User agent:", navigator.userAgent);
     
     if (!secure) {
       console.error("Audio recording requires a secure context (HTTPS)");
@@ -51,24 +58,37 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
     try {
       setErrorMessage(null);
       
-      // Check for microphone permission first with explicit constraints for mobile
-      console.log("Requesting microphone access...");
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-          sampleRate: 44100 // Standardize sample rate
-        } 
+      // Set audio constraints optimized for speech recognition
+      const audioConstraints: MediaTrackConstraints = {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+      };
+      
+      // Add mobile-specific constraints if needed
+      if (isMobile) {
+        console.log("Using mobile-optimized audio constraints");
+      } else {
+        // For desktop browsers
+        Object.assign(audioConstraints, {
+          sampleRate: 44100,
+          channelCount: 1
+        });
+      }
+      
+      console.log("Requesting microphone access with constraints:", audioConstraints);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
+      
+      // Log audio tracks information for debugging
+      stream.getAudioTracks().forEach(track => {
+        console.log("Audio track:", track.label, "- settings:", JSON.stringify(track.getSettings()));
       });
       
       // Store the stream in the ref for later cleanup
       mediaStreamRef.current = stream;
       
-      // If we got here, permission was granted
-      console.log("Microphone permission granted, starting recording");
-      
       // Start recording
+      console.log("Microphone permission granted, starting recording");
       startRecording();
     } catch (err) {
       console.error("Microphone permission error:", err);

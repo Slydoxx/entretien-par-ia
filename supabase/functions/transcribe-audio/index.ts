@@ -53,7 +53,10 @@ serve(async (req) => {
   try {
     console.log("Transcription request received");
     const reqBody = await req.json();
-    const { audioBlob, mimeType, language } = reqBody;
+    const { audioBlob, mimeType, language, isMobile, userAgent } = reqBody;
+    
+    console.log("Device info - Mobile:", isMobile);
+    console.log("User agent:", userAgent);
     
     if (!audioBlob) {
       console.error("No audio data provided");
@@ -61,6 +64,7 @@ serve(async (req) => {
     }
 
     console.log("Received audio data, processing...");
+    console.log("Original mime type:", mimeType);
     
     // Process audio in chunks
     const binaryAudio = processBase64Chunks(audioBlob);
@@ -70,8 +74,8 @@ serve(async (req) => {
       throw new Error('Processed audio has zero length');
     }
     
-    // Use provided mime type or fallback to a default
-    const audioType = mimeType || 'audio/webm';
+    // Normalize the mime type for better compatibility
+    let audioType = mimeType || 'audio/webm';
     console.log("Using audio type:", audioType);
     
     // Prepare form data
@@ -80,20 +84,22 @@ serve(async (req) => {
     
     // Explicitly set the filename with the right extension based on the mime type
     let filename = 'audio.webm';
-    if (audioType.includes('mp4') || audioType.includes('mp4a')) {
-      filename = 'audio.mp4';
-    } else if (audioType.includes('wav')) {
+    if (audioType.includes('wav')) {
       filename = 'audio.wav';
+    } else if (audioType.includes('mp4') || audioType.includes('m4a')) {
+      filename = 'audio.mp4';
     } else if (audioType.includes('mpeg') || audioType.includes('mp3')) {
       filename = 'audio.mp3';
     }
     
     formData.append('file', blob, filename);
     formData.append('model', 'whisper-1');
-    // Force French language for better accuracy
-    formData.append('language', 'fr');
     
-    console.log("Sending request to OpenAI with filename:", filename, "and language: fr");
+    // Force language for better accuracy
+    formData.append('language', 'fr');
+    formData.append('response_format', 'json');
+    
+    console.log("Sending request to OpenAI with filename:", filename, "language:", 'fr');
     
     // Get the OpenAI API key
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY');

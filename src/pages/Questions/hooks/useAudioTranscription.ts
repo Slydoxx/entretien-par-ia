@@ -16,9 +16,22 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
         throw new Error("Aucun audio enregistré");
       }
 
-      // Ensure we have the correct mime type and normalize for mobile if needed
-      const mimeType = audioBlob.type || 'audio/webm';
-      console.log("Using MIME type:", mimeType);
+      // Force the MIME type for mobile compatibility
+      let mimeType = audioBlob.type || 'audio/webm';
+      
+      // Add compatibility for common mobile formats
+      if (mimeType.includes('audio/wav') || mimeType.includes('audio/x-wav')) {
+        mimeType = 'audio/wav';
+      } else if (mimeType.includes('audio/mp4') || mimeType.includes('audio/x-m4a')) {
+        mimeType = 'audio/mp4';
+      } else if (mimeType.includes('audio/mpeg') || mimeType.includes('audio/mp3')) {
+        mimeType = 'audio/mp3';
+      } else {
+        // Default to webm for browsers
+        mimeType = 'audio/webm';
+      }
+      
+      console.log("Normalized MIME type for processing:", mimeType);
 
       // Convert audio blob to base64 for Supabase function
       const reader = new FileReader();
@@ -44,14 +57,18 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
       reader.readAsDataURL(audioBlob);
       const base64Audio = await base64Promise;
       
-      // Call Supabase function to transcribe audio with explicit language setting
+      // Call Supabase function to transcribe audio with explicit language and device info
       console.log("Calling transcribe-audio function with explicit French language...");
+      
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       
       const { data, error } = await supabase.functions.invoke('transcribe-audio', {
         body: { 
           audioBlob: base64Audio,
           mimeType: mimeType,
-          language: 'fr'  // Always use French
+          language: 'fr',  // Always use French
+          isMobile: isMobile,  // Pass device info
+          userAgent: navigator.userAgent  // Send user agent for debugging
         }
       });
 
