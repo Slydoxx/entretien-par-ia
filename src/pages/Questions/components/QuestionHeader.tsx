@@ -1,5 +1,5 @@
 
-import { ChevronLeft, Info } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 type QuestionHeaderProps = {
@@ -33,13 +33,6 @@ const QuestionHeader = ({ currentStep, totalQuestions }: QuestionHeaderProps) =>
         >
           Terminer
         </button>
-        <Link 
-          to="/about"
-          className="flex items-center text-gray-600 hover:text-gray-900 ml-2"
-          title="À propos"
-        >
-          <Info className="w-5 h-5" />
-        </Link>
       </div>
     </div>
   );
