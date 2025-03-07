@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Mic, Square } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -13,6 +12,7 @@ type AudioRecorderProps = {
 const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }: AudioRecorderProps) => {
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [isSecureContext, setIsSecureContext] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if we're in a secure context (required for getUserMedia on mobile)
@@ -26,22 +26,33 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
     // Reset permission state when status changes
     if (status === "idle") {
       setPermissionDenied(false);
+      setErrorMessage(null);
     }
   }, [status]);
 
   const handleStartRecording = async () => {
     try {
+      setErrorMessage(null);
+      
       // Check for microphone permission first
       console.log("Requesting microphone access...");
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach(track => track.stop()); // Stop the test stream
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } 
+      });
       
-      // If we got here, permission was granted, so start recording
+      // If we got here, permission was granted
       console.log("Microphone permission granted, starting recording");
+      
+      // Keep the stream active to prevent permission issues on some mobile devices
       startRecording();
     } catch (err) {
       console.error("Microphone permission error:", err);
       setPermissionDenied(true);
+      setErrorMessage("Accès au microphone refusé. Vérifiez les permissions de votre navigateur.");
     }
   };
 
@@ -50,6 +61,12 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
       {!isSecureContext && (
         <div className="text-xs text-red-500 text-center mb-2">
           L'enregistrement audio nécessite HTTPS. Veuillez utiliser un site sécurisé.
+        </div>
+      )}
+      
+      {errorMessage && (
+        <div className="text-xs text-red-500 text-center mb-2">
+          {errorMessage}
         </div>
       )}
       

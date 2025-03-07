@@ -53,7 +53,7 @@ serve(async (req) => {
   try {
     console.log("Transcription request received");
     const reqBody = await req.json();
-    const { audioBlob } = reqBody;
+    const { audioBlob, mimeType } = reqBody;
     
     if (!audioBlob) {
       console.error("No audio data provided");
@@ -70,18 +70,29 @@ serve(async (req) => {
       throw new Error('Processed audio has zero length');
     }
     
-    // Determine audio type based on browser/device characteristics
-    // Most mobile browsers use audio/webm
-    const audioType = 'audio/webm';
+    // Use provided mime type or fallback to a default
+    const audioType = mimeType || 'audio/webm';
     console.log("Using audio type:", audioType);
     
     // Prepare form data
     const formData = new FormData();
     const blob = new Blob([binaryAudio], { type: audioType });
-    formData.append('file', blob, 'audio.webm');
+    
+    // Explicitly set the filename with the right extension based on the mime type
+    let filename = 'audio.webm';
+    if (audioType.includes('mp4') || audioType.includes('mp4a')) {
+      filename = 'audio.mp4';
+    } else if (audioType.includes('wav')) {
+      filename = 'audio.wav';
+    } else if (audioType.includes('mpeg') || audioType.includes('mp3')) {
+      filename = 'audio.mp3';
+    }
+    
+    formData.append('file', blob, filename);
     formData.append('model', 'whisper-1');
+    formData.append('language', 'fr'); // Specify French language for better accuracy
 
-    console.log("Sending request to OpenAI...");
+    console.log("Sending request to OpenAI with filename:", filename);
     
     // Get the OpenAI API key
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
