@@ -75,7 +75,7 @@ const QuestionList = ({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-16">
       {questionThemes.map((theme, themeIndex) => (
         <QuestionThemeSection
           key={themeIndex}
