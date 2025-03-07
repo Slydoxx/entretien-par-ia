@@ -9,17 +9,19 @@ type SelectionFooterProps = {
 
 const SelectionFooter = ({ selectedCount, onContinue }: SelectionFooterProps) => {
   return (
-    <div className="flex justify-between items-center pt-4">
-      <div className="text-sm text-gray-500">
-        {selectedCount} / 3 questions sélectionnées
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-10 shadow-md">
+      <div className="max-w-4xl mx-auto flex justify-between items-center">
+        <div className="text-sm text-gray-500">
+          {selectedCount} / 3 questions sélectionnées
+        </div>
+        <Button
+          onClick={onContinue}
+          className="bg-prepera-blue text-white hover:bg-prepera-darkBlue flex items-center gap-2"
+        >
+          <span>Continuer</span>
+          <ArrowRight className="w-4 h-4" />
+        </Button>
       </div>
-      <Button
-        onClick={onContinue}
-        className="bg-prepera-blue text-white hover:bg-prepera-darkBlue flex items-center gap-2"
-      >
-        <span>Continuer</span>
-        <ArrowRight className="w-4 h-4" />
-      </Button>
     </div>
   );
 };

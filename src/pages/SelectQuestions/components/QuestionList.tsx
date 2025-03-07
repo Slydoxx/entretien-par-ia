@@ -1,7 +1,5 @@
 
-import { ChevronUp, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { QuestionTheme } from "../hooks/useQuestionGeneration";
 
 type QuestionListProps = {
@@ -66,51 +64,27 @@ const QuestionItem = ({
   </button>
 );
 
-const ScrollToTopButton = ({ onClick }: { onClick: () => void }) => (
-  <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-10">
-    <Button
-      variant="outline"
-      size="icon"
-      onClick={onClick}
-      className="rounded-full shadow-md bg-white hover:bg-gray-50 text-prepera-darkBlue"
-    >
-      <ChevronUp className="w-5 h-5" />
-    </Button>
-  </div>
-);
-
 const QuestionList = ({ 
   questionThemes, 
   selectedQuestions, 
   toggleSelection, 
   isLoading 
 }: QuestionListProps) => {
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
-
   if (isLoading) {
     return <LoadingState />;
   }
 
   return (
-    <>
-      <div className="space-y-8">
-        {questionThemes.map((theme, themeIndex) => (
-          <QuestionThemeSection
-            key={themeIndex}
-            theme={theme}
-            selectedQuestions={selectedQuestions}
-            toggleSelection={toggleSelection}
-          />
-        ))}
-      </div>
-      
-      {questionThemes.length > 0 && <ScrollToTopButton onClick={scrollToTop} />}
-    </>
+    <div className="space-y-8">
+      {questionThemes.map((theme, themeIndex) => (
+        <QuestionThemeSection
+          key={themeIndex}
+          theme={theme}
+          selectedQuestions={selectedQuestions}
+          toggleSelection={toggleSelection}
+        />
+      ))}
+    </div>
   );
 };
 
