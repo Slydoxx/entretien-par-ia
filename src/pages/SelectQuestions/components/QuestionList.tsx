@@ -67,7 +67,7 @@ const QuestionItem = ({
 );
 
 const ScrollToTopButton = ({ onClick }: { onClick: () => void }) => (
-  <div className="fixed bottom-6 right-6 z-10">
+  <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-10">
     <Button
       variant="outline"
       size="icon"
