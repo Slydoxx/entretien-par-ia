@@ -8,7 +8,7 @@ type QuestionBoxProps = {
 
 const QuestionBox = ({ title, children }: QuestionBoxProps) => {
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-8 space-y-6 animate-fade-in">
+    <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-8 space-y-6 animate-fade-in">
       <h2 className="text-xl font-semibold text-prepera-blue">
         {title}
       </h2>
