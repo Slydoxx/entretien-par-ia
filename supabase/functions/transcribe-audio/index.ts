@@ -95,9 +95,10 @@ serve(async (req) => {
     formData.append('file', blob, filename);
     formData.append('model', 'whisper-1');
     
-    // Force French language detection and disable prompt filtering
+    // Improved prompt with strict guidance for French transcription
+    // Using much more explicit prompt to avoid default placeholders
     formData.append('language', 'fr'); 
-    formData.append('prompt', 'Transcris exactement ce qui est dit en français.');
+    formData.append('prompt', 'Ce qui suit est une transcription en français. Transcrire le discours oral en texte précis. Ne pas générer de phrases par défaut comme "Sous-titrage Société Radio-Canada" ou autres contenus génériques.');
     formData.append('response_format', 'json');
     
     console.log("Sending request to OpenAI with filename:", filename, "language:", 'fr');
@@ -125,6 +126,15 @@ serve(async (req) => {
 
     const result = await response.json();
     console.log("Transcription received:", result.text);
+    
+    // Add additional validation to filter out common placeholder responses
+    if (result.text.includes("Sous-titrage") || 
+        result.text.includes("Radio-Canada") ||
+        result.text.includes("Amara.org") ||
+        result.text.includes("soustiteur")) {
+      console.error("Detected placeholder text:", result.text);
+      throw new Error("La transcription a généré un texte par défaut incorrect. Veuillez réessayer.");
+    }
 
     return new Response(
       JSON.stringify({ text: result.text }),

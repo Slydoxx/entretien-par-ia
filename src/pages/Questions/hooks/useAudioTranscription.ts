@@ -85,11 +85,31 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
 
       console.log("Transcription successful:", data.text);
       
-      // Check for problematic default text that sometimes appears
-      if (data.text.includes("Sous-titres réalisés par") || 
-          data.text.includes("Amara.org") ||
-          data.text.includes("soustiteur.com")) {
-        throw new Error("La transcription a produit un texte par défaut incorrect. Veuillez réessayer.");
+      // Enhanced validation to catch problematic transcriptions
+      const knownPlaceholders = [
+        "sous-titres réalisés par",
+        "sous-titrage",
+        "amara.org",
+        "soustiteur",
+        "radio-canada",
+        "société radio-canada"
+      ];
+      
+      // Check for any of the known placeholder texts
+      const lowerText = data.text.toLowerCase();
+      const hasPlaceholder = knownPlaceholders.some(placeholder => 
+        lowerText.includes(placeholder.toLowerCase())
+      );
+      
+      if (hasPlaceholder) {
+        console.error("Detected placeholder text:", data.text);
+        throw new Error("La transcription a produit un texte par défaut incorrect. Veuillez réessayer avec un enregistrement plus clair.");
+      }
+      
+      // If the text is too short and doesn't match what's expected
+      if (data.text.length < 5 && audioBlob.size > 10000) {
+        console.warn("Suspiciously short transcription for audio length:", data.text);
+        throw new Error("La transcription semble incomplète. Veuillez réessayer avec un enregistrement plus clair.");
       }
       
       setAnswer(data.text);
