@@ -2,7 +2,9 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, X } from "lucide-react";
+import { Search, X, Wand2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface JobSearchInputProps {
   jobTitle: string;
@@ -10,6 +12,7 @@ interface JobSearchInputProps {
   jobs: Record<string, string>;
   onSelectJob: (job: string) => void;
   onClear: () => void;
+  onGenerateDescription: (description: string) => void;
 }
 
 const JobSearchInput = ({ 
@@ -17,10 +20,15 @@ const JobSearchInput = ({
   setJobTitle, 
   jobs, 
   onSelectJob,
-  onClear
+  onClear,
+  onGenerateDescription
 }: JobSearchInputProps) => {
   const [filteredJobs, setFilteredJobs] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const { toast } = useToast();
+
+  const isCustomJob = jobTitle && !Object.keys(jobs).includes(jobTitle);
 
   useEffect(() => {
     if (jobTitle === "") {
@@ -41,6 +49,44 @@ const JobSearchInput = ({
     
     // Show suggestions when typing
     setShowSuggestions(value.length > 0);
+  };
+
+  const handleGenerateDescription = async () => {
+    if (!jobTitle.trim()) return;
+    
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-job-description', {
+        body: { jobTitle }
+      });
+
+      if (error) {
+        console.error('Error generating job description:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de générer la description du poste.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data.description) {
+        onGenerateDescription(data.description);
+        toast({
+          title: "Description générée",
+          description: "La description du poste a été générée avec succès.",
+        });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la génération.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -83,6 +129,21 @@ const JobSearchInput = ({
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {isCustomJob && (
+        <div className="mt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2 text-prepera-blue border-prepera-blue hover:bg-prepera-blue/10"
+            disabled={isGenerating}
+            onClick={handleGenerateDescription}
+          >
+            <Wand2 className="h-4 w-4" />
+            <span>{isGenerating ? "Génération en cours..." : "Générer une description pour ce métier"}</span>
+          </Button>
         </div>
       )}
     </div>

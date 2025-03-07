@@ -25,6 +25,11 @@ const Index = () => {
     setJobDescription("");
   };
 
+  const handleGenerateDescription = (description: string) => {
+    setJobDescription(description);
+    // Auto-switch to the description tab if needed
+  };
+
   const handleJobDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setJobDescription(e.target.value);
   };
@@ -74,6 +79,7 @@ const Index = () => {
           jobs={jobs}
           onSelectJob={handleSelectJob}
           onClear={handleClearJob}
+          onGenerateDescription={handleGenerateDescription}
         />
 
         <JobDescriptionTabs 
@@ -96,4 +102,3 @@ const Index = () => {
 };
 
 export default Index;
-
