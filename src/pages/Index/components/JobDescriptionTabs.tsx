@@ -19,7 +19,7 @@ const JobDescriptionTabs = ({
     <Tabs defaultValue="description" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="description">Description du poste</TabsTrigger>
-        <TabsTrigger value="offer">Offre d'emploi (optionnel)</TabsTrigger>
+        <TabsTrigger value="offer">Offre d'emploi</TabsTrigger>
       </TabsList>
       
       <TabsContent value="description">
@@ -36,7 +36,7 @@ const JobDescriptionTabs = ({
       
       <TabsContent value="offer">
         <Textarea
-          placeholder="Collez l'offre d'emploi complète ici pour obtenir des questions plus ciblées (optionnel)"
+          placeholder="Collez l'offre d'emploi complète ici pour obtenir des questions plus ciblées"
           value={jobOffer}
           onChange={onJobOfferChange}
           className="min-h-[200px] p-4 text-base"
