@@ -26,7 +26,15 @@ serve(async (req) => {
 Tu es un expert en recrutement spécialisé dans la préparation d'entretiens pour étudiants en alternance ou à la recherche de stages.
 Génère 12 questions d'entretien pertinentes pour un poste de ${jobTitle}.
 
-Ces questions doivent être spécifiquement adaptées au niveau d'un étudiant en alternance qui débute sa carrière professionnelle, tout en étant suffisamment exigeantes pour évaluer ses compétences et son potentiel d'apprentissage.
+Ces questions doivent sonner naturelles, comme si elles étaient posées par un vrai recruteur lors d'un entretien. Évite le langage trop formel ou robotique.
+Utilise un ton conversationnel et amical, comme lors d'une vraie discussion entre humains.
+
+Important:
+- Formule les questions de façon simple et directe
+- Utilise la deuxième personne ("tu" ou "vous")
+- Évite les phrases trop longues ou complexes
+- Évite le jargon RH ou les formulations artificielles
+- Sois concret et spécifique au poste
 
 Voici la description du poste:
 ${jobDescription}
@@ -42,17 +50,23 @@ ${jobOffer}
 
     promptContent += `
 Divise les questions en 4 thèmes principaux pertinents pour ce poste d'alternance (3 questions par thème):
-- Compétences techniques (spécifiques au métier, adaptées au niveau étudiant)
-- Formation et projets académiques (mettant en valeur les compétences acquises en formation)
-- Soft skills et travail d'équipe (particulièrement importants pour les alternants)
-- Motivation et projet professionnel (pourquoi cette entreprise, ce secteur, cette alternance)
+- Compétences techniques (adaptées au niveau étudiant)
+- Formation et projets académiques
+- Soft skills et travail d'équipe
+- Motivation et projet professionnel
 
 Pour chaque question:
-1. Assure-toi qu'elle soit adaptée à un profil junior/étudiant en alternance
-2. Formule-les de manière à ce que l'étudiant puisse valoriser son parcours académique et ses projets d'études
-3. Évite les questions qui nécessitent une longue expérience professionnelle
-4. Intègre des questions sur la capacité à apprendre et à s'adapter, essentielle en alternance
-5. Prends en compte le rythme alternance école/entreprise dans tes questions
+1. Formule-la comme lors d'une vraie conversation, de façon naturelle
+2. Garde-la concise et facile à comprendre
+3. Assure-toi qu'elle soit adaptée à un profil junior/étudiant
+4. Évite les formulations du type "Pouvez-vous me parler de..." ou "Pourriez-vous décrire..." pour toutes les questions
+5. Varie les formulations pour que les questions ne se ressemblent pas toutes
+
+Exemples de formulations naturelles:
+- "Qu'est-ce qui t'a attiré vers ce domaine?"
+- "As-tu déjà travaillé sur [compétence spécifique]?"
+- "Comment tu t'organises quand tu as plusieurs projets en même temps?"
+- "Raconte-moi un projet dont tu es fier"
 
 Renvoie tes résultats au format JSON structuré comme ceci:
 {
@@ -88,7 +102,7 @@ N'inclus aucun autre texte ou explication en dehors de ce JSON.
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'Tu es un assistant spécialisé dans les entretiens professionnels pour étudiants en alternance.' },
+          { role: 'system', content: 'Tu es un assistant spécialisé dans les entretiens professionnels pour étudiants en alternance. Tu formules tes questions de façon naturelle et conversationnelle.' },
           { role: 'user', content: promptContent }
         ],
         temperature: 0.7,
