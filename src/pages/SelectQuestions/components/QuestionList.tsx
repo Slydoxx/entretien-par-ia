@@ -85,30 +85,12 @@ const QuestionList = ({
   toggleSelection, 
   isLoading 
 }: QuestionListProps) => {
-  const [showScrollButton, setShowScrollButton] = useState(false);
-
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
     });
   };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      // Show button when user scrolls down 300px
-      if (window.scrollY > 300) {
-        setShowScrollButton(true);
-      } else {
-        setShowScrollButton(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
 
   if (isLoading) {
     return <LoadingState />;
@@ -127,7 +109,7 @@ const QuestionList = ({
         ))}
       </div>
       
-      {showScrollButton && <ScrollToTopButton onClick={scrollToTop} />}
+      {questionThemes.length > 0 && <ScrollToTopButton onClick={scrollToTop} />}
     </>
   );
 };
