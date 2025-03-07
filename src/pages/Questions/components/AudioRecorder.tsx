@@ -16,6 +16,7 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [deviceInfo, setDeviceInfo] = useState<string>("");
 
   useEffect(() => {
     // Check if we're in a secure context (required for getUserMedia on mobile)
@@ -25,8 +26,33 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
     // Detect mobile device
     const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     setIsMobile(mobile);
+    setDeviceInfo(navigator.userAgent);
+    
     console.log("Device detection - Mobile:", mobile);
     console.log("User agent:", navigator.userAgent);
+    console.log("Browser:", navigator.userAgent.match(/chrome|chromium|crios|edg|firefox|safari/i)?.[0] || "unknown");
+    
+    // Test microphone access once to check capabilities
+    if (secure && navigator.mediaDevices) {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          console.log("Microphone access test successful");
+          const audioTracks = stream.getAudioTracks();
+          console.log(`Audio tracks available: ${audioTracks.length}`);
+          
+          audioTracks.forEach(track => {
+            console.log(`Track label: ${track.label}`);
+            const capabilities = track.getCapabilities();
+            console.log("Track capabilities:", capabilities);
+            
+            // Clean up test track
+            track.stop();
+          });
+        })
+        .catch(err => {
+          console.error("Microphone test access denied:", err);
+        });
+    }
     
     if (!secure) {
       console.error("Audio recording requires a secure context (HTTPS)");
@@ -68,18 +94,20 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
       // Optimize for mobile devices
       if (isMobile) {
         console.log("Using mobile-optimized audio constraints");
-        // Don't specify sampleRate for mobile - let the device decide
+        // For iOS devices
         if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
-          // iOS specific settings if needed
+          console.log("iOS-specific audio settings");
           audioConstraints = {
             ...audioConstraints,
-            // iOS often works best with default settings
+            // iOS often works best with these settings
+            echoCancellation: true,
+            noiseSuppression: true,
           };
         } else if (navigator.userAgent.includes('Android')) {
-          // Android specific settings if needed
+          console.log("Android-specific audio settings");
           audioConstraints = {
             ...audioConstraints,
-            // Most Android devices support these settings
+            // Android specific settings
             channelCount: 1
           };
         }
@@ -115,7 +143,7 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
     } catch (err) {
       console.error("Microphone permission error:", err);
       setPermissionDenied(true);
-      setErrorMessage("Accès au microphone refusé. Vérifiez les permissions de votre navigateur.");
+      setErrorMessage(`Accès au microphone refusé: ${err.message || 'Vérifiez les permissions de votre navigateur.'}`);
     }
   };
 
@@ -176,6 +204,12 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
       <span className="text-xs text-gray-500">
         {status === "recording" ? "Stop" : "Enregistrer"}
       </span>
+      
+      {deviceInfo && (
+        <span className="text-[10px] text-gray-400 mt-1 max-w-[200px] text-center">
+          {isMobile ? "Appareil mobile" : "Ordinateur"} détecté
+        </span>
+      )}
     </div>
   );
 };

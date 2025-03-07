@@ -18,22 +18,49 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
 
       // Determine device type for better handling
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      console.log("Device detection - Mobile:", isMobile);
+      const browser = navigator.userAgent.match(/chrome|chromium|crios|edg|firefox|safari/i)?.[0] || "unknown";
+      console.log("Device detection - Mobile:", isMobile, "Browser:", browser);
       console.log("User agent:", navigator.userAgent);
       
-      // Force the MIME type based on the device
+      // Force the MIME type based on the device and browser
       let mimeType = audioBlob.type || 'audio/webm';
+      let fileExtension = 'webm';
       
       // On mobile, we need special handling for the audio format
       if (isMobile) {
         if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
-          mimeType = 'audio/mp4'; // iOS typically uses AAC in MP4 container
+          if (browser.toLowerCase().includes('safari')) {
+            mimeType = 'audio/mp4';
+            fileExtension = 'mp4';
+          } else {
+            mimeType = 'audio/mp4';
+            fileExtension = 'm4a';
+          }
         } else if (navigator.userAgent.includes('Android')) {
-          mimeType = 'audio/webm'; // Modern Android should support WebM
+          if (browser.toLowerCase().includes('firefox')) {
+            mimeType = 'audio/ogg';
+            fileExtension = 'ogg';
+          } else {
+            mimeType = 'audio/webm';
+            fileExtension = 'webm';
+          }
+        }
+      } else {
+        // Desktop browsers
+        if (browser.toLowerCase().includes('firefox')) {
+          mimeType = 'audio/ogg';
+          fileExtension = 'ogg';
+        } else if (browser.toLowerCase().includes('safari')) {
+          mimeType = 'audio/mp4';
+          fileExtension = 'm4a';
+        } else {
+          // Chrome, Edge, etc.
+          mimeType = 'audio/webm';
+          fileExtension = 'webm';
         }
       }
       
-      console.log("Using MIME type for processing:", mimeType);
+      console.log("Using MIME type for processing:", mimeType, "File extension:", fileExtension);
 
       // Convert audio blob to base64 for Supabase function
       const reader = new FileReader();
@@ -62,12 +89,22 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
       // Call Supabase function with detailed device information
       console.log("Calling transcribe-audio function with explicit parameters...");
       
+      // If audio file is large, inform the user that it may take longer
+      if (audioBlob.size > 1000000) { // > 1MB
+        toast({
+          title: "Fichier audio volumineux",
+          description: "La transcription peut prendre plus de temps...",
+        });
+      }
+      
       const { data, error } = await supabase.functions.invoke('transcribe-audio', {
         body: { 
           audioBlob: base64Audio,
           mimeType: mimeType,
+          fileExtension: fileExtension,
           language: 'fr',  // Always use French
           isMobile: isMobile,  // Pass device info
+          browser: browser,    // Pass browser info
           userAgent: navigator.userAgent  // Send user agent for debugging
         }
       });

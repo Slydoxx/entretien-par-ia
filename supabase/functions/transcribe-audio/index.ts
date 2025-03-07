@@ -53,9 +53,9 @@ serve(async (req) => {
   try {
     console.log("Transcription request received");
     const reqBody = await req.json();
-    const { audioBlob, mimeType, language, isMobile, userAgent } = reqBody;
+    const { audioBlob, mimeType, fileExtension, language, isMobile, browser, userAgent } = reqBody;
     
-    console.log("Device info - Mobile:", isMobile);
+    console.log("Device info - Mobile:", isMobile, "Browser:", browser);
     console.log("User agent:", userAgent);
     
     if (!audioBlob) {
@@ -64,7 +64,7 @@ serve(async (req) => {
     }
 
     console.log("Received audio data, processing...");
-    console.log("Original mime type:", mimeType);
+    console.log("Original mime type:", mimeType, "File extension:", fileExtension);
     
     // Process audio in chunks
     const binaryAudio = processBase64Chunks(audioBlob);
@@ -83,22 +83,16 @@ serve(async (req) => {
     const blob = new Blob([binaryAudio], { type: audioType });
     
     // Explicitly set the filename with the right extension based on the mime type
-    let filename = 'audio.webm';
-    if (audioType.includes('wav')) {
-      filename = 'audio.wav';
-    } else if (audioType.includes('mp4') || audioType.includes('m4a')) {
-      filename = 'audio.mp4';
-    } else if (audioType.includes('mpeg') || audioType.includes('mp3')) {
-      filename = 'audio.mp3';
-    }
+    let filename = `audio.${fileExtension || 'webm'}`;
     
+    console.log("Creating audio file with name:", filename);
     formData.append('file', blob, filename);
     formData.append('model', 'whisper-1');
     
     // Improved prompt with strict guidance for French transcription
     // Using much more explicit prompt to avoid default placeholders
     formData.append('language', 'fr'); 
-    formData.append('prompt', 'Ce qui suit est une transcription en français. Transcrire le discours oral en texte précis. Ne pas générer de phrases par défaut comme "Sous-titrage Société Radio-Canada" ou autres contenus génériques.');
+    formData.append('prompt', 'Ce qui suit est une transcription en français. Transcrire uniquement et exactement le discours oral en texte précis. Ne jamais générer de phrases par défaut comme "Sous-titrage Société Radio-Canada", "Amara.org", ou autres contenus génériques. Transcrire seulement ce qui est dit dans l\'audio et rien d\'autre.');
     formData.append('response_format', 'json');
     
     console.log("Sending request to OpenAI with filename:", filename, "language:", 'fr');
@@ -109,11 +103,12 @@ serve(async (req) => {
       throw new Error('OpenAI API key not found in environment variables');
     }
     
-    // Send to OpenAI with specific headers
+    // Send to OpenAI with detailed user agent information
     const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openaiApiKey}`,
+        'User-Agent': `TranscriptionApp/${isMobile ? 'Mobile' : 'Desktop'}-${browser}`,
       },
       body: formData,
     });
@@ -135,6 +130,12 @@ serve(async (req) => {
       console.error("Detected placeholder text:", result.text);
       throw new Error("La transcription a généré un texte par défaut incorrect. Veuillez réessayer.");
     }
+    
+    // If the text is empty or extremely short, consider it an error
+    if (!result.text || result.text.trim().length < 2) {
+      console.error("Empty or extremely short transcription");
+      throw new Error("Aucun texte n'a été détecté dans l'enregistrement. Veuillez parler plus fort ou vous rapprocher du microphone.");
+    }
 
     return new Response(
       JSON.stringify({ text: result.text }),
@@ -144,7 +145,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in transcribe-audio function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message || "Erreur de transcription inconnue" }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
