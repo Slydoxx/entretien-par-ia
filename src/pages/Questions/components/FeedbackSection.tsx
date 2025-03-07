@@ -28,10 +28,18 @@ const FeedbackSection = ({
     });
   };
 
+  const toggleFeedback = () => {
+    setShowFeedback(!showFeedback);
+  };
+
+  const toggleSampleResponse = () => {
+    setShowSampleResponse(!showSampleResponse);
+  };
+
   return (
     <div className="space-y-2 mt-6">
       <button 
-        onClick={() => setShowFeedback(!showFeedback)}
+        onClick={toggleFeedback}
         className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between text-prepera-darkBlue"
       >
         Feedback
@@ -57,7 +65,7 @@ const FeedbackSection = ({
       )}
       
       <button 
-        onClick={() => setShowSampleResponse(!showSampleResponse)}
+        onClick={toggleSampleResponse}
         className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between text-prepera-darkBlue"
       >
         Exemple de réponse
