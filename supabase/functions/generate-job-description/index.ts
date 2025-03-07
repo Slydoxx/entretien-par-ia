@@ -38,15 +38,15 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: 'Vous êtes un expert en ressources humaines qui rédige des descriptions de poste détaillées et professionnelles. Écrivez en français. Fournissez des informations sur les compétences requises, les responsabilités et les qualifications. Soyez concis mais complet, en 300 mots maximum.' 
+            content: 'Vous êtes un expert en ressources humaines qui décrit des métiers de façon synthétique. Écrivez en français. Décrivez simplement en quoi consiste le métier, ses principales responsabilités et compétences requises. Soyez concis et factuel, en 150 mots maximum. N\'incluez pas d\'éléments d\'une offre d\'emploi comme le salaire, les horaires ou les avantages.' 
           },
           { 
             role: 'user', 
-            content: `Générez une description de poste réaliste et détaillée pour le métier de : ${jobTitle}` 
+            content: `Décrivez de façon simple et directe le métier de : ${jobTitle}` 
           }
         ],
         temperature: 0.7,
-        max_tokens: 800,
+        max_tokens: 500,
       }),
     });
 
