@@ -58,30 +58,52 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
     try {
       setErrorMessage(null);
       
-      // Set audio constraints optimized for speech recognition
-      const audioConstraints: MediaTrackConstraints = {
+      // Different audio constraints based on device type
+      let audioConstraints: MediaTrackConstraints = {
         echoCancellation: true,
         noiseSuppression: true,
         autoGainControl: true,
       };
       
-      // Add mobile-specific constraints if needed
+      // Optimize for mobile devices
       if (isMobile) {
         console.log("Using mobile-optimized audio constraints");
+        // Don't specify sampleRate for mobile - let the device decide
+        if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+          // iOS specific settings if needed
+          audioConstraints = {
+            ...audioConstraints,
+            // iOS often works best with default settings
+          };
+        } else if (navigator.userAgent.includes('Android')) {
+          // Android specific settings if needed
+          audioConstraints = {
+            ...audioConstraints,
+            // Most Android devices support these settings
+            channelCount: 1
+          };
+        }
       } else {
-        // For desktop browsers
-        Object.assign(audioConstraints, {
+        // For desktop browsers - more specific settings
+        audioConstraints = {
+          ...audioConstraints,
           sampleRate: 44100,
           channelCount: 1
-        });
+        };
       }
       
-      console.log("Requesting microphone access with constraints:", audioConstraints);
+      console.log("Requesting microphone with constraints:", JSON.stringify(audioConstraints));
       const stream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
       
       // Log audio tracks information for debugging
       stream.getAudioTracks().forEach(track => {
-        console.log("Audio track:", track.label, "- settings:", JSON.stringify(track.getSettings()));
+        const settings = track.getSettings();
+        console.log(`Audio track: ${track.label}`);
+        console.log(`- Sample rate: ${settings.sampleRate || 'unknown'}`);
+        console.log(`- Channel count: ${settings.channelCount || 'unknown'}`);
+        console.log(`- Echo cancellation: ${settings.echoCancellation}`);
+        console.log(`- Noise suppression: ${settings.noiseSuppression}`);
+        console.log(`- Auto gain control: ${settings.autoGainControl}`);
       });
       
       // Store the stream in the ref for later cleanup

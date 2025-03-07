@@ -16,22 +16,24 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
         throw new Error("Aucun audio enregistré");
       }
 
-      // Force the MIME type for mobile compatibility
+      // Determine device type for better handling
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      console.log("Device detection - Mobile:", isMobile);
+      console.log("User agent:", navigator.userAgent);
+      
+      // Force the MIME type based on the device
       let mimeType = audioBlob.type || 'audio/webm';
       
-      // Add compatibility for common mobile formats
-      if (mimeType.includes('audio/wav') || mimeType.includes('audio/x-wav')) {
-        mimeType = 'audio/wav';
-      } else if (mimeType.includes('audio/mp4') || mimeType.includes('audio/x-m4a')) {
-        mimeType = 'audio/mp4';
-      } else if (mimeType.includes('audio/mpeg') || mimeType.includes('audio/mp3')) {
-        mimeType = 'audio/mp3';
-      } else {
-        // Default to webm for browsers
-        mimeType = 'audio/webm';
+      // On mobile, we need special handling for the audio format
+      if (isMobile) {
+        if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+          mimeType = 'audio/mp4'; // iOS typically uses AAC in MP4 container
+        } else if (navigator.userAgent.includes('Android')) {
+          mimeType = 'audio/webm'; // Modern Android should support WebM
+        }
       }
       
-      console.log("Normalized MIME type for processing:", mimeType);
+      console.log("Using MIME type for processing:", mimeType);
 
       // Convert audio blob to base64 for Supabase function
       const reader = new FileReader();
@@ -57,10 +59,8 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
       reader.readAsDataURL(audioBlob);
       const base64Audio = await base64Promise;
       
-      // Call Supabase function to transcribe audio with explicit language and device info
-      console.log("Calling transcribe-audio function with explicit French language...");
-      
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      // Call Supabase function with detailed device information
+      console.log("Calling transcribe-audio function with explicit parameters...");
       
       const { data, error } = await supabase.functions.invoke('transcribe-audio', {
         body: { 
@@ -84,6 +84,14 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
       }
 
       console.log("Transcription successful:", data.text);
+      
+      // Check for problematic default text that sometimes appears
+      if (data.text.includes("Sous-titres réalisés par") || 
+          data.text.includes("Amara.org") ||
+          data.text.includes("soustiteur.com")) {
+        throw new Error("La transcription a produit un texte par défaut incorrect. Veuillez réessayer.");
+      }
+      
       setAnswer(data.text);
       toast({
         title: "Transcription réussie",

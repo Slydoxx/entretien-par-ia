@@ -95,8 +95,9 @@ serve(async (req) => {
     formData.append('file', blob, filename);
     formData.append('model', 'whisper-1');
     
-    // Force language for better accuracy
-    formData.append('language', 'fr');
+    // Force French language detection and disable prompt filtering
+    formData.append('language', 'fr'); 
+    formData.append('prompt', 'Transcris exactement ce qui est dit en français.');
     formData.append('response_format', 'json');
     
     console.log("Sending request to OpenAI with filename:", filename, "language:", 'fr');
@@ -107,7 +108,7 @@ serve(async (req) => {
       throw new Error('OpenAI API key not found in environment variables');
     }
     
-    // Send to OpenAI
+    // Send to OpenAI with specific headers
     const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
       headers: {
