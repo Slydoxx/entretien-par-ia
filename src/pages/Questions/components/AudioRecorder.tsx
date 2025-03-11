@@ -1,8 +1,9 @@
-
 import { Button } from "@/components/ui/button";
 import { Mic, Square } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { getMostCompatibleFormat, isAudioFormatSupported } from "../utils/audioFormatUtils";
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { toBlobURL, fetchFile } from '@ffmpeg/util';
 
 type AudioRecorderProps = {
   status: string;
@@ -11,7 +12,7 @@ type AudioRecorderProps = {
   isTranscribing: boolean;
 };
 
-// Declare a module-level variable to store preferred audio format
+// Module-level variable for preferred format
 let preferredAudioMimeType: string = '';
 
 const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }: AudioRecorderProps) => {
@@ -120,6 +121,23 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
       }
     };
   }, [status]);
+
+  const loadFFmpeg = async () => {
+    try {
+      const ffmpeg = new FFmpeg();
+      await ffmpeg.load({
+        coreURL: await toBlobURL('/ffmpeg-core.js', 'text/javascript'),
+        wasmURL: await toBlobURL('/ffmpeg-core.wasm', 'application/wasm'),
+      });
+      console.log("FFmpeg loaded successfully");
+    } catch (error) {
+      console.error("Error loading FFmpeg:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadFFmpeg();
+  }, []);
 
   const handleStartRecording = async () => {
     try {
