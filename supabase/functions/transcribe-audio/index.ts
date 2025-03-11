@@ -45,17 +45,13 @@ function processBase64Chunks(base64String: string, chunkSize = 32768) {
 }
 
 serve(async (req) => {
-  // CORS handling for preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
     console.log("Transcription request received");
-    const reqBody = await req.json().catch(err => {
-      console.error("Error parsing request JSON:", err);
-      throw new Error("Invalid JSON in request");
-    });
+    const reqBody = await req.json();
     
     console.log("Request parsed successfully");
     const { audioBlob, mimeType, fileExtension, language, isMobile, browser, userAgent } = reqBody;
@@ -108,19 +104,15 @@ serve(async (req) => {
     console.log("Creating audio file with name:", filename);
     formData.append('file', blob, filename);
     formData.append('model', 'whisper-1');
-    
-    // Set language explicitly and add prompt to avoid default placeholders
-    formData.append('language', 'fr'); 
-    formData.append('prompt', 'Ce qui suit est une transcription en français. Transcrire uniquement et exactement le discours oral en texte précis. Ne jamais générer de phrases par défaut comme "Sous-titrage Société Radio-Canada", "Amara.org", ou autres contenus génériques. Transcrire seulement ce qui est dit dans l\'audio et rien d\'autre.');
-    formData.append('response_format', 'json');
-    
-    console.log("Sending request to OpenAI with filename:", filename, "language:", 'fr');
+    formData.append('language', 'fr');
     
     // Get the OpenAI API key
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openaiApiKey) {
       throw new Error('OpenAI API key not found in environment variables');
     }
+    
+    console.log("Sending request to OpenAI");
     
     // Send to OpenAI with detailed user agent information
     const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
@@ -130,41 +122,19 @@ serve(async (req) => {
         'User-Agent': `TranscriptionApp/${isMobile ? 'Mobile' : 'Desktop'}-${browser || 'Unknown'}`,
       },
       body: formData,
-    }).catch(err => {
-      console.error("Fetch to OpenAI failed:", err);
-      throw new Error(`Failed to connect to OpenAI API: ${err.message}`);
     });
 
     if (!response.ok) {
-      const errorText = await response.text().catch(() => "Could not read error response");
+      const errorText = await response.text();
       const statusCode = response.status;
       console.error(`OpenAI API Error (${statusCode}):`, errorText);
       throw new Error(`OpenAI API error: ${statusCode} - ${errorText}`);
     }
 
-    const result = await response.json().catch(err => {
-      console.error("Failed to parse OpenAI response:", err);
-      throw new Error("Invalid response from OpenAI");
-    });
+    const result = await response.json();
     
-    console.log("Transcription received:", result.text);
+    console.log("Transcription received from OpenAI");
     
-    // Add additional validation to filter out common placeholder responses
-    if (result.text && 
-        (result.text.toLowerCase().includes("sous-titrage") || 
-        result.text.toLowerCase().includes("radio-canada") ||
-        result.text.toLowerCase().includes("amara.org") ||
-        result.text.toLowerCase().includes("soustiteur"))) {
-      console.error("Detected placeholder text:", result.text);
-      throw new Error("La transcription a généré un texte par défaut incorrect. Veuillez réessayer.");
-    }
-    
-    // If the text is empty or extremely short, consider it an error
-    if (!result.text || result.text.trim().length < 2) {
-      console.error("Empty or extremely short transcription");
-      throw new Error("Aucun texte n'a été détecté dans l'enregistrement. Veuillez parler plus fort ou vous rapprocher du microphone.");
-    }
-
     return new Response(
       JSON.stringify({ text: result.text }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -173,7 +143,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in transcribe-audio function:', error);
     return new Response(
-      JSON.stringify({ error: error.message || "Erreur de transcription inconnue" }),
+      JSON.stringify({ error: error.message || "Unknown transcription error" }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

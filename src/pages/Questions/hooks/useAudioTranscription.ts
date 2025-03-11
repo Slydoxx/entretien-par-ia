@@ -16,7 +16,7 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
         throw new Error("Aucun audio enregistré");
       }
 
-      // Determine device type for better handling
+      // Determine device type and browser for better handling
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       const browser = navigator.userAgent.match(/chrome|chromium|crios|edg|firefox|safari/i)?.[0] || "unknown";
       console.log("Device detection - Mobile:", isMobile, "Browser:", browser);
@@ -55,7 +55,7 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
         }
       }
       
-      console.log("Using MIME type for processing:", mimeType, "File extension:", fileExtension);
+      console.log("Using MIME type:", mimeType, "File extension:", fileExtension);
 
       // Show toast for large files
       if (audioBlob.size > 500000) { // > 500KB
@@ -74,7 +74,6 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
         reader.onloadend = () => {
           try {
             const base64Audio = reader.result as string;
-            // Extract the base64 data part (remove the data URL prefix)
             const base64Data = base64Audio.split(',')[1];
             console.log("Audio converted to base64, length:", base64Data?.length || 0);
             
@@ -94,7 +93,6 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
           reject(new Error("Erreur lors de la conversion de l'audio"));
         };
         
-        // Use readAsDataURL instead of readAsArrayBuffer for better compatibility
         reader.readAsDataURL(audioBlob);
       });
       
@@ -102,18 +100,15 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
         const base64Audio = await base64Promise;
         console.log("Base64 conversion successful, calling transcribe function...");
         
-        // Call Supabase function with detailed device information
-        console.log("Calling transcribe-audio function with explicit parameters...");
-        
         const { data, error } = await supabase.functions.invoke('transcribe-audio', {
           body: { 
             audioBlob: base64Audio,
             mimeType: mimeType,
             fileExtension: fileExtension,
-            language: 'fr',  // Always use French
-            isMobile: isMobile,  // Pass device info
-            browser: browser,    // Pass browser info
-            userAgent: navigator.userAgent  // Send user agent for debugging
+            language: 'fr',
+            isMobile: isMobile,
+            browser: browser,
+            userAgent: navigator.userAgent
           }
         });
 
@@ -122,49 +117,20 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
           throw new Error(`Erreur du serveur: ${error.message || 'Problème de connexion avec le serveur'}`);
         }
 
-        console.log("Transcribe function response:", data);
-
         if (!data?.text) {
           throw new Error(data?.error || 'Aucun texte n\'a été transcrit');
         }
 
         console.log("Transcription successful:", data.text);
-        
-        // Enhanced validation to catch problematic transcriptions
-        const knownPlaceholders = [
-          "sous-titres réalisés par",
-          "sous-titrage",
-          "amara.org",
-          "soustiteur",
-          "radio-canada",
-          "société radio-canada"
-        ];
-        
-        // Check for any of the known placeholder texts
-        const lowerText = data.text.toLowerCase();
-        const hasPlaceholder = knownPlaceholders.some(placeholder => 
-          lowerText.includes(placeholder.toLowerCase())
-        );
-        
-        if (hasPlaceholder) {
-          console.error("Detected placeholder text:", data.text);
-          throw new Error("La transcription a produit un texte par défaut incorrect. Veuillez réessayer avec un enregistrement plus clair.");
-        }
-        
-        // If the text is too short and doesn't match what's expected
-        if (data.text.length < 5 && audioBlob.size > 10000) {
-          console.warn("Suspiciously short transcription for audio length:", data.text);
-          throw new Error("La transcription semble incomplète. Veuillez réessayer avec un enregistrement plus clair.");
-        }
-        
         setAnswer(data.text);
+        
         toast({
           title: "Transcription réussie",
           description: "Votre réponse vocale a été transcrite avec succès.",
         });
       } catch (err) {
         console.error("Error in transcription process:", err);
-        throw err; // Re-throw to be caught by the outer try-catch
+        throw err;
       }
     } catch (error) {
       console.error('Transcription error:', error);
