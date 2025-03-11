@@ -1,9 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Mic, Square } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { getMostCompatibleFormat, isAudioFormatSupported } from "../utils/audioFormatUtils";
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { toBlobURL, fetchFile } from '@ffmpeg/util';
+import { getMostCompatibleFormat } from "../utils/audioFormatUtils";
 
 type AudioRecorderProps = {
   status: string;
@@ -122,31 +120,9 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
     };
   }, [status]);
 
-  const loadFFmpeg = async () => {
-    try {
-      const ffmpeg = new FFmpeg();
-      await ffmpeg.load({
-        coreURL: await toBlobURL('/ffmpeg-core.js', 'text/javascript'),
-        wasmURL: await toBlobURL('/ffmpeg-core.wasm', 'application/wasm'),
-      });
-      console.log("FFmpeg loaded successfully");
-    } catch (error) {
-      console.error("Error loading FFmpeg:", error);
-    }
-  };
-
-  useEffect(() => {
-    loadFFmpeg();
-  }, []);
-
   const handleStartRecording = async () => {
     try {
       setErrorMessage(null);
-      
-      // Determine best audio format for this device
-      let optimalMimeType = audioFormat;
-      
-      console.log("Starting recording with format:", optimalMimeType);
       
       // Different audio constraints based on device type
       let audioConstraints: MediaTrackConstraints = {
@@ -200,14 +176,6 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
       
       // Store the stream in the ref for later cleanup
       mediaStreamRef.current = stream;
-      
-      // Store the preferred audio MIME type in module-level variable
-      preferredAudioMimeType = optimalMimeType;
-      
-      // For compatibility with other components that might access this
-      (window as any).preferredAudioMimeType = optimalMimeType;
-      
-      console.log("Set preferred audio MIME type:", optimalMimeType);
       
       // Start recording
       console.log("Microphone permission granted, starting recording");
