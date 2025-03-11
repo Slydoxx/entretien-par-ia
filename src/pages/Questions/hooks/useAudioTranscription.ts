@@ -13,15 +13,21 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
   const handleTranscription = async (audioBlob: Blob) => {
     setIsTranscribing(true);
     try {
-      // Get preferred audio format set by AudioRecorder if available
-      const preferredFormat = (window as any).preferredAudioMimeType || audioBlob.type;
-      
       // Log detailed information about the received audio blob
       console.log("Audio received for transcription:", {
         type: audioBlob.type,
-        preferredFormat,
         size: audioBlob.size,
         timestamp: new Date().toISOString()
+      });
+      
+      // Detect browser and device
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const browser = navigator.userAgent.match(/chrome|chromium|crios|edg|firefox|safari/i)?.[0]?.toLowerCase() || "unknown";
+      
+      console.log("Device detection:", {
+        isMobile,
+        browser,
+        userAgent: navigator.userAgent
       });
       
       // Show toast for processing
@@ -48,9 +54,11 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
       
       // Add more user-friendly descriptions based on error patterns
       if (errorMessage.includes("format")) {
-        errorMessage += " Problème de format audio détecté. Essayez un enregistrement plus court.";
+        errorMessage += " Problème de format audio détecté. Essayez un enregistrement plus court ou différent.";
       } else if (errorMessage.includes("connection") || errorMessage.includes("connexion")) {
         errorMessage += " Vérifiez votre connexion internet.";
+      } else if (errorMessage.includes("OPENAI")) {
+        errorMessage = "Erreur lors de la transcription par l'API. Veuillez réessayer.";
       }
       
       toast({

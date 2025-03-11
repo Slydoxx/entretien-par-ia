@@ -146,10 +146,23 @@ export const normalizeAudioFormat = (
 /**
  * Force the audio blob to be in a compatible format
  * This is a critical step to ensure the audio is accepted by the OpenAI API
+ * 
+ * For iPhones/Safari browsers, this is especially important as the format 
+ * detection on the server side can sometimes be inconsistent
  */
 export const ensureCompatibleFormat = (audioBlob: Blob, targetFormat: string): Blob => {
   // Log information about the conversion
   console.log(`Ensuring audio format compatibility: ${audioBlob.type} → ${targetFormat}`);
+  
+  // Special handling for iOS devices using Safari
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);
+  
+  if (isIOS && isSafari) {
+    console.log("iOS Safari detected - forcing audio/mp3 format for better OpenAI compatibility");
+    // For iOS Safari, force MP3 which is more reliably processed by OpenAI
+    return new Blob([audioBlob], { type: 'audio/mp3' });
+  }
   
   // If the audio is already in the target format, return it unchanged
   if (audioBlob.type === targetFormat) {
@@ -157,8 +170,7 @@ export const ensureCompatibleFormat = (audioBlob: Blob, targetFormat: string): B
     return audioBlob;
   }
   
-  // For now, we're just forcing the MIME type, which is what OpenAI sees
-  // A more robust solution would involve actual transcoding (using ffmpeg.wasm)
+  // For non-iOS devices, use the determined target format
   console.log("Forcing MIME type to:", targetFormat);
   return new Blob([audioBlob], { type: targetFormat });
 };

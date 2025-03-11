@@ -27,22 +27,24 @@ export const transcribeAudio = async (audioBlob: Blob): Promise<string> => {
       browser
     );
     
-    // Ensure the audio is in a compatible format
-    // Force to a format we know works with OpenAI API
-    const compatibleAudioBlob = ensureCompatibleFormat(audioBlob, mimeType);
+    // Ensure the audio is in a compatible format for OpenAI
+    // Force to m4a for iOS devices, mp3 for others
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const preferredFormat = isIOS ? 'audio/mp4' : 'audio/mp3';
+    const compatibleAudioBlob = ensureCompatibleFormat(audioBlob, preferredFormat);
     
     // Convert audio to base64
     const base64Audio = await convertAudioToBase64(compatibleAudioBlob);
     
     console.log("Base64 conversion successful, calling transcribe function...");
-    console.log("Audio format being sent:", mimeType, extension);
+    console.log("Audio format being sent:", compatibleAudioBlob.type, extension);
     
     // Send to Supabase function for transcription
     const { data, error } = await supabase.functions.invoke('transcribe-audio', {
       body: { 
         audioBlob: base64Audio,
-        mimeType: mimeType,
-        fileExtension: extension,
+        mimeType: compatibleAudioBlob.type,
+        fileExtension: isIOS ? 'm4a' : 'mp3',
         language: 'fr',
         isMobile: isMobile,
         browser: browser,

@@ -98,49 +98,36 @@ function detectAudioFormat(data: Uint8Array): string {
   return '';
 }
 
-// Get the most appropriate filename and content type for the audio
-function getAudioDetails(binaryAudio: Uint8Array, mimeType: string, fileExtension: string): {
-  filename: string;
-  contentType: string;
+// Map detected format to OpenAI-compatible format
+function getOpenAICompatibleFormat(detectedFormat: string, mimeType: string): {
+  contentType: string,
+  extension: string,
+  isCompatible: boolean
 } {
-  // Try to detect format from the file's binary data
-  const detectedExt = detectAudioFormat(binaryAudio);
+  // List of formats explicitly supported by OpenAI's API
+  const openAIFormats = ['flac', 'm4a', 'mp3', 'mp4', 'mpeg', 'mpga', 'oga', 'ogg', 'wav', 'webm'];
   
-  // Use detected format if available, otherwise fall back to provided values
-  let extension = detectedExt || fileExtension || 'webm';
-  let audioType = '';
-  
-  // Map extension to proper MIME type
-  switch (extension) {
-    case 'mp3':
-      audioType = 'audio/mpeg';
-      break;
-    case 'm4a':
-      audioType = 'audio/mp4';
-      break;
-    case 'wav':
-      audioType = 'audio/wav';
-      break;
-    case 'ogg':
-      audioType = 'audio/ogg';
-      break;
-    case 'webm':
-    default:
-      audioType = 'audio/webm';
-      break;
+  // First try to use the detected format
+  if (detectedFormat && openAIFormats.includes(detectedFormat)) {
+    const contentType = `audio/${detectedFormat}`;
+    console.log(`Format ${detectedFormat} is directly compatible with OpenAI`);
+    return { contentType, extension: detectedFormat, isCompatible: true };
   }
   
-  // If client explicitly provided a MIME type, use it
-  if (mimeType && !detectedExt) {
-    audioType = mimeType;
+  // If detected format isn't compatible, try to map the MIME type
+  if (mimeType) {
+    // Extract the format from MIME type (e.g., audio/webm -> webm)
+    const formatFromMime = mimeType.split('/')[1]?.split(';')[0];
+    if (formatFromMime && openAIFormats.includes(formatFromMime)) {
+      console.log(`Using MIME-derived format: ${formatFromMime}`);
+      return { contentType: mimeType, extension: formatFromMime, isCompatible: true };
+    }
   }
   
-  console.log(`Final audio details - Type: ${audioType}, Extension: ${extension}`);
-  
-  return {
-    filename: `audio.${extension}`,
-    contentType: audioType
-  };
+  // If we get here, we need to force a compatible format
+  // Default to mp3 as it's widely compatible
+  console.log("Format not directly compatible with OpenAI, forcing to mp3");
+  return { contentType: 'audio/mp3', extension: 'mp3', isCompatible: false };
 }
 
 serve(async (req) => {
@@ -179,15 +166,23 @@ serve(async (req) => {
       throw new Error('Processed audio has zero length');
     }
     
-    // Get the appropriate filename and content type
-    const { filename, contentType } = getAudioDetails(binaryAudio, mimeType, fileExtension);
-    console.log("Using content type:", contentType, "with filename:", filename);
+    // Detect the format from the binary data
+    const detectedFormat = detectAudioFormat(binaryAudio);
+    console.log("Format detection result:", detectedFormat || "Unknown");
     
-    // Prepare form data
+    // Get compatible format information for OpenAI
+    const { contentType, extension, isCompatible } = getOpenAICompatibleFormat(
+      detectedFormat, 
+      mimeType
+    );
+    
+    console.log(`Using content type: ${contentType} with extension: ${extension} (Compatible: ${isCompatible})`);
+    
+    // Prepare form data for OpenAI
     const formData = new FormData();
     const blob = new Blob([binaryAudio], { type: contentType });
     
-    formData.append('file', blob, filename);
+    formData.append('file', blob, `audio.${extension}`);
     formData.append('model', 'whisper-1');
     
     if (language) {
