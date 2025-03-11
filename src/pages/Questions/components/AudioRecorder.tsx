@@ -11,6 +11,9 @@ type AudioRecorderProps = {
   isTranscribing: boolean;
 };
 
+// Declare a module-level variable to store preferred audio format
+let preferredAudioMimeType: string = '';
+
 const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }: AudioRecorderProps) => {
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [isSecureContext, setIsSecureContext] = useState(true);
@@ -180,8 +183,12 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
       // Store the stream in the ref for later cleanup
       mediaStreamRef.current = stream;
       
-      // If using ReactMediaRecorder, set appropriate format
-      window.preferredAudioMimeType = optimalMimeType;
+      // Store the preferred audio MIME type in module-level variable
+      preferredAudioMimeType = optimalMimeType;
+      
+      // For compatibility with other components that might access this
+      (window as any).preferredAudioMimeType = optimalMimeType;
+      
       console.log("Set preferred audio MIME type:", optimalMimeType);
       
       // Start recording

@@ -13,9 +13,13 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
   const handleTranscription = async (audioBlob: Blob) => {
     setIsTranscribing(true);
     try {
+      // Get preferred audio format set by AudioRecorder if available
+      const preferredFormat = (window as any).preferredAudioMimeType || audioBlob.type;
+      
       // Log detailed information about the received audio blob
       console.log("Audio received for transcription:", {
         type: audioBlob.type,
+        preferredFormat,
         size: audioBlob.size,
         timestamp: new Date().toISOString()
       });
