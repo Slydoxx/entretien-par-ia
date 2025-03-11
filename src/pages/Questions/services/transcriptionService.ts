@@ -1,7 +1,12 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { detectOptimalAudioFormat } from "../utils/audioFormatUtils";
-import { convertAudioToBase64, validateAudioBlob } from "./audioProcessingService";
+import { 
+  convertAudioToBase64, 
+  validateAudioBlob, 
+  normalizeAudioFormat,
+  ensureCompatibleFormat 
+} from "./audioProcessingService";
 
 /**
  * Service for handling audio transcription via Supabase Edge function
@@ -12,19 +17,32 @@ export const transcribeAudio = async (audioBlob: Blob): Promise<string> => {
     validateAudioBlob(audioBlob);
     
     // Detect the optimal audio format based on device and browser
-    const { mimeType, fileExtension, isMobile, browser, userAgent } = detectOptimalAudioFormat();
+    const { mimeType: detectedMimeType, fileExtension, isMobile, browser, userAgent } = detectOptimalAudioFormat();
+    
+    // Normalize the format for better compatibility
+    const { mimeType, extension } = normalizeAudioFormat(
+      audioBlob.type || detectedMimeType,
+      fileExtension,
+      isMobile,
+      browser
+    );
+    
+    // Ensure the audio is in a compatible format
+    // Force to a format we know works with OpenAI API
+    const compatibleAudioBlob = ensureCompatibleFormat(audioBlob, mimeType);
     
     // Convert audio to base64
-    const base64Audio = await convertAudioToBase64(audioBlob);
+    const base64Audio = await convertAudioToBase64(compatibleAudioBlob);
     
     console.log("Base64 conversion successful, calling transcribe function...");
+    console.log("Audio format being sent:", mimeType, extension);
     
     // Send to Supabase function for transcription
     const { data, error } = await supabase.functions.invoke('transcribe-audio', {
       body: { 
         audioBlob: base64Audio,
         mimeType: mimeType,
-        fileExtension: fileExtension,
+        fileExtension: extension,
         language: 'fr',
         isMobile: isMobile,
         browser: browser,

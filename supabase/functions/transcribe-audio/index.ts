@@ -36,12 +36,111 @@ function processBase64Chunks(base64String: string, chunkSize = 32768) {
       offset += chunk.length;
     }
 
+    // Log first few bytes for debugging format issues
+    console.log("First 20 bytes of processed audio:", Array.from(result.slice(0, 20)));
     console.log("Finished base64 processing, total size:", result.length, "bytes");
     return result;
   } catch (error) {
     console.error("Error processing base64 chunks:", error);
     throw new Error("Failed to process audio data: " + error.message);
   }
+}
+
+// Detect audio format from file signature
+function detectAudioFormat(data: Uint8Array): string {
+  // Log first bytes for debugging
+  console.log("Detecting format from bytes:", Array.from(data.slice(0, 16)));
+  
+  // Common audio format signatures
+  const signatures: Record<string, { bytes: number[], extension: string }> = {
+    // WebM format
+    webm: { bytes: [0x1A, 0x45, 0xDF, 0xA3], extension: 'webm' },
+    // MP3 format
+    mp3: { bytes: [0x49, 0x44, 0x33], extension: 'mp3' },
+    // Alternative MP3 signature
+    mp3alt: { bytes: [0xFF, 0xFB], extension: 'mp3' },
+    // WAV format
+    wav: { bytes: [0x52, 0x49, 0x46, 0x46], extension: 'wav' },
+    // M4A format
+    m4a: { bytes: [0x66, 0x74, 0x79, 0x70], extension: 'm4a' },
+    // OGG format
+    ogg: { bytes: [0x4F, 0x67, 0x67, 0x53], extension: 'ogg' },
+  };
+
+  // Check for each signature
+  for (const [format, { bytes, extension }] of Object.entries(signatures)) {
+    let match = true;
+    
+    // Special case for m4a which has its signature at offset 4
+    if (format === 'm4a') {
+      for (let i = 0; i < bytes.length; i++) {
+        if (data[i + 4] !== bytes[i]) {
+          match = false;
+          break;
+        }
+      }
+    } else {
+      for (let i = 0; i < bytes.length; i++) {
+        if (data[i] !== bytes[i]) {
+          match = false;
+          break;
+        }
+      }
+    }
+    
+    if (match) {
+      console.log(`Detected format: ${format} (${extension})`);
+      return extension;
+    }
+  }
+  
+  console.log("Could not detect format from signatures, falling back to user-provided type");
+  return '';
+}
+
+// Get the most appropriate filename and content type for the audio
+function getAudioDetails(binaryAudio: Uint8Array, mimeType: string, fileExtension: string): {
+  filename: string;
+  contentType: string;
+} {
+  // Try to detect format from the file's binary data
+  const detectedExt = detectAudioFormat(binaryAudio);
+  
+  // Use detected format if available, otherwise fall back to provided values
+  let extension = detectedExt || fileExtension || 'webm';
+  let audioType = '';
+  
+  // Map extension to proper MIME type
+  switch (extension) {
+    case 'mp3':
+      audioType = 'audio/mpeg';
+      break;
+    case 'm4a':
+      audioType = 'audio/mp4';
+      break;
+    case 'wav':
+      audioType = 'audio/wav';
+      break;
+    case 'ogg':
+      audioType = 'audio/ogg';
+      break;
+    case 'webm':
+    default:
+      audioType = 'audio/webm';
+      break;
+  }
+  
+  // If client explicitly provided a MIME type, use it
+  if (mimeType && !detectedExt) {
+    audioType = mimeType;
+  }
+  
+  console.log(`Final audio details - Type: ${audioType}, Extension: ${extension}`);
+  
+  return {
+    filename: `audio.${extension}`,
+    contentType: audioType
+  };
 }
 
 serve(async (req) => {
@@ -58,6 +157,7 @@ serve(async (req) => {
     
     console.log("Device info - Mobile:", isMobile, "Browser:", browser);
     console.log("User agent:", userAgent || "Not provided");
+    console.log("Received format info - MIME:", mimeType, "Extension:", fileExtension);
     
     if (!audioBlob) {
       console.error("No audio data provided");
@@ -70,7 +170,6 @@ serve(async (req) => {
     }
 
     console.log("Received audio data, processing...");
-    console.log("Original mime type:", mimeType, "File extension:", fileExtension);
     
     // Process audio in chunks
     const binaryAudio = processBase64Chunks(audioBlob);
@@ -80,31 +179,21 @@ serve(async (req) => {
       throw new Error('Processed audio has zero length');
     }
     
-    // Normalize the mime type for better compatibility
-    let audioType = mimeType || 'audio/webm';
-    let filename = `audio.${fileExtension || 'webm'}`;
-    
-    // Adjust format based on device/browser for better compatibility
-    if (isMobile) {
-      if (browser?.toLowerCase().includes('safari') || userAgent?.includes('iPhone') || userAgent?.includes('iPad')) {
-        audioType = 'audio/mp4';
-        filename = 'audio.m4a';
-      } else if (browser?.toLowerCase().includes('firefox')) {
-        audioType = 'audio/ogg';
-        filename = 'audio.ogg';
-      }
-    }
-    
-    console.log("Using audio type:", audioType, "with filename:", filename);
+    // Get the appropriate filename and content type
+    const { filename, contentType } = getAudioDetails(binaryAudio, mimeType, fileExtension);
+    console.log("Using content type:", contentType, "with filename:", filename);
     
     // Prepare form data
     const formData = new FormData();
-    const blob = new Blob([binaryAudio], { type: audioType });
+    const blob = new Blob([binaryAudio], { type: contentType });
     
-    console.log("Creating audio file with name:", filename);
     formData.append('file', blob, filename);
     formData.append('model', 'whisper-1');
-    formData.append('language', 'fr');
+    
+    if (language) {
+      formData.append('language', language);
+      console.log("Language set to:", language);
+    }
     
     // Get the OpenAI API key
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY');

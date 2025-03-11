@@ -13,13 +13,18 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
   const handleTranscription = async (audioBlob: Blob) => {
     setIsTranscribing(true);
     try {
-      // Show toast for large files
-      if (audioBlob.size > 500000) { // > 500KB
-        toast({
-          title: "Traitement en cours...",
-          description: "Fichier audio volumineux, le traitement peut prendre quelques instants",
-        });
-      }
+      // Log detailed information about the received audio blob
+      console.log("Audio received for transcription:", {
+        type: audioBlob.type,
+        size: audioBlob.size,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Show toast for processing
+      toast({
+        title: "Traitement en cours...",
+        description: "Conversion et envoi de l'audio pour transcription",
+      });
 
       // Transcribe the audio
       const transcribedText = await transcribeAudio(audioBlob);
@@ -33,9 +38,20 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
       });
     } catch (error) {
       console.error('Transcription error:', error);
+      
+      // Enhanced error message with troubleshooting info
+      let errorMessage = error.message || "Impossible de transcrire l'audio.";
+      
+      // Add more user-friendly descriptions based on error patterns
+      if (errorMessage.includes("format")) {
+        errorMessage += " Problème de format audio détecté. Essayez un enregistrement plus court.";
+      } else if (errorMessage.includes("connection") || errorMessage.includes("connexion")) {
+        errorMessage += " Vérifiez votre connexion internet.";
+      }
+      
       toast({
         title: "Erreur de transcription",
-        description: error.message || "Impossible de transcrire l'audio. Veuillez réessayer.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Mic, Square } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { getMostCompatibleFormat, isAudioFormatSupported } from "../utils/audioFormatUtils";
 
 type AudioRecorderProps = {
   status: string;
@@ -17,6 +18,7 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [deviceInfo, setDeviceInfo] = useState<string>("");
+  const [audioFormat, setAudioFormat] = useState<string>("");
 
   useEffect(() => {
     // Check if we're in a secure context (required for getUserMedia on mobile)
@@ -30,7 +32,14 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
     
     console.log("Device detection - Mobile:", mobile);
     console.log("User agent:", navigator.userAgent);
-    console.log("Browser:", navigator.userAgent.match(/chrome|chromium|crios|edg|firefox|safari/i)?.[0] || "unknown");
+    const browserMatch = navigator.userAgent.match(/chrome|chromium|crios|edg|firefox|safari/i);
+    const browser = browserMatch ? browserMatch[0].toLowerCase() : "unknown";
+    console.log("Browser:", browser);
+    
+    // Get the most compatible format
+    const format = getMostCompatibleFormat();
+    setAudioFormat(format);
+    console.log("Most compatible audio format:", format);
     
     // Test microphone access once to check capabilities
     if (secure && navigator.mediaDevices) {
@@ -42,12 +51,41 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
           
           audioTracks.forEach(track => {
             console.log(`Track label: ${track.label}`);
-            const capabilities = track.getCapabilities();
-            console.log("Track capabilities:", capabilities);
+            try {
+              const capabilities = track.getCapabilities();
+              console.log("Track capabilities:", capabilities);
+            } catch (err) {
+              console.log("Could not get capabilities:", err);
+            }
+            
+            // Try getting settings
+            try {
+              const settings = track.getSettings();
+              console.log("Track settings:", settings);
+            } catch (err) {
+              console.log("Could not get settings:", err);
+            }
             
             // Clean up test track
             track.stop();
           });
+          
+          // Test MediaRecorder support
+          if (typeof MediaRecorder !== 'undefined') {
+            const formats = [
+              'audio/webm', 
+              'audio/webm;codecs=opus',
+              'audio/mp4',
+              'audio/ogg',
+              'audio/wav'
+            ];
+            
+            formats.forEach(format => {
+              console.log(`MediaRecorder supports ${format}:`, MediaRecorder.isTypeSupported(format));
+            });
+          } else {
+            console.log("MediaRecorder API not available");
+          }
         })
         .catch(err => {
           console.error("Microphone test access denied:", err);
@@ -83,6 +121,11 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
   const handleStartRecording = async () => {
     try {
       setErrorMessage(null);
+      
+      // Determine best audio format for this device
+      let optimalMimeType = audioFormat;
+      
+      console.log("Starting recording with format:", optimalMimeType);
       
       // Different audio constraints based on device type
       let audioConstraints: MediaTrackConstraints = {
@@ -136,6 +179,10 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
       
       // Store the stream in the ref for later cleanup
       mediaStreamRef.current = stream;
+      
+      // If using ReactMediaRecorder, set appropriate format
+      window.preferredAudioMimeType = optimalMimeType;
+      console.log("Set preferred audio MIME type:", optimalMimeType);
       
       // Start recording
       console.log("Microphone permission granted, starting recording");
@@ -207,7 +254,8 @@ const AudioRecorder = ({ status, startRecording, stopRecording, isTranscribing }
       
       {deviceInfo && (
         <span className="text-[10px] text-gray-400 mt-1 max-w-[200px] text-center">
-          {isMobile ? "Appareil mobile" : "Ordinateur"} détecté
+          {isMobile ? "Appareil mobile" : "Ordinateur"} 
+          {audioFormat ? ` - Format: ${audioFormat}` : ""}
         </span>
       )}
     </div>
