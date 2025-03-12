@@ -21,12 +21,13 @@ const AnswerInput = ({
 }: AnswerInputProps) => {
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
+      {/* Sur mobile: disposition en colonne, sur desktop: disposition en ligne */}
+      <div className="flex flex-col sm:flex-row items-center gap-4">
         <Textarea
           value={answer}
           onChange={handleAnswerChange}
           placeholder="Tapez votre réponse ou utilisez l'enregistrement vocal"
-          className="min-h-[200px] p-4 text-base flex-1"
+          className="min-h-[200px] sm:min-h-[200px] p-4 text-base flex-1 w-full"
           disabled={isTranscribing}
         />
         <AudioRecorder 
