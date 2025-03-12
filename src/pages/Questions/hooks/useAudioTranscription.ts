@@ -36,7 +36,7 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
         description: "Conversion et envoi de l'audio pour transcription",
       });
 
-      // Transcribe the audio using the updated service
+      // Transcribe the audio
       const transcribedText = await transcribeAudio(audioBlob);
       
       // Update the answer with the transcribed text
@@ -51,6 +51,15 @@ const useAudioTranscription = (setAnswer: (answer: string) => void) => {
       
       // Enhanced error message with troubleshooting info
       let errorMessage = error.message || "Impossible de transcrire l'audio.";
+      
+      // Add more user-friendly descriptions based on error patterns
+      if (errorMessage.includes("format")) {
+        errorMessage += " Problème de format audio détecté. Essayez un enregistrement plus court ou différent.";
+      } else if (errorMessage.includes("connection") || errorMessage.includes("connexion")) {
+        errorMessage += " Vérifiez votre connexion internet.";
+      } else if (errorMessage.includes("OPENAI")) {
+        errorMessage = "Erreur lors de la transcription par l'API. Veuillez réessayer.";
+      }
       
       toast({
         title: "Erreur de transcription",

@@ -1,15 +1,15 @@
 
+import { supabase } from "@/integrations/supabase/client";
 import { detectOptimalAudioFormat } from "../utils/audioFormatUtils";
 import { 
   convertAudioToBase64, 
-  validateAudioBlob 
+  validateAudioBlob, 
+  normalizeAudioFormat,
+  ensureCompatibleFormat 
 } from "./audioProcessingService";
 
-// Environment-specific configuration
-const VERCEL_TRANSCRIPTION_ENDPOINT = "https://your-vercel-app.vercel.app/api/transcribe";
-
 /**
- * Service for handling audio transcription via Vercel function
+ * Service for handling audio transcription via Supabase Edge function
  */
 export const transcribeAudio = async (audioBlob: Blob): Promise<string> => {
   try {
@@ -17,48 +17,52 @@ export const transcribeAudio = async (audioBlob: Blob): Promise<string> => {
     validateAudioBlob(audioBlob);
     
     // Detect the optimal audio format based on device and browser
-    const { isMobile, browser, userAgent } = detectOptimalAudioFormat();
+    const { mimeType: detectedMimeType, fileExtension, isMobile, browser, userAgent } = detectOptimalAudioFormat();
     
-    console.log("Device detection - Mobile:", isMobile, "Browser:", browser);
-    console.log("User agent:", userAgent || "Not provided");
+    // Normalize the format for better compatibility
+    const { mimeType, extension } = normalizeAudioFormat(
+      audioBlob.type || detectedMimeType,
+      fileExtension,
+      isMobile,
+      browser
+    );
+    
+    // Ensure the audio is in a compatible format for OpenAI
+    // Force to m4a for iOS devices, mp3 for others
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const preferredFormat = isIOS ? 'audio/mp4' : 'audio/mp3';
+    const compatibleAudioBlob = ensureCompatibleFormat(audioBlob, preferredFormat);
     
     // Convert audio to base64
-    const base64Audio = await convertAudioToBase64(audioBlob);
+    const base64Audio = await convertAudioToBase64(compatibleAudioBlob);
     
     console.log("Base64 conversion successful, calling transcribe function...");
-    console.log("Audio format being sent:", audioBlob.type);
+    console.log("Audio format being sent:", compatibleAudioBlob.type, extension);
     
-    // Send to Vercel function for transcription
-    const formData = new FormData();
-    formData.append('audio', new Blob([audioBlob], { type: audioBlob.type }));
-    formData.append('language', 'fr');
-    formData.append('userAgent', userAgent || '');
-    formData.append('isMobile', String(isMobile));
-    formData.append('browser', browser || '');
-
-    const response = await fetch(VERCEL_TRANSCRIPTION_ENDPOINT, {
-      method: 'POST',
-      body: formData
+    // Send to Supabase function for transcription
+    const { data, error } = await supabase.functions.invoke('transcribe-audio', {
+      body: { 
+        audioBlob: base64Audio,
+        mimeType: compatibleAudioBlob.type,
+        fileExtension: isIOS ? 'm4a' : 'mp3',
+        language: 'fr',
+        isMobile: isMobile,
+        browser: browser,
+        userAgent: userAgent
+      }
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Vercel function error:', errorData);
-      throw new Error(`Erreur du serveur: ${errorData.error || 'Problème de connexion avec le serveur'}`);
+    if (error) {
+      console.error('Supabase function error:', error);
+      throw new Error(`Erreur du serveur: ${error.message || 'Problème de connexion avec le serveur'}`);
     }
 
-    const data = await response.json();
-    
     if (!data?.text) {
       throw new Error(data?.error || 'Aucun texte n\'a été transcrit');
     }
 
     console.log("Transcription successful:", data.text);
-    
-    // Filter out any amara.org references (debugging for those weird completions)
-    const cleanText = data.text.replace(/sous-titre d'amara\.org|amara\.org/gi, '').trim();
-    
-    return cleanText;
+    return data.text;
     
   } catch (error) {
     console.error('Transcription processing error:', error);
