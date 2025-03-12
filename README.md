@@ -1,69 +1,130 @@
-# Welcome to your Lovable project
 
-## Project info
+# Entretien-par-IA
 
-**URL**: https://lovable.dev/projects/421b899c-0c28-456a-8296-9386867e71f0
+**Entretien-par-IA** est une application web qui permet d'enregistrer des audios (comme des entretiens) et de les transcrire automatiquement grâce à l'API OpenAI Whisper. Elle est construite avec React, utilise Supabase pour une architecture serverless, et offre une interface utilisateur intuitive et moderne.
 
-## How can I edit this code?
+## Aperçu
+- **Frontend** : React avec Vite, Tailwind CSS, et composants UI optimisés.
+- **Backend** : Supabase Edge Functions pour une gestion serverless.
+- **API** : OpenAI Whisper pour la transcription audio.
+- **UI** : Interface utilisateur améliorée pour une expérience fluide et professionnelle.
 
-There are several ways of editing your application.
+## Pourquoi serverless avec Supabase ?
+J'ai choisi une approche serverless avec Supabase pour les raisons suivantes :
+- **Rapidité de livraison** : Ce prototype a été livré en une journée, grâce à l'efficacité de Supabase.
+- **Simplicité d'installation** : Pas besoin de configurer un serveur, tout est géré par Supabase.
+- **Scalabilité automatique** : L'application s'adapte à la demande, même si le nombre d'utilisateurs augmente.
+- **Coût réduit** : Vous payez uniquement pour l'utilisation réelle (appels à la Edge Function), et non un serveur fixe.
 
-**Use Lovable**
+### Comment ça fonctionne ?
+1. L'interface React (accessible via navigateur) capture l'audio de l'utilisateur.
+2. L'audio est envoyé à une Edge Function hébergée sur Supabase (`transcribe-audio`).
+3. La fonction appelle l'API OpenAI Whisper pour transcrire l'audio et renvoie le texte.
+4. La transcription s'affiche dans l'interface utilisateur.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/421b899c-0c28-456a-8296-9386867e71f0) and start prompting.
+## Prérequis
+Avant de commencer, assurez-vous d'avoir :
+- Un compte [Supabase](https://supabase.com/) (inscription gratuite).
+- Une clé API OpenAI ([obtenez-la ici](https://platform.openai.com/)).
+- Un serveur web pour héberger le frontend (ex. Apache, Nginx, ou un hébergement comme Netlify).
+- Node.js et npm installés pour construire le projet.
+- La CLI Supabase : installez-la avec `npm install -g supabase`.
 
-Changes made via Lovable will be committed automatically to this repo.
+## Installation
+Suivez ces étapes pour installer et déployer l'application :
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### 1. Clonez le dépôt
+Clonez le projet depuis GitHub et naviguez dans le dossier :
+```bash
+git clone https://github.com/Slydoxx/entretien-o-matic.git
+cd entretien-o-matic
 ```
 
-**Edit a file directly in GitHub**
+### 2. Installez les dépendances
+Installez les dépendances nécessaires pour le frontend :
+```bash
+npm install
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### 3. Configurez un projet Supabase
+Inscrivez-vous sur Supabase et créez un nouveau projet (ex. nom : entretien-o-matic, choisissez une région proche).
 
-**Use GitHub Codespaces**
+Notez l'ID du projet (ex. abc123) depuis le Dashboard Supabase (Settings > General).
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### 4. Déployez la Edge Function
+Déployez la fonction transcribe-audio qui gère la transcription :
+Connectez-vous à la CLI Supabase :
+```bash
+supabase login
+```
 
-## What technologies are used for this project?
+Liez votre projet local à Supabase :
+```bash
+supabase link --project-ref abc123
+```
 
-This project is built with .
+Déployez la fonction :
+```bash
+cd supabase/functions/transcribe-audio
+supabase functions deploy transcribe-audio --project-ref abc123
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Ajoutez la clé API OpenAI dans Supabase :
+Allez dans Dashboard > Settings > Environment Variables.
 
-## How can I deploy this project?
+Ajoutez une variable OPENAI_API_KEY avec votre clé OpenAI.
 
-Simply open [Lovable](https://lovable.dev/projects/421b899c-0c28-456a-8296-9386867e71f0) and click on Share -> Publish.
+Notez l'URL de la fonction (ex. https://abc123.supabase.co/functions/v1/transcribe-audio).
 
-## I want to use a custom domain - is that possible?
+### 5. Configurez l'application
+Mettez à jour le fichier de configuration pour pointer vers votre Edge Function :
+Ouvrez src/transcriptionService.ts (ou le fichier équivalent qui appelle l'API).
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+Remplacez l'URL placeholder par l'URL de votre fonction (ex. https://abc123.supabase.co/functions/v1/transcribe-audio).
+
+### 6. Construisez et déployez le frontend
+Construisez le projet React et déployez-le sur votre serveur :
+Construisez le projet :
+```bash
+npm run build
+```
+
+Copiez le dossier dist/ généré vers votre serveur web (ex. /var/www/html pour Apache, ou utilisez un hébergement comme Netlify).
+
+Assurez-vous que votre domaine (ex. app.mondomaine.com) pointe vers ce dossier.
+
+## Utilisation
+Accédez à votre application via l'URL (ex. app.mondomaine.com).
+
+Cliquez sur le bouton "Start" pour commencer l'enregistrement audio.
+
+Cliquez sur "Stop" pour arrêter et lancer la transcription.
+
+La transcription s'affiche à l'écran une fois terminée.
+
+## Limitations
+Compatibilité iOS/Safari : L'application ne fonctionne pas correctement sur iPhone/Safari en raison d'un bug avec l'enregistrement audio (format non supporté). Une solution sera proposée ultérieurement.
+
+Solution temporaire : Utilisez Android ou un navigateur desktop (Chrome, Firefox), ou pré-enregistrez un fichier MP3.
+
+Stockage : Pas de base de données persistante (les transcriptions ne sont pas sauvegardées).
+
+## Support
+Pour toute question ou problème, contactez-moi à [votre e-mail] ou [votre numéro].
+
+Support initial disponible jusqu'au 19/03/2025.
+
+Si vous souhaitez des améliorations (ex. compatibilité iPhone, stockage des transcriptions), je peux vous fournir un devis personnalisé.
+
+## Développement
+Technologies : React, Vite, Tailwind CSS, Supabase, OpenAI Whisper.
+
+UI : Interface optimisée avec Lovable pour une meilleure expérience utilisateur.
+
+Structure :
+- `src/components/ui/` : Composants réutilisables (boutons, cartes, etc.).
+- `supabase/functions/transcribe-audio/` : Edge Function pour la transcription.
+- `pages/` : Pages principales de l'application (ex. index.tsx).
+
+## Crédits
+Développé par Elano, spécialiste des prototypes rapides.
