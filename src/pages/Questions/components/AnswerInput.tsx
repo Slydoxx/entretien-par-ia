@@ -23,13 +23,18 @@ const AnswerInput = ({
     <div className="space-y-4">
       {/* Stack vertically on mobile, horizontally on larger screens */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <Textarea
-          value={answer}
-          onChange={handleAnswerChange}
-          placeholder="Tapez votre réponse ou utilisez l'enregistrement vocal"
-          className="min-h-[250px] md:min-h-[200px] p-4 text-lg md:text-base flex-1"
-          disabled={isTranscribing}
-        />
+        <div className="flex flex-col w-full">
+          <Textarea
+            value={answer}
+            onChange={handleAnswerChange}
+            placeholder="Tapez votre réponse ou utilisez l'enregistrement vocal"
+            className="min-h-[250px] md:min-h-[200px] p-4 text-lg md:text-base flex-1"
+            disabled={isTranscribing}
+          />
+          <div className="text-right text-sm text-gray-500 mt-1 mb-3">
+            {5000 - answer.length} caractères restants
+          </div>
+        </div>
         <div className="flex justify-center md:block">
           <AudioRecorder 
             status={status}
@@ -38,9 +43,6 @@ const AnswerInput = ({
             isTranscribing={isTranscribing}
           />
         </div>
-      </div>
-      <div className="text-right text-sm text-gray-500">
-        {5000 - answer.length} caractères restants
       </div>
     </div>
   );
