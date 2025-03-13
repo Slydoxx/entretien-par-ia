@@ -1,130 +1,198 @@
 
 # Entretien-par-IA
 
-**Entretien-par-IA** est une application web qui permet d'enregistrer des audios (comme des entretiens) et de les transcrire automatiquement grâce à l'API OpenAI Whisper. Elle est construite avec React, utilise Supabase pour une architecture serverless, et offre une interface utilisateur intuitive et moderne.
+**Entretien-par-IA** est une solution d'enregistrement et de transcription audio qui s'intègre facilement dans une application web existante. Elle permet d'enregistrer des entretiens et de les transcrire automatiquement grâce à l'API OpenAI Whisper, le tout via une architecture serverless Supabase.
 
-## Aperçu
-- **Frontend** : React avec Vite, Tailwind CSS, et composants UI optimisés.
-- **Backend** : Supabase Edge Functions pour une gestion serverless.
-- **API** : OpenAI Whisper pour la transcription audio.
-- **UI** : Interface utilisateur améliorée pour une expérience fluide et professionnelle.
+## Technologies utilisées
+- **Frontend** : React avec Vite, Tailwind CSS, shadcn/ui
+- **Backend serverless** : Supabase Edge Functions
+- **API externe** : OpenAI Whisper pour la transcription audio
+- **Autres dépendances** : FFmpeg (traitement audio côté client)
 
-## Pourquoi serverless avec Supabase ?
-J'ai choisi une approche serverless avec Supabase pour les raisons suivantes :
-- **Rapidité de livraison** : Ce prototype a été livré en une journée, grâce à l'efficacité de Supabase.
-- **Simplicité d'installation** : Pas besoin de configurer un serveur, tout est géré par Supabase.
-- **Scalabilité automatique** : L'application s'adapte à la demande, même si le nombre d'utilisateurs augmente.
-- **Coût réduit** : Vous payez uniquement pour l'utilisation réelle (appels à la Edge Function), et non un serveur fixe.
+## Guide d'intégration à votre application existante
 
-### Comment ça fonctionne ?
-1. L'interface React (accessible via navigateur) capture l'audio de l'utilisateur.
-2. L'audio est envoyé à une Edge Function hébergée sur Supabase (`transcribe-audio`).
-3. La fonction appelle l'API OpenAI Whisper pour transcrire l'audio et renvoie le texte.
-4. La transcription s'affiche dans l'interface utilisateur.
+Cette section explique comment intégrer cette solution à votre application web PHP/SQL existante.
 
-## Prérequis
-Avant de commencer, assurez-vous d'avoir :
-- Un compte [Supabase](https://supabase.com/) (inscription gratuite).
-- Une clé API OpenAI ([obtenez-la ici](https://platform.openai.com/)).
-- Un serveur web pour héberger le frontend (ex. Apache, Nginx, ou un hébergement comme Netlify).
-- Node.js et npm installés pour construire le projet.
-- La CLI Supabase : installez-la avec `npm install -g supabase`.
+### 1. Configuration de Supabase (pour les Edge Functions)
 
-## Installation
-Suivez ces étapes pour installer et déployer l'application :
+Même si votre application principale utilise PHP/SQL, les fonctions serverless nécessitent Supabase:
 
-### 1. Clonez le dépôt
-Clonez le projet depuis GitHub et naviguez dans le dossier :
-```bash
-git clone https://github.com/Slydoxx/entretien-o-matic.git
-cd entretien-o-matic
+1. **Créez un compte Supabase** gratuit sur [supabase.com](https://supabase.com/)
+2. **Créez un nouveau projet** (ex. "entretien-transcription")
+3. **Notez les informations de connexion** depuis le Dashboard:
+   - Project URL: `https://votre-id-projet.supabase.co`
+   - API Key (anon/public): visible dans Project Settings > API
+
+### 2. Déploiement des Edge Functions
+
+Les Edge Functions sont des fonctions serverless qui traitent la transcription:
+
+1. **Installez la CLI Supabase**:
+   ```bash
+   npm install -g supabase
+   ```
+
+2. **Connectez-vous et liez votre projet**:
+   ```bash
+   supabase login
+   supabase link --project-ref votre-id-projet
+   ```
+
+3. **Déployez la fonction de transcription**:
+   ```bash
+   # Naviguez vers le dossier du projet
+   cd chemin/vers/entretien-par-ia
+   
+   # Déployez la fonction
+   supabase functions deploy transcribe-audio
+   ```
+
+4. **Configuration de la clé API OpenAI**:
+   - Allez dans le Dashboard Supabase > Settings > API > Edge Functions
+   - Ajoutez une variable d'environnement: `OPENAI_API_KEY` avec votre clé API OpenAI
+   - Pour obtenir une clé API: [platform.openai.com](https://platform.openai.com/)
+
+### 3. Intégration des composants dans votre application PHP
+
+#### Option 1: Intégration via iframe (plus simple)
+
+Si vous préférez ne pas modifier votre codebase PHP:
+
+1. **Construisez l'application React**:
+   ```bash
+   cd chemin/vers/entretien-par-ia
+   npm install
+   npm run build
+   ```
+
+2. **Déployez les fichiers statiques** sur votre serveur dans un sous-dossier (ex: `/entretien-tool/`)
+
+3. **Intégrez via iframe** dans vos pages PHP:
+   ```html
+   <iframe 
+     src="/entretien-tool/index.html" 
+     width="100%" 
+     height="700px" 
+     frameborder="0">
+   </iframe>
+   ```
+
+#### Option 2: Intégration directe des composants (plus avancée)
+
+Pour une intégration plus poussée:
+
+1. **Extrayez les composants clés**:
+   - `src/pages/Questions/components/AudioRecorder.tsx`: Pour l'enregistrement audio
+   - `src/pages/Questions/components/AnswerInput.tsx`: Pour l'interface de saisie/transcription
+   - Les services de transcription dans `src/pages/Questions/services/`
+
+2. **Configurez les variables d'environnement**:
+   Créez un fichier `.env` dans votre application avec:
+   ```
+   VITE_SUPABASE_URL=https://votre-id-projet.supabase.co
+   VITE_SUPABASE_ANON_KEY=votre-clé-publique-supabase
+   ```
+
+3. **Modifiez le client Supabase** dans `src/integrations/supabase/client.ts`:
+   - Remplacez les constantes par vos variables d'environnement
+
+### 4. Configuration supplémentaire
+
+#### Ajout de CORS sur votre serveur PHP
+
+Si vous utilisez l'intégration directe, configurez CORS dans votre `.htaccess`:
+
+```
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+</IfModule>
 ```
 
-### 2. Installez les dépendances
-Installez les dépendances nécessaires pour le frontend :
-```bash
-npm install
+#### Modification du backend PHP pour stocker les transcriptions
+
+Pour sauvegarder les transcriptions dans votre base de données SQL:
+
+1. **Créez un point d'API PHP** (par exemple `/api/save-transcription.php`):
+   ```php
+   <?php
+   header('Content-Type: application/json');
+   
+   // Récupération des données
+   $input = file_get_contents('php://input');
+   $data = json_decode($input, true);
+   
+   // Validation
+   if (!isset($data['text']) || empty($data['text'])) {
+       http_response_code(400);
+       echo json_encode(['error' => 'Texte de transcription manquant']);
+       exit;
+   }
+   
+   // Connexion à la base de données (utilisez vos paramètres)
+   $mysqli = new mysqli('localhost', 'user', 'password', 'database');
+   
+   if ($mysqli->connect_error) {
+       http_response_code(500);
+       echo json_encode(['error' => 'Erreur de connexion à la base de données']);
+       exit;
+   }
+   
+   // Préparez et exécutez la requête
+   $stmt = $mysqli->prepare("INSERT INTO transcriptions (text, created_at) VALUES (?, NOW())");
+   $stmt->bind_param("s", $data['text']);
+   
+   if ($stmt->execute()) {
+       echo json_encode(['success' => true, 'id' => $mysqli->insert_id]);
+   } else {
+       http_response_code(500);
+       echo json_encode(['error' => 'Erreur lors de l\'enregistrement']);
+   }
+   
+   $stmt->close();
+   $mysqli->close();
+   ?>
+   ```
+
+2. **Modifiez le service de transcription frontend** pour envoyer les données à votre API PHP
+
+## Limitations et solutions
+
+### Compatibilité iOS/Safari
+L'application peut rencontrer des problèmes avec les formats audio sur iOS/Safari. Solutions:
+
+- Utilisation de FFmpeg pour la conversion des formats audio côté client
+- Support de formats alternatifs (.m4a) pour iOS
+- Fallback à une saisie manuelle si la transcription échoue
+
+### Sécurité
+- Limitez l'utilisation de votre clé API Supabase
+- Ajoutez une authentification sur les points d'API sensibles
+- Utilisez HTTPS pour toutes les communications
+
+## Support technique
+
+Pour toute question d'intégration ou problème, contactez [contact@email.com].
+
+Support technique disponible jusqu'au 19/03/2025.
+
+Pour des fonctionnalités supplémentaires ou modifications, un devis personnalisé peut être fourni.
+
+## Structure du code
+
 ```
-
-### 3. Configurez un projet Supabase
-Inscrivez-vous sur Supabase et créez un nouveau projet (ex. nom : entretien-o-matic, choisissez une région proche).
-
-Notez l'ID du projet (ex. abc123) depuis le Dashboard Supabase (Settings > General).
-
-### 4. Déployez la Edge Function
-Déployez la fonction transcribe-audio qui gère la transcription :
-Connectez-vous à la CLI Supabase :
-```bash
-supabase login
+entretien-par-ia/
+├── src/
+│   ├── components/ui/       # Composants d'interface réutilisables
+│   ├── pages/Questions/     # Interface de questions et transcription
+│   ├── integrations/        # Intégrations externes (Supabase)
+│   └── services/            # Services (traitement audio, transcription)
+├── supabase/
+│   └── functions/           # Edge Functions Supabase
+│       └── transcribe-audio/# Fonction de transcription
+└── public/                  # Ressources statiques
 ```
-
-Liez votre projet local à Supabase :
-```bash
-supabase link --project-ref abc123
-```
-
-Déployez la fonction :
-```bash
-cd supabase/functions/transcribe-audio
-supabase functions deploy transcribe-audio --project-ref abc123
-```
-
-Ajoutez la clé API OpenAI dans Supabase :
-Allez dans Dashboard > Settings > Environment Variables.
-
-Ajoutez une variable OPENAI_API_KEY avec votre clé OpenAI.
-
-Notez l'URL de la fonction (ex. https://abc123.supabase.co/functions/v1/transcribe-audio).
-
-### 5. Configurez l'application
-Mettez à jour le fichier de configuration pour pointer vers votre Edge Function :
-Ouvrez src/transcriptionService.ts (ou le fichier équivalent qui appelle l'API).
-
-Remplacez l'URL placeholder par l'URL de votre fonction (ex. https://abc123.supabase.co/functions/v1/transcribe-audio).
-
-### 6. Construisez et déployez le frontend
-Construisez le projet React et déployez-le sur votre serveur :
-Construisez le projet :
-```bash
-npm run build
-```
-
-Copiez le dossier dist/ généré vers votre serveur web (ex. /var/www/html pour Apache, ou utilisez un hébergement comme Netlify).
-
-Assurez-vous que votre domaine (ex. app.mondomaine.com) pointe vers ce dossier.
-
-## Utilisation
-Accédez à votre application via l'URL (ex. app.mondomaine.com).
-
-Cliquez sur le bouton "Start" pour commencer l'enregistrement audio.
-
-Cliquez sur "Stop" pour arrêter et lancer la transcription.
-
-La transcription s'affiche à l'écran une fois terminée.
-
-## Limitations
-Compatibilité iOS/Safari : L'application ne fonctionne pas correctement sur iPhone/Safari en raison d'un bug avec l'enregistrement audio (format non supporté). Une solution sera proposée ultérieurement.
-
-Solution temporaire : Utilisez Android ou un navigateur desktop (Chrome, Firefox), ou pré-enregistrez un fichier MP3.
-
-Stockage : Pas de base de données persistante (les transcriptions ne sont pas sauvegardées).
-
-## Support
-Pour toute question ou problème, contactez-moi à [votre e-mail] ou [votre numéro].
-
-Support initial disponible jusqu'au 19/03/2025.
-
-Si vous souhaitez des améliorations (ex. compatibilité iPhone, stockage des transcriptions), je peux vous fournir un devis personnalisé.
-
-## Développement
-Technologies : React, Vite, Tailwind CSS, Supabase, OpenAI Whisper.
-
-UI : Interface optimisée avec Lovable pour une meilleure expérience utilisateur.
-
-Structure :
-- `src/components/ui/` : Composants réutilisables (boutons, cartes, etc.).
-- `supabase/functions/transcribe-audio/` : Edge Function pour la transcription.
-- `pages/` : Pages principales de l'application (ex. index.tsx).
 
 ## Crédits
 Développé par Elano, spécialiste des prototypes rapides.
