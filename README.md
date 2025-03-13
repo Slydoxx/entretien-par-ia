@@ -173,9 +173,9 @@ L'application peut rencontrer des problèmes avec les formats audio sur iOS/Safa
 
 ## Support technique
 
-Pour toute question d'intégration ou problème, contactez [contact@email.com].
+Pour toute question d'intégration ou problème, contactez [thomasszyd@gmail.com].
 
-Support technique disponible jusqu'au 19/03/2025.
+Support technique disponible.
 
 Pour des fonctionnalités supplémentaires ou modifications, un devis personnalisé peut être fourni.
 
