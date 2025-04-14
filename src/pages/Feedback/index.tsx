@@ -66,12 +66,9 @@ const Feedback = () => {
 
   return (
     <PageContainer>
-      <Card className="w-full max-w-4xl mx-auto animate-fade-in shadow-lg">
+      <Card className="w-full max-w-4xl mx-auto animate-fade-in">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">Qu'en pensez-vous ?</CardTitle>
-          <CardDescription className="text-center">
-            Aidez-nous à améliorer notre application avec votre feedback
-          </CardDescription>
         </CardHeader>
         
         <CardContent className="space-y-6">
@@ -91,17 +88,19 @@ const Feedback = () => {
                 <RadioGroupItem value="wrong" id="wrong" />
                 <Label htmlFor="wrong" className="cursor-pointer">Quelque chose ne va pas</Label>
               </div>
-              
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="not_relevant" id="not_relevant" />
-                <Label htmlFor="not_relevant" className="cursor-pointer">Ce n'est pas pertinent</Label>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="not_useful" id="not_useful" />
-                <Label htmlFor="not_useful" className="cursor-pointer">Ce n'est pas utile</Label>
-              </div>
             </RadioGroup>
+          </div>
+          
+          {/* Commentaires ou suggestions - déplacés en 2e position */}
+          <div className="space-y-2 pt-4 border-t">
+            <Label htmlFor="comment" className="font-medium">Avez-vous des commentaires ou des suggestions ?</Label>
+            <Textarea 
+              id="comment"
+              placeholder="Partagez vos suggestions"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="min-h-[120px]"
+            />
           </div>
 
           {/* Questions avec notation par étoiles */}
@@ -135,28 +134,17 @@ const Feedback = () => {
             </div>
           </div>
 
-          {/* Commentaires ou suggestions */}
-          <div className="space-y-2 pt-4 border-t">
-            <Label htmlFor="comment" className="font-medium">Avez-vous des commentaires ou des suggestions ?</Label>
-            <Textarea 
-              id="comment"
-              placeholder="Partagez vos suggestions"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              className="min-h-[120px]"
-            />
-          </div>
-
           <div className="text-sm text-muted-foreground">
             Les données que vous fournissez nous aident à améliorer notre plateforme.
           </div>
         </CardContent>
         
-        <CardFooter className="flex justify-between">
+        <CardFooter className="flex justify-start">
           <Button 
             variant="outline"
             onClick={() => navigate("/")}
             disabled={isSubmitting}
+            className="mr-4"
           >
             Passer
           </Button>

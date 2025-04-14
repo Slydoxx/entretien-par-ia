@@ -27,7 +27,7 @@ const StarRating = ({ rating, onChange, size = 24 }: StarRatingProps) => {
             className={`
               cursor-pointer transition-colors
               ${(hover || rating) >= star 
-                ? "fill-destructive text-destructive" 
+                ? "fill-prepera-blue text-prepera-blue" 
                 : "fill-none text-gray-300"}
             `}
           />
