@@ -9,6 +9,7 @@ import StarRating from "@/components/StarRating";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import PageContainer from "../SelectQuestions/components/PageContainer";
+import { supabase } from "@/integrations/supabase/client";
 
 const Feedback = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const Feedback = () => {
   
   const [generalFeedback, setGeneralFeedback] = useState<string | null>(null);
   const [comment, setComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // États pour les notations par étoiles
   const [jobRelevanceRating, setJobRelevanceRating] = useState(0);
@@ -23,24 +25,43 @@ const Feedback = () => {
   const [prototypeRating, setPrototypeRating] = useState(0);
   const [uiNavigationRating, setUiNavigationRating] = useState(0);
 
-  const handleSubmit = () => {
-    // Ici vous pourriez envoyer les données à une API
-    console.log({
-      generalFeedback,
-      jobRelevanceRating,
-      aiFeedbackRating,
-      prototypeRating,
-      uiNavigationRating,
-      comment
-    });
-    
-    toast({
-      title: "Merci pour votre retour !",
-      description: "Votre feedback a été envoyé avec succès.",
-    });
-    
-    // Rediriger vers la page d'accueil après soumission
-    navigate("/");
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      // Ici on envoie les données à Supabase
+      const { error } = await supabase
+        .from('user_feedback')
+        .insert({
+          general_feedback: generalFeedback,
+          job_relevance_rating: jobRelevanceRating || null,
+          ai_feedback_rating: aiFeedbackRating || null,
+          prototype_rating: prototypeRating || null,
+          ui_navigation_rating: uiNavigationRating || null,
+          comment: comment || null
+        });
+      
+      if (error) {
+        console.error("Erreur lors de l'enregistrement du feedback:", error);
+        throw error;
+      }
+      
+      toast({
+        title: "Merci pour votre retour !",
+        description: "Votre feedback a été envoyé avec succès.",
+      });
+      
+      // Rediriger vers la page d'accueil après soumission
+      navigate("/");
+    } catch (error) {
+      console.error("Erreur:", error);
+      toast({
+        title: "Une erreur s'est produite",
+        description: "Impossible d'envoyer votre feedback. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -135,11 +156,15 @@ const Feedback = () => {
           <Button 
             variant="outline"
             onClick={() => navigate("/")}
+            disabled={isSubmitting}
           >
             Passer
           </Button>
-          <Button onClick={handleSubmit}>
-            Soumettre
+          <Button 
+            onClick={handleSubmit} 
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Envoi en cours..." : "Soumettre"}
           </Button>
         </CardFooter>
       </Card>
