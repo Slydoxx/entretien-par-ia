@@ -1,3 +1,4 @@
+
 import { useLocation, Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import QuestionHeader from "./components/QuestionHeader";
@@ -82,15 +83,13 @@ const QuestionsContainer = () => {
   const currentQuestion = selectedQuestions[currentStep - 1] || "";
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="container mx-auto px-4">
+    <div className="flex flex-col min-h-screen pt-4">
+      <div className="max-w-4xl mx-auto px-4 w-full">
         <QuestionHeader 
           currentStep={Math.min(currentStep, selectedQuestions.length)} 
           totalQuestions={selectedQuestions.length} 
         />
-      </div>
-      
-      <div className="max-w-4xl mx-auto p-4 w-full flex-grow">
+        
         <QuestionCard
           question={currentQuestion}
           answer={answer}

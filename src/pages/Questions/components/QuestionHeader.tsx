@@ -20,7 +20,7 @@ const QuestionHeader = ({ currentStep, totalQuestions }: QuestionHeaderProps) =>
   };
 
   return (
-    <div className="flex flex-col items-center justify-center mb-8">
+    <div className="flex flex-col items-center justify-center mb-6">
       <span className="px-4 py-2 rounded-full inline-block bg-white border text-center w-auto">
         Question {Math.min(currentStep, totalQuestions)}/{totalQuestions}
       </span>

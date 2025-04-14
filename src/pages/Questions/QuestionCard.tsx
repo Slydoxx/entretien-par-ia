@@ -1,3 +1,4 @@
+
 import { useReactMediaRecorder } from "react-media-recorder";
 import { Button } from "@/components/ui/button";
 import { Download, MessageSquare } from "lucide-react";
@@ -95,79 +96,75 @@ const QuestionCard = ({
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center">
-      <div className="max-w-4xl mx-auto p-4 w-full space-y-4">
-        
+    <div className="flex flex-col mt-4">
+      <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-8 space-y-6">
+        <h2 className="text-xl font-semibold text-prepera-darkBlue text-left">
+          {question}
+        </h2>
 
-        <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-8 space-y-6">
-          <h2 className="text-xl font-semibold text-prepera-darkBlue text-left">
-            {question}
-          </h2>
+        <AnswerInput
+          answer={answer}
+          handleAnswerChange={onAnswerChange}
+          isTranscribing={isTranscribing}
+          status={status}
+          startRecording={startRecording}
+          stopRecording={stopRecording}
+        />
 
-          <AnswerInput
-            answer={answer}
-            handleAnswerChange={onAnswerChange}
-            isTranscribing={isTranscribing}
-            status={status}
-            startRecording={startRecording}
-            stopRecording={stopRecording}
-          />
-
-          <div className="flex flex-col gap-3">
-            <NavigationButtons
-              currentStep={currentStep}
-              totalQuestions={totalQuestions}
-              handlePreviousQuestion={onPreviousQuestion}
-              handleNextQuestion={onNextQuestion}
-              handleAnalyzeResponse={onAnalyzeResponse}
-              isAnalyzing={isAnalyzing}
-              isTranscribing={isTranscribing}
-            />
-          </div>
-
-          <FeedbackSection
-            showFeedback={showFeedback}
-            setShowFeedback={setShowFeedback}
-            showSampleResponse={showSampleResponse}
-            setShowSampleResponse={setShowSampleResponse}
-            feedback={feedback}
-            sampleResponse={sampleResponse}
+        <div className="flex flex-col gap-3">
+          <NavigationButtons
+            currentStep={currentStep}
+            totalQuestions={totalQuestions}
+            handlePreviousQuestion={onPreviousQuestion}
+            handleNextQuestion={onNextQuestion}
+            handleAnalyzeResponse={onAnalyzeResponse}
             isAnalyzing={isAnalyzing}
+            isTranscribing={isTranscribing}
           />
-
-          {canDownloadPDF && (
-            <div className="flex flex-col items-center gap-4">
-              <Button
-                variant="outline"
-                className="w-full sm:w-auto"
-                onClick={handleDownloadPDF}
-                disabled={!canDownloadPDF}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Télécharger PDF
-              </Button>
-            </div>
-          )}
         </div>
 
-        {/* Action buttons moved below the main card */}
-        <div className="flex justify-center gap-4 mt-4">
-          <Button 
-            onClick={handleFeedback}
-            variant="outline"
-            className="bg-white text-[#2A3F54] border-[#2A3F54] hover:bg-gray-50 flex items-center gap-2"
-          >
-            <MessageSquare className="w-4 h-4" />
-            Donner mon avis
-          </Button>
-          <Button 
-            onClick={handleFinish}
-            variant="outline"
-            className="bg-white text-[#2A3F54] border-[#2A3F54] hover:bg-gray-50"
-          >
-            Terminer
-          </Button>
-        </div>
+        <FeedbackSection
+          showFeedback={showFeedback}
+          setShowFeedback={setShowFeedback}
+          showSampleResponse={showSampleResponse}
+          setShowSampleResponse={setShowSampleResponse}
+          feedback={feedback}
+          sampleResponse={sampleResponse}
+          isAnalyzing={isAnalyzing}
+        />
+
+        {canDownloadPDF && (
+          <div className="flex flex-col items-center gap-4">
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={handleDownloadPDF}
+              disabled={!canDownloadPDF}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Télécharger PDF
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Action buttons moved below the main card */}
+      <div className="flex justify-center gap-4 mt-4">
+        <Button 
+          onClick={handleFeedback}
+          variant="outline"
+          className="bg-white text-[#2A3F54] border-[#2A3F54] hover:bg-gray-50 flex items-center gap-2"
+        >
+          <MessageSquare className="w-4 h-4" />
+          Donner mon avis
+        </Button>
+        <Button 
+          onClick={handleFinish}
+          variant="outline"
+          className="bg-white text-[#2A3F54] border-[#2A3F54] hover:bg-gray-50"
+        >
+          Terminer
+        </Button>
       </div>
     </div>
   );
