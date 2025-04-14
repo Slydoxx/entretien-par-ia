@@ -75,19 +75,19 @@ const Feedback = () => {
             <RadioGroup
               value={generalFeedback || ""}
               onValueChange={setGeneralFeedback}
-              className="flex justify-center space-x-4"
+              className="flex flex-wrap justify-center gap-3"
             >
               <div className="flex flex-col items-center">
                 <div className={`rounded-md border border-input p-2 cursor-pointer transition-colors ${generalFeedback === "useful" ? "bg-prepera-blue text-white" : "bg-white"}`}>
                   <RadioGroupItem value="useful" id="useful" className="hidden" />
-                  <Label htmlFor="useful" className="cursor-pointer px-2 md:px-4">C'est utile</Label>
+                  <Label htmlFor="useful" className="cursor-pointer px-3 py-1 whitespace-nowrap">C'est utile</Label>
                 </div>
               </div>
               
               <div className="flex flex-col items-center">
                 <div className={`rounded-md border border-input p-2 cursor-pointer transition-colors ${generalFeedback === "wrong" ? "bg-prepera-blue text-white" : "bg-white"}`}>
                   <RadioGroupItem value="wrong" id="wrong" className="hidden" />
-                  <Label htmlFor="wrong" className="cursor-pointer px-2 md:px-4 whitespace-nowrap">Quelque chose ne va pas</Label>
+                  <Label htmlFor="wrong" className="cursor-pointer px-3 py-1 whitespace-nowrap">Quelque chose ne va pas</Label>
                 </div>
               </div>
             </RadioGroup>
