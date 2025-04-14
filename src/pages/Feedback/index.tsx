@@ -71,22 +71,26 @@ const Feedback = () => {
           <CardTitle className="text-2xl font-bold text-center">Qu'en pensez-vous ?</CardTitle>
         </CardHeader>
         
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-8">
           {/* Section de feedback général */}
           <div className="space-y-4">
             <RadioGroup
               value={generalFeedback || ""}
               onValueChange={setGeneralFeedback}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+              className="flex justify-center space-x-8"
             >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="useful" id="useful" />
-                <Label htmlFor="useful" className="cursor-pointer">C'est utile</Label>
+              <div className="flex flex-col items-center space-y-2">
+                <div className="rounded-md border border-input p-2 cursor-pointer hover:bg-accent">
+                  <RadioGroupItem value="useful" id="useful" className="hidden" />
+                  <Label htmlFor="useful" className="cursor-pointer px-4">C'est utile</Label>
+                </div>
               </div>
               
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="wrong" id="wrong" />
-                <Label htmlFor="wrong" className="cursor-pointer">Quelque chose ne va pas</Label>
+              <div className="flex flex-col items-center space-y-2">
+                <div className="rounded-md border border-input p-2 cursor-pointer hover:bg-accent">
+                  <RadioGroupItem value="wrong" id="wrong" className="hidden" />
+                  <Label htmlFor="wrong" className="cursor-pointer px-4">Quelque chose ne va pas</Label>
+                </div>
               </div>
             </RadioGroup>
           </div>
@@ -139,12 +143,11 @@ const Feedback = () => {
           </div>
         </CardContent>
         
-        <CardFooter className="flex justify-start">
+        <CardFooter className="flex justify-between">
           <Button 
             variant="outline"
             onClick={() => navigate("/")}
             disabled={isSubmitting}
-            className="mr-4"
           >
             Passer
           </Button>
