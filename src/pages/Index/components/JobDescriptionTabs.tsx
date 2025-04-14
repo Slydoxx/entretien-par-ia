@@ -20,13 +20,13 @@ const JobDescriptionTabs = ({
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger 
           value="description" 
-          className="text-[#2A3F54] font-semibold data-[state=active]:border-[#2A3F54] data-[state=active]:border-2 data-[state=active]:bg-transparent"
+          className="text-[#2A3F54] font-semibold data-[state=active]:border-[#2A3F54] data-[state=active]:border data-[state=active]:bg-transparent"
         >
           Description du poste
         </TabsTrigger>
         <TabsTrigger 
           value="offer" 
-          className="text-[#2A3F54] font-semibold data-[state=active]:border-[#2A3F54] data-[state=active]:border-2 data-[state=active]:bg-transparent"
+          className="text-[#2A3F54] font-semibold data-[state=active]:border-[#2A3F54] data-[state=active]:border data-[state=active]:bg-transparent"
         >
           Offre d'emploi
         </TabsTrigger>
@@ -37,7 +37,7 @@ const JobDescriptionTabs = ({
           placeholder="Description du poste - modifiez si nécessaire"
           value={jobDescription}
           onChange={onJobDescriptionChange}
-          className="min-h-[200px] p-4 text-base"
+          className="min-h-[200px] p-4 text-base text-[#2A3F54] border-gray-300"
         />
         <div className="text-right text-sm text-[#2A3F54] mt-2">
           {5000 - jobDescription.length} caractères restants
@@ -49,7 +49,7 @@ const JobDescriptionTabs = ({
           placeholder="Collez l'offre d'emploi complète ici pour obtenir des questions plus ciblées"
           value={jobOffer}
           onChange={onJobOfferChange}
-          className="min-h-[200px] p-4 text-base"
+          className="min-h-[200px] p-4 text-base text-[#2A3F54] border-gray-300"
         />
         <div className="text-right text-sm text-[#2A3F54] mt-2">
           {10000 - jobOffer.length} caractères restants
