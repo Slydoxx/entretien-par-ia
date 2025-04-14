@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 type NavigationButtonsProps = {
   currentStep: number;
@@ -15,7 +15,6 @@ type NavigationButtonsProps = {
 const NavigationButtons = ({ 
   currentStep, 
   totalQuestions, 
-  handlePreviousQuestion, 
   handleNextQuestion, 
   handleAnalyzeResponse, 
   isAnalyzing, 
@@ -23,15 +22,6 @@ const NavigationButtons = ({
 }: NavigationButtonsProps) => {
   return (
     <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:justify-between">
-      <Button 
-        variant="outline"
-        className="w-full sm:w-auto text-sm"
-        onClick={handlePreviousQuestion}
-        disabled={currentStep === 1}
-      >
-        <ChevronLeft className="h-4 w-4 mr-1" /> Question précédente
-      </Button>
-
       <Button 
         variant="secondary"
         className="bg-prepera-blue text-white hover:bg-prepera-darkBlue w-full sm:w-auto text-sm"
@@ -47,7 +37,7 @@ const NavigationButtons = ({
         onClick={handleNextQuestion}
         disabled={currentStep === totalQuestions}
       >
-        Question suivante <ChevronRight className="h-4 w-4 ml-1" />
+        Question suivante <ChevronRight className="w-4 h-4 ml-1" />
       </Button>
     </div>
   );
