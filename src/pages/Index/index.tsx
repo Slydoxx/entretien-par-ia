@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import JobSearchInput from "./components/JobSearchInput";
 import JobDescriptionTabs from "./components/JobDescriptionTabs";
 import { jobs } from "./data/jobs";
+import { trackEvent } from "@/services/analyticsService";
 
 const Index = () => {
   const [jobTitle, setJobTitle] = useState<string>("");
@@ -48,6 +48,14 @@ const Index = () => {
       return;
     }
 
+    trackEvent({
+      event_type: 'generate_questions_clicked',
+      event_data: {
+        job_title: jobTitle || "Personnalisé",
+        has_job_offer: !!jobOffer
+      }
+    });
+
     navigate(`/select-questions`, { 
       state: { 
         job: jobTitle || "Personnalisé",
@@ -57,7 +65,6 @@ const Index = () => {
     });
   };
 
-  // When a job is selected from the list, set the description
   useEffect(() => {
     if (jobTitle && jobs[jobTitle as keyof typeof jobs]) {
       setJobDescription(jobs[jobTitle as keyof typeof jobs]);
