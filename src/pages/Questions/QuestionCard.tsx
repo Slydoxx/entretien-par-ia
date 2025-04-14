@@ -88,7 +88,7 @@ const QuestionCard = ({
 
   return (
     <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-8 space-y-6">
-      <h2 className="text-xl font-semibold text-prepera-darkBlue text-center">
+      <h2 className="text-xl font-semibold text-prepera-darkBlue text-left">
         {question}
       </h2>
 
