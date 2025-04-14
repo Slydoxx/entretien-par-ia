@@ -60,7 +60,7 @@ const SelectQuestions = () => {
 
   return (
     <PageContainer>
-      <SelectionHeader job={job} onBack={() => navigate('/')} />
+      <SelectionHeader onBack={() => navigate('/')} />
 
       <QuestionBox title="Sélectionnez jusqu'à 3 questions d'entretien">
         <QuestionList 
