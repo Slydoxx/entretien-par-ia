@@ -1,4 +1,3 @@
-
 import { useLocation, Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import QuestionHeader from "./components/QuestionHeader";
@@ -7,6 +6,7 @@ import { useQuestionsPageState } from "./hooks/useQuestionsPageState";
 import useAudioTranscription from "./hooks/useAudioTranscription";
 import useResponseAnalysis from "./hooks/useResponseAnalysis";
 import { useToast } from "@/components/ui/use-toast";
+import { trackEvent } from "@/services/analyticsService";
 
 const QuestionsContainer = () => {
   const location = useLocation();
@@ -54,6 +54,14 @@ const QuestionsContainer = () => {
         description,
         questions: selectedQuestions
       }));
+      
+      trackEvent({
+        event_type: 'interview_session_started',
+        event_data: {
+          job,
+          question_count: selectedQuestions.length
+        }
+      });
     }
   }, [job, description, selectedQuestions, navigate]);
 
@@ -75,6 +83,15 @@ const QuestionsContainer = () => {
 
   const handleAnalyzeResponse = async () => {
     if (!selectedQuestions[currentStep - 1]) return;
+    
+    trackEvent({
+      event_type: 'response_analysis_requested',
+      event_data: {
+        question_number: currentStep,
+        question: selectedQuestions[currentStep - 1],
+        answer_length: answer.length
+      }
+    });
     
     await analyzeResponse(selectedQuestions[currentStep - 1], answer, job);
     saveCurrentResponse(feedback, sampleResponse);

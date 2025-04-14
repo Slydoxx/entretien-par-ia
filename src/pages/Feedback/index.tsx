@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -11,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import PageContainer from "../SelectQuestions/components/PageContainer";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { trackEvent } from "@/services/analyticsService";
 
 const Feedback = () => {
   const navigate = useNavigate();
@@ -44,6 +44,18 @@ const Feedback = () => {
         console.error("Erreur lors de l'enregistrement du feedback:", error);
         throw error;
       }
+      
+      trackEvent({
+        event_type: 'feedback_submitted',
+        event_data: {
+          general_feedback: generalFeedback,
+          job_relevance_rating: jobRelevanceRating,
+          ai_feedback_rating: aiFeedbackRating,
+          prototype_rating: prototypeRating,
+          ui_navigation_rating: uiNavigationRating,
+          has_comment: !!comment
+        }
+      });
       
       toast({
         title: "Merci pour votre retour !",

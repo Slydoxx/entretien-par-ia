@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PageContainer from "./components/PageContainer";
@@ -8,6 +7,7 @@ import SelectionHeader from "./components/SelectionHeader";
 import SelectionFooter from "./components/SelectionFooter";
 import useQuestionGeneration from "./hooks/useQuestionGeneration";
 import { useQuestionSelection } from "./hooks/useQuestionSelection";
+import { trackEvent } from "@/services/analyticsService";
 
 const SelectQuestions = () => {
   const location = useLocation();
@@ -26,14 +26,20 @@ const SelectQuestions = () => {
     validateSelection
   } = useQuestionSelection(3);
 
-  // Redirect if no job description is provided
   useEffect(() => {
     if (!description) {
       navigate("/", { replace: true });
     } else {
       generateQuestions();
       
-      // Save state to session storage for recovery
+      trackEvent({
+        event_type: 'questions_generation_started',
+        event_data: {
+          job,
+          has_job_offer: !!jobOffer
+        }
+      });
+      
       sessionStorage.setItem('selectQuestionsState', JSON.stringify({
         job,
         description,
@@ -45,7 +51,14 @@ const SelectQuestions = () => {
   const handleContinue = () => {
     if (!validateSelection()) return;
 
-    // Clear question responses when starting a new session
+    trackEvent({
+      event_type: 'questions_selected',
+      event_data: {
+        selected_count: selectedQuestions.length,
+        questions: selectedQuestions
+      }
+    });
+
     sessionStorage.removeItem('questionResponses');
     sessionStorage.setItem('currentQuestionStep', '1');
     
