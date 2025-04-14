@@ -95,65 +95,67 @@ const QuestionCard = ({
   };
 
   return (
-    <>
-      <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-8 space-y-6">
-        <h2 className="text-xl font-semibold text-prepera-darkBlue text-left">
-          {question}
-        </h2>
+    <div className="min-h-screen flex flex-col justify-center">
+      <div className="max-w-4xl mx-auto p-4 w-full space-y-4">
+        
 
-        <AnswerInput
-          answer={answer}
-          handleAnswerChange={onAnswerChange}
-          isTranscribing={isTranscribing}
-          status={status}
-          startRecording={startRecording}
-          stopRecording={stopRecording}
-        />
+        <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-8 space-y-6">
+          <h2 className="text-xl font-semibold text-prepera-darkBlue text-left">
+            {question}
+          </h2>
 
-        <div className="flex flex-col gap-3">
-          <NavigationButtons
-            currentStep={currentStep}
-            totalQuestions={totalQuestions}
-            handlePreviousQuestion={onPreviousQuestion}
-            handleNextQuestion={onNextQuestion}
-            handleAnalyzeResponse={onAnalyzeResponse}
-            isAnalyzing={isAnalyzing}
+          <AnswerInput
+            answer={answer}
+            handleAnswerChange={onAnswerChange}
             isTranscribing={isTranscribing}
+            status={status}
+            startRecording={startRecording}
+            stopRecording={stopRecording}
           />
+
+          <div className="flex flex-col gap-3">
+            <NavigationButtons
+              currentStep={currentStep}
+              totalQuestions={totalQuestions}
+              handlePreviousQuestion={onPreviousQuestion}
+              handleNextQuestion={onNextQuestion}
+              handleAnalyzeResponse={onAnalyzeResponse}
+              isAnalyzing={isAnalyzing}
+              isTranscribing={isTranscribing}
+            />
+          </div>
+
+          <FeedbackSection
+            showFeedback={showFeedback}
+            setShowFeedback={setShowFeedback}
+            showSampleResponse={showSampleResponse}
+            setShowSampleResponse={setShowSampleResponse}
+            feedback={feedback}
+            sampleResponse={sampleResponse}
+            isAnalyzing={isAnalyzing}
+          />
+
+          {canDownloadPDF && (
+            <div className="flex flex-col items-center gap-4">
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={handleDownloadPDF}
+                disabled={!canDownloadPDF}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Télécharger PDF
+              </Button>
+            </div>
+          )}
         </div>
 
-        <FeedbackSection
-          showFeedback={showFeedback}
-          setShowFeedback={setShowFeedback}
-          showSampleResponse={showSampleResponse}
-          setShowSampleResponse={setShowSampleResponse}
-          feedback={feedback}
-          sampleResponse={sampleResponse}
-          isAnalyzing={isAnalyzing}
-        />
-
-        {canDownloadPDF && (
-          <div className="flex flex-col items-center gap-4">
-            <Button
-              variant="outline"
-              className="w-full sm:w-auto"
-              onClick={handleDownloadPDF}
-              disabled={!canDownloadPDF}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Télécharger PDF
-            </Button>
-          </div>
-        )}
-      </div>
-      
-      {/* Buttons positioned outside the card, at the bottom of the page */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white py-4 border-t shadow-lg z-10">
-        <div className="max-w-4xl mx-auto px-4 flex justify-center gap-4">
+        {/* Action buttons moved below the main card */}
+        <div className="flex justify-center gap-4 mt-4">
           <Button 
             onClick={handleFeedback}
             variant="outline"
-            className="w-full sm:w-auto flex items-center gap-2"
+            className="bg-white text-[#2A3F54] border-[#2A3F54] hover:bg-gray-50 flex items-center gap-2"
           >
             <MessageSquare className="w-4 h-4" />
             Donner mon avis
@@ -161,13 +163,13 @@ const QuestionCard = ({
           <Button 
             onClick={handleFinish}
             variant="outline"
-            className="w-full sm:w-auto"
+            className="bg-white text-[#2A3F54] border-[#2A3F54] hover:bg-gray-50"
           >
             Terminer
           </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
