@@ -20,13 +20,13 @@ const JobDescriptionTabs = ({
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger 
           value="description" 
-          className="text-[#2A3F54] font-semibold data-[state=active]:bg-[#2A3F54] data-[state=active]:text-white"
+          className="text-[#2A3F54] font-semibold data-[state=active]:border-[#2A3F54] data-[state=active]:border-2 data-[state=active]:bg-transparent"
         >
           Description du poste
         </TabsTrigger>
         <TabsTrigger 
           value="offer" 
-          className="text-[#2A3F54] font-semibold data-[state=active]:bg-[#2A3F54] data-[state=active]:text-white"
+          className="text-[#2A3F54] font-semibold data-[state=active]:border-[#2A3F54] data-[state=active]:border-2 data-[state=active]:bg-transparent"
         >
           Offre d'emploi
         </TabsTrigger>
