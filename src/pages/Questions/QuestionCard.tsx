@@ -95,81 +95,79 @@ const QuestionCard = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-8 space-y-6">
-      <h2 className="text-xl font-semibold text-prepera-darkBlue text-left">
-        {question}
-      </h2>
+    <>
+      <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-8 space-y-6">
+        <h2 className="text-xl font-semibold text-prepera-darkBlue text-left">
+          {question}
+        </h2>
 
-      <AnswerInput
-        answer={answer}
-        handleAnswerChange={onAnswerChange}
-        isTranscribing={isTranscribing}
-        status={status}
-        startRecording={startRecording}
-        stopRecording={stopRecording}
-      />
-
-      <div className="flex flex-col gap-3">
-        <NavigationButtons
-          currentStep={currentStep}
-          totalQuestions={totalQuestions}
-          handlePreviousQuestion={onPreviousQuestion}
-          handleNextQuestion={onNextQuestion}
-          handleAnalyzeResponse={onAnalyzeResponse}
-          isAnalyzing={isAnalyzing}
+        <AnswerInput
+          answer={answer}
+          handleAnswerChange={onAnswerChange}
           isTranscribing={isTranscribing}
+          status={status}
+          startRecording={startRecording}
+          stopRecording={stopRecording}
         />
+
+        <div className="flex flex-col gap-3">
+          <NavigationButtons
+            currentStep={currentStep}
+            totalQuestions={totalQuestions}
+            handlePreviousQuestion={onPreviousQuestion}
+            handleNextQuestion={onNextQuestion}
+            handleAnalyzeResponse={onAnalyzeResponse}
+            isAnalyzing={isAnalyzing}
+            isTranscribing={isTranscribing}
+          />
+        </div>
+
+        <FeedbackSection
+          showFeedback={showFeedback}
+          setShowFeedback={setShowFeedback}
+          showSampleResponse={showSampleResponse}
+          setShowSampleResponse={setShowSampleResponse}
+          feedback={feedback}
+          sampleResponse={sampleResponse}
+          isAnalyzing={isAnalyzing}
+        />
+
+        {canDownloadPDF && (
+          <div className="flex flex-col items-center gap-4">
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={handleDownloadPDF}
+              disabled={!canDownloadPDF}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Télécharger PDF
+            </Button>
+          </div>
+        )}
       </div>
-
-      <FeedbackSection
-        showFeedback={showFeedback}
-        setShowFeedback={setShowFeedback}
-        showSampleResponse={showSampleResponse}
-        setShowSampleResponse={setShowSampleResponse}
-        feedback={feedback}
-        sampleResponse={sampleResponse}
-        isAnalyzing={isAnalyzing}
-      />
-
-      {canDownloadPDF && (
-        <div className="flex flex-col items-center gap-4">
-          <Button
+      
+      {/* Buttons positioned outside the card, at the bottom of the page */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white py-4 border-t shadow-lg z-10">
+        <div className="max-w-4xl mx-auto px-4 flex justify-center gap-4">
+          <Button 
+            onClick={handleFeedback}
+            variant="outline"
+            className="w-full sm:w-auto flex items-center gap-2"
+          >
+            <MessageSquare className="w-4 h-4" />
+            Donner mon avis
+          </Button>
+          <Button 
+            onClick={handleFinish}
             variant="outline"
             className="w-full sm:w-auto"
-            onClick={handleDownloadPDF}
-            disabled={!canDownloadPDF}
           >
-            <Download className="w-4 h-4 mr-2" />
-            Télécharger PDF
-          </Button>
-          <Button
-            variant="ghost"
-            className="text-sm text-gray-500 hover:text-gray-700"
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          >
-            Retour en haut
+            Terminer
           </Button>
         </div>
-      )}
-
-      <div className="mt-6 flex flex-col sm:flex-row justify-center gap-4">
-        <Button 
-          onClick={handleFeedback}
-          variant="outline"
-          className="w-full sm:w-auto flex items-center gap-2"
-        >
-          <MessageSquare className="w-4 h-4" />
-          Donner mon avis
-        </Button>
-        <Button 
-          onClick={handleFinish}
-          variant="outline"
-          className="w-full sm:w-auto"
-        >
-          Terminer
-        </Button>
       </div>
-    </div>
+    </>
   );
 };
 
