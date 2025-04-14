@@ -1,4 +1,3 @@
-
 import { useReactMediaRecorder } from "react-media-recorder";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
@@ -89,7 +88,7 @@ const QuestionCard = ({
 
   return (
     <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-8 space-y-6">
-      <h2 className="text-xl font-semibold text-prepera-darkBlue">
+      <h2 className="text-xl font-semibold text-prepera-darkBlue text-center">
         {question}
       </h2>
 
@@ -112,18 +111,6 @@ const QuestionCard = ({
           isAnalyzing={isAnalyzing}
           isTranscribing={isTranscribing}
         />
-
-        {canDownloadPDF && (
-          <Button
-            variant="outline"
-            className="w-full sm:w-auto self-center sm:self-end mt-2"
-            onClick={handleDownloadPDF}
-            disabled={!canDownloadPDF}
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Télécharger PDF
-          </Button>
-        )}
       </div>
 
       <FeedbackSection
@@ -135,6 +122,27 @@ const QuestionCard = ({
         sampleResponse={sampleResponse}
         isAnalyzing={isAnalyzing}
       />
+
+      {canDownloadPDF && (
+        <div className="flex flex-col items-center gap-4">
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={handleDownloadPDF}
+            disabled={!canDownloadPDF}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Télécharger PDF
+          </Button>
+          <Button
+            variant="ghost"
+            className="text-sm text-gray-500 hover:text-gray-700"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
+            Retour en haut
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
