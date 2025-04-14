@@ -1,4 +1,3 @@
-
 import { useLocation, Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import QuestionHeader from "./components/QuestionHeader";
@@ -14,7 +13,6 @@ const QuestionsContainer = () => {
   const { toast } = useToast();
   const [isFirstRender, setIsFirstRender] = useState(true);
   
-  // Extract selected questions from location state
   const { job, description, questions: selectedQuestions = [] } = location.state || {};
   
   const { 
@@ -42,17 +40,14 @@ const QuestionsContainer = () => {
     resetFeedback
   } = useResponseAnalysis();
 
-  // Reset feedback when changing questions
   useEffect(() => {
     resetFeedback();
   }, [currentStep]);
 
-  // Redirect if no questions
   useEffect(() => {
     if (!selectedQuestions || selectedQuestions.length === 0) {
       navigate("/select-questions", { replace: true });
     } else {
-      // Save state to session storage
       sessionStorage.setItem('questionPageState', JSON.stringify({
         job,
         description,
@@ -61,44 +56,41 @@ const QuestionsContainer = () => {
     }
   }, [job, description, selectedQuestions, navigate]);
 
-  // Ensure the currentStep is never greater than the total number of questions
   useEffect(() => {
-    // Only show the toast on first render if needed
     if (isFirstRender && currentStep > selectedQuestions.length && selectedQuestions.length > 0) {
       setIsFirstRender(false);
       toast({
         title: "Navigation corrigée",
         description: "Le nombre de questions a été ajusté",
       });
-      // Reset current step
       sessionStorage.setItem('currentQuestionStep', '1');
-      window.location.reload(); // Force a reload to ensure state is consistent
+      window.location.reload();
     }
   }, [currentStep, selectedQuestions.length, isFirstRender, toast]);
 
-  // If no questions available, redirect
   if (!selectedQuestions || selectedQuestions.length === 0) {
     return <Navigate to="/select-questions" replace />;
   }
 
   const handleAnalyzeResponse = async () => {
-    if (!selectedQuestions[currentStep - 1]) return; // Prevent analysis if question doesn't exist
+    if (!selectedQuestions[currentStep - 1]) return;
     
     await analyzeResponse(selectedQuestions[currentStep - 1], answer, job);
     saveCurrentResponse(feedback, sampleResponse);
   };
 
-  // Get the current question, ensuring it exists
   const currentQuestion = selectedQuestions[currentStep - 1] || "";
 
   return (
-    <div className="min-h-screen flex flex-col justify-center">
-      <div className="max-w-4xl mx-auto p-4 w-full">
+    <div className="min-h-screen flex flex-col">
+      <div className="container mx-auto px-4">
         <QuestionHeader 
           currentStep={Math.min(currentStep, selectedQuestions.length)} 
           totalQuestions={selectedQuestions.length} 
         />
-
+      </div>
+      
+      <div className="max-w-4xl mx-auto p-4 w-full flex-grow">
         <QuestionCard
           question={currentQuestion}
           answer={answer}
