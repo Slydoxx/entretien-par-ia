@@ -20,13 +20,11 @@ const QuestionHeader = ({ currentStep, totalQuestions }: QuestionHeaderProps) =>
   };
 
   return (
-    <div className="flex items-center justify-between mb-8">
-      <div className="w-full text-center">
-        <span className="px-4 py-2 rounded-full inline-block bg-white border">
-          Question {Math.min(currentStep, totalQuestions)}/{totalQuestions}
-        </span>
-      </div>
-      <div className="flex gap-2">
+    <div className="flex flex-col items-center justify-center mb-8">
+      <span className="px-4 py-2 rounded-full inline-block bg-white border text-center w-auto">
+        Question {Math.min(currentStep, totalQuestions)}/{totalQuestions}
+      </span>
+      <div className="flex gap-2 mt-4">
         <Button 
           onClick={handleFeedback}
           variant="outline"
@@ -40,7 +38,7 @@ const QuestionHeader = ({ currentStep, totalQuestions }: QuestionHeaderProps) =>
           onClick={handleFinish}
           variant="outline"
           size="sm"
-          className="whitespace-nowrap bg-gray-800 hover:bg-gray-800 text-white"
+          className="whitespace-nowrap bg-[#2A3F54] text-white hover:bg-[#243748]"
         >
           Terminer
         </Button>
