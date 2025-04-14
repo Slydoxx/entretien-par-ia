@@ -18,8 +18,18 @@ const JobDescriptionTabs = ({
   return (
     <Tabs defaultValue="description" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="description">Description du poste</TabsTrigger>
-        <TabsTrigger value="offer">Offre d'emploi</TabsTrigger>
+        <TabsTrigger 
+          value="description" 
+          className="text-[#2A3F54] font-semibold data-[state=active]:bg-[#2A3F54] data-[state=active]:text-white"
+        >
+          Description du poste
+        </TabsTrigger>
+        <TabsTrigger 
+          value="offer" 
+          className="text-[#2A3F54] font-semibold data-[state=active]:bg-[#2A3F54] data-[state=active]:text-white"
+        >
+          Offre d'emploi
+        </TabsTrigger>
       </TabsList>
       
       <TabsContent value="description">
@@ -29,7 +39,7 @@ const JobDescriptionTabs = ({
           onChange={onJobDescriptionChange}
           className="min-h-[200px] p-4 text-base"
         />
-        <div className="text-right text-sm text-gray-500 mt-2">
+        <div className="text-right text-sm text-[#2A3F54] mt-2">
           {5000 - jobDescription.length} caractères restants
         </div>
       </TabsContent>
@@ -41,7 +51,7 @@ const JobDescriptionTabs = ({
           onChange={onJobOfferChange}
           className="min-h-[200px] p-4 text-base"
         />
-        <div className="text-right text-sm text-gray-500 mt-2">
+        <div className="text-right text-sm text-[#2A3F54] mt-2">
           {10000 - jobOffer.length} caractères restants
         </div>
       </TabsContent>
