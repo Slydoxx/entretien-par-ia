@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -19,7 +18,6 @@ const Feedback = () => {
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // États pour les notations par étoiles
   const [jobRelevanceRating, setJobRelevanceRating] = useState(0);
   const [aiFeedbackRating, setAiFeedbackRating] = useState(0);
   const [prototypeRating, setPrototypeRating] = useState(0);
@@ -28,7 +26,6 @@ const Feedback = () => {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // Ici on envoie les données à Supabase
       const { error } = await supabase
         .from('user_feedback')
         .insert({
@@ -50,7 +47,6 @@ const Feedback = () => {
         description: "Votre feedback a été envoyé avec succès.",
       });
       
-      // Rediriger vers la page d'accueil après soumission
       navigate("/");
     } catch (error) {
       console.error("Erreur:", error);
@@ -72,22 +68,21 @@ const Feedback = () => {
         </CardHeader>
         
         <CardContent className="space-y-8">
-          {/* Section de feedback général */}
           <div className="space-y-4">
             <RadioGroup
               value={generalFeedback || ""}
               onValueChange={setGeneralFeedback}
-              className="flex justify-center space-x-8"
+              className="flex justify-center space-x-4"
             >
               <div className="flex flex-col items-center space-y-2">
-                <div className={`rounded-md border border-input p-2 cursor-pointer hover:bg-accent ${generalFeedback === "useful" ? "bg-prepera-blue text-white" : ""}`}>
+                <div className={`rounded-md border border-input p-2 cursor-pointer ${generalFeedback === "useful" ? "bg-prepera-blue text-white" : "bg-white"}`}>
                   <RadioGroupItem value="useful" id="useful" className="hidden" />
                   <Label htmlFor="useful" className="cursor-pointer px-4">C'est utile</Label>
                 </div>
               </div>
               
               <div className="flex flex-col items-center space-y-2">
-                <div className={`rounded-md border border-input p-2 cursor-pointer hover:bg-accent ${generalFeedback === "wrong" ? "bg-prepera-blue text-white" : ""}`}>
+                <div className={`rounded-md border border-input p-2 cursor-pointer ${generalFeedback === "wrong" ? "bg-prepera-blue text-white" : "bg-white"}`}>
                   <RadioGroupItem value="wrong" id="wrong" className="hidden" />
                   <Label htmlFor="wrong" className="cursor-pointer px-4">Quelque chose ne va pas</Label>
                 </div>
@@ -95,7 +90,6 @@ const Feedback = () => {
             </RadioGroup>
           </div>
           
-          {/* Commentaires ou suggestions - déplacés en 2e position */}
           <div className="space-y-2">
             <Label htmlFor="comment" className="font-medium">Avez-vous des commentaires ou des suggestions ?</Label>
             <Textarea 
@@ -107,30 +101,25 @@ const Feedback = () => {
             />
           </div>
 
-          {/* Questions avec notation par étoiles */}
           <div className="space-y-6">
             <h3 className="text-lg font-medium">Sur une échelle de 1 à 5, évaluez les points suivants :</h3>
 
             <div className="space-y-6">
-              {/* Question 1 */}
               <div className="space-y-2">
                 <Label className="font-medium">Les questions étaient-elles adaptées au métier sélectionné ?</Label>
                 <StarRating rating={jobRelevanceRating} onChange={setJobRelevanceRating} />
               </div>
 
-              {/* Question 2 */}
               <div className="space-y-2">
                 <Label className="font-medium">Le feedback de l'IA était-il utile pour vous améliorer ?</Label>
                 <StarRating rating={aiFeedbackRating} onChange={setAiFeedbackRating} />
               </div>
 
-              {/* Question 3 */}
               <div className="space-y-2">
                 <Label className="font-medium">Quelle note donneriez-vous au prototype dans l'état actuel ?</Label>
                 <StarRating rating={prototypeRating} onChange={setPrototypeRating} />
               </div>
 
-              {/* Question 4 */}
               <div className="space-y-2">
                 <Label className="font-medium">Sur une échelle de 1 à 5, dans quelle mesure l'interface est-elle facile à naviguer ?</Label>
                 <StarRating rating={uiNavigationRating} onChange={setUiNavigationRating} />
