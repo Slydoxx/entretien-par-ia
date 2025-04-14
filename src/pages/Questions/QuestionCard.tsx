@@ -1,12 +1,13 @@
 import { useReactMediaRecorder } from "react-media-recorder";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, MessageSquare } from "lucide-react";
 import AnswerInput from "./components/AnswerInput";
 import FeedbackSection from "./components/FeedbackSection";
 import NavigationButtons from "./components/NavigationButtons";
 import generatePDF from "./utils/generatePDF";
 import { useToast } from "@/components/ui/use-toast";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface ResponseData {
   answer: string;
@@ -58,9 +59,9 @@ const QuestionCard = ({
   responses
 }: QuestionCardProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const canDownloadPDF = feedback && !isAnalyzing;
 
-  // Media recorder setup
   const { status, startRecording, stopRecording } = useReactMediaRecorder({
     audio: true,
     onStop: async (blobUrl, blob) => {
@@ -69,7 +70,6 @@ const QuestionCard = ({
     }
   });
 
-  // Remove the permission notification toast
   useEffect(() => {
     if (status === "permission_denied") {
       console.error("Media recorder permission issue:", status);
@@ -84,6 +84,14 @@ const QuestionCard = ({
       sampleResponse,
       job
     });
+  };
+
+  const handleFeedback = () => {
+    navigate("/feedback");
+  };
+
+  const handleFinish = () => {
+    navigate("/feedback");
   };
 
   return (
@@ -143,6 +151,24 @@ const QuestionCard = ({
           </Button>
         </div>
       )}
+
+      <div className="mt-6 flex flex-col sm:flex-row justify-center gap-4">
+        <Button 
+          onClick={handleFeedback}
+          variant="outline"
+          className="w-full sm:w-auto flex items-center gap-2"
+        >
+          <MessageSquare className="w-4 h-4" />
+          Donner mon avis
+        </Button>
+        <Button 
+          onClick={handleFinish}
+          variant="outline"
+          className="w-full sm:w-auto"
+        >
+          Terminer
+        </Button>
+      </div>
     </div>
   );
 };
