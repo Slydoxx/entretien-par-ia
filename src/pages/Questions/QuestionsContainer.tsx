@@ -83,8 +83,8 @@ const QuestionsContainer = () => {
   const currentQuestion = selectedQuestions[currentStep - 1] || "";
 
   return (
-    <div className="flex flex-col min-h-screen pt-4">
-      <div className="max-w-4xl mx-auto px-4 w-full">
+    <div className="min-h-screen flex items-center justify-center py-8">
+      <div className="max-w-4xl w-full px-4">
         <QuestionHeader 
           currentStep={Math.min(currentStep, selectedQuestions.length)} 
           totalQuestions={selectedQuestions.length} 
