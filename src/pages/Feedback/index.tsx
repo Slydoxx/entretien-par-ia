@@ -80,14 +80,14 @@ const Feedback = () => {
               className="flex justify-center space-x-8"
             >
               <div className="flex flex-col items-center space-y-2">
-                <div className="rounded-md border border-input p-2 cursor-pointer hover:bg-accent">
+                <div className={`rounded-md border border-input p-2 cursor-pointer hover:bg-accent ${generalFeedback === "useful" ? "bg-prepera-blue text-white" : ""}`}>
                   <RadioGroupItem value="useful" id="useful" className="hidden" />
                   <Label htmlFor="useful" className="cursor-pointer px-4">C'est utile</Label>
                 </div>
               </div>
               
               <div className="flex flex-col items-center space-y-2">
-                <div className="rounded-md border border-input p-2 cursor-pointer hover:bg-accent">
+                <div className={`rounded-md border border-input p-2 cursor-pointer hover:bg-accent ${generalFeedback === "wrong" ? "bg-prepera-blue text-white" : ""}`}>
                   <RadioGroupItem value="wrong" id="wrong" className="hidden" />
                   <Label htmlFor="wrong" className="cursor-pointer px-4">Quelque chose ne va pas</Label>
                 </div>
@@ -96,7 +96,7 @@ const Feedback = () => {
           </div>
           
           {/* Commentaires ou suggestions - déplacés en 2e position */}
-          <div className="space-y-2 pt-4 border-t">
+          <div className="space-y-2">
             <Label htmlFor="comment" className="font-medium">Avez-vous des commentaires ou des suggestions ?</Label>
             <Textarea 
               id="comment"
@@ -108,7 +108,7 @@ const Feedback = () => {
           </div>
 
           {/* Questions avec notation par étoiles */}
-          <div className="space-y-6 pt-4 border-t">
+          <div className="space-y-6">
             <h3 className="text-lg font-medium">Sur une échelle de 1 à 5, évaluez les points suivants :</h3>
 
             <div className="space-y-6">
