@@ -1,5 +1,7 @@
 
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { MessageSquare } from "lucide-react";
 
 type QuestionHeaderProps = {
   currentStep: number;
@@ -13,6 +15,10 @@ const QuestionHeader = ({ currentStep, totalQuestions }: QuestionHeaderProps) =>
     navigate("/", { replace: true });
   };
 
+  const handleFeedback = () => {
+    navigate("/feedback");
+  };
+
   return (
     <div className="flex items-center justify-between mb-8">
       <div className="flex-1 flex justify-center">
@@ -20,12 +26,25 @@ const QuestionHeader = ({ currentStep, totalQuestions }: QuestionHeaderProps) =>
           Question {Math.min(currentStep, totalQuestions)}/{totalQuestions}
         </span>
       </div>
-      <button 
-        onClick={handleFinish}
-        className="px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors whitespace-nowrap"
-      >
-        Terminer
-      </button>
+      <div className="flex gap-2">
+        <Button 
+          onClick={handleFeedback}
+          variant="outline"
+          size="sm"
+          className="whitespace-nowrap flex items-center gap-1"
+        >
+          <MessageSquare className="w-4 h-4" />
+          Donner mon avis
+        </Button>
+        <Button 
+          onClick={handleFinish}
+          variant="outline"
+          size="sm"
+          className="whitespace-nowrap bg-gray-100 hover:bg-gray-200 text-gray-500"
+        >
+          Terminer
+        </Button>
+      </div>
     </div>
   );
 };

@@ -136,7 +136,7 @@ const Feedback = () => {
             variant="outline"
             onClick={() => navigate("/")}
           >
-            Annuler
+            Passer
           </Button>
           <Button onClick={handleSubmit}>
             Soumettre
