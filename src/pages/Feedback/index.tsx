@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -9,10 +10,12 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import PageContainer from "../SelectQuestions/components/PageContainer";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Feedback = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   const [generalFeedback, setGeneralFeedback] = useState<string | null>(null);
   const [comment, setComment] = useState("");
@@ -63,28 +66,28 @@ const Feedback = () => {
   return (
     <PageContainer>
       <Card className="w-full max-w-4xl mx-auto animate-fade-in">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Qu'en pensez-vous ?</CardTitle>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl md:text-2xl font-bold text-center">Qu'en pensez-vous ?</CardTitle>
         </CardHeader>
         
-        <CardContent className="space-y-8">
+        <CardContent className="space-y-6 md:space-y-8 px-3 md:px-6">
           <div className="space-y-4">
             <RadioGroup
               value={generalFeedback || ""}
               onValueChange={setGeneralFeedback}
               className="flex justify-center space-x-4"
             >
-              <div className="flex flex-col items-center space-y-2">
-                <div className={`rounded-md border border-input p-2 cursor-pointer ${generalFeedback === "useful" ? "bg-prepera-blue text-white" : "bg-white"}`}>
+              <div className="flex flex-col items-center">
+                <div className={`rounded-md border border-input p-2 cursor-pointer transition-colors ${generalFeedback === "useful" ? "bg-prepera-blue text-white" : "bg-white"}`}>
                   <RadioGroupItem value="useful" id="useful" className="hidden" />
-                  <Label htmlFor="useful" className="cursor-pointer px-4">C'est utile</Label>
+                  <Label htmlFor="useful" className="cursor-pointer px-2 md:px-4">C'est utile</Label>
                 </div>
               </div>
               
-              <div className="flex flex-col items-center space-y-2">
-                <div className={`rounded-md border border-input p-2 cursor-pointer ${generalFeedback === "wrong" ? "bg-prepera-blue text-white" : "bg-white"}`}>
+              <div className="flex flex-col items-center">
+                <div className={`rounded-md border border-input p-2 cursor-pointer transition-colors ${generalFeedback === "wrong" ? "bg-prepera-blue text-white" : "bg-white"}`}>
                   <RadioGroupItem value="wrong" id="wrong" className="hidden" />
-                  <Label htmlFor="wrong" className="cursor-pointer px-4">Quelque chose ne va pas</Label>
+                  <Label htmlFor="wrong" className="cursor-pointer px-2 md:px-4 whitespace-nowrap">Quelque chose ne va pas</Label>
                 </div>
               </div>
             </RadioGroup>
@@ -97,52 +100,54 @@ const Feedback = () => {
               placeholder="Partagez vos suggestions"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              className="min-h-[120px]"
+              className="min-h-[100px] md:min-h-[120px]"
             />
           </div>
 
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium">Sur une échelle de 1 à 5, évaluez les points suivants :</h3>
+          <div className="space-y-4 md:space-y-6">
+            <h3 className="text-base md:text-lg font-medium">Sur une échelle de 1 à 5, évaluez les points suivants :</h3>
 
-            <div className="space-y-6">
+            <div className="space-y-5 md:space-y-6">
               <div className="space-y-2">
-                <Label className="font-medium">Les questions étaient-elles adaptées au métier sélectionné ?</Label>
-                <StarRating rating={jobRelevanceRating} onChange={setJobRelevanceRating} />
+                <Label className="font-medium text-sm md:text-base">Les questions étaient-elles adaptées au métier sélectionné ?</Label>
+                <StarRating rating={jobRelevanceRating} onChange={setJobRelevanceRating} size={isMobile ? 20 : 24} />
               </div>
 
               <div className="space-y-2">
-                <Label className="font-medium">Le feedback de l'IA était-il utile pour vous améliorer ?</Label>
-                <StarRating rating={aiFeedbackRating} onChange={setAiFeedbackRating} />
+                <Label className="font-medium text-sm md:text-base">Le feedback de l'IA était-il utile pour vous améliorer ?</Label>
+                <StarRating rating={aiFeedbackRating} onChange={setAiFeedbackRating} size={isMobile ? 20 : 24} />
               </div>
 
               <div className="space-y-2">
-                <Label className="font-medium">Quelle note donneriez-vous au prototype dans l'état actuel ?</Label>
-                <StarRating rating={prototypeRating} onChange={setPrototypeRating} />
+                <Label className="font-medium text-sm md:text-base">Quelle note donneriez-vous au prototype dans l'état actuel ?</Label>
+                <StarRating rating={prototypeRating} onChange={setPrototypeRating} size={isMobile ? 20 : 24} />
               </div>
 
               <div className="space-y-2">
-                <Label className="font-medium">Sur une échelle de 1 à 5, dans quelle mesure l'interface est-elle facile à naviguer ?</Label>
-                <StarRating rating={uiNavigationRating} onChange={setUiNavigationRating} />
+                <Label className="font-medium text-sm md:text-base">Sur une échelle de 1 à 5, dans quelle mesure l'interface est-elle facile à naviguer ?</Label>
+                <StarRating rating={uiNavigationRating} onChange={setUiNavigationRating} size={isMobile ? 20 : 24} />
               </div>
             </div>
           </div>
 
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs md:text-sm text-muted-foreground">
             Les données que vous fournissez nous aident à améliorer notre plateforme.
           </div>
         </CardContent>
         
-        <CardFooter className="flex justify-between">
+        <CardFooter className="flex justify-between pt-2 px-3 md:px-6">
           <Button 
             variant="outline"
             onClick={() => navigate("/")}
             disabled={isSubmitting}
+            className="text-sm md:text-base"
           >
             Passer
           </Button>
           <Button 
             onClick={handleSubmit} 
             disabled={isSubmitting}
+            className="text-sm md:text-base"
           >
             {isSubmitting ? "Envoi en cours..." : "Soumettre"}
           </Button>
