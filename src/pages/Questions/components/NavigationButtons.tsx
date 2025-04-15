@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ChevronRight, ChevronLeft } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type NavigationButtonsProps = {
   currentStep: number;
@@ -21,6 +22,8 @@ const NavigationButtons = ({
   isAnalyzing, 
   isTranscribing 
 }: NavigationButtonsProps) => {
+  const isMobile = useIsMobile();
+
   return (
     <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:justify-between">
       <Button 
@@ -40,7 +43,7 @@ const NavigationButtons = ({
           disabled={currentStep === 1}
         >
           <ChevronLeft className="w-4 h-4 mr-1" />
-          Question précédente
+          {!isMobile && "Question précédente"}
         </Button>
         
         <Button 
@@ -49,7 +52,8 @@ const NavigationButtons = ({
           onClick={handleNextQuestion}
           disabled={currentStep === totalQuestions}
         >
-          Question suivante <ChevronRight className="w-4 h-4 ml-1" />
+          {!isMobile && "Question suivante "}
+          <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
       </div>
     </div>
