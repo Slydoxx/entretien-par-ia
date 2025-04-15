@@ -44,9 +44,12 @@ export type Database = {
           ai_feedback_rating: number | null
           comment: string | null
           created_at: string
+          email: string | null
           general_feedback: string | null
           id: string
           job_relevance_rating: number | null
+          name: string | null
+          phone: string | null
           prototype_rating: number | null
           ui_navigation_rating: number | null
         }
@@ -54,9 +57,12 @@ export type Database = {
           ai_feedback_rating?: number | null
           comment?: string | null
           created_at?: string
+          email?: string | null
           general_feedback?: string | null
           id?: string
           job_relevance_rating?: number | null
+          name?: string | null
+          phone?: string | null
           prototype_rating?: number | null
           ui_navigation_rating?: number | null
         }
@@ -64,9 +70,12 @@ export type Database = {
           ai_feedback_rating?: number | null
           comment?: string | null
           created_at?: string
+          email?: string | null
           general_feedback?: string | null
           id?: string
           job_relevance_rating?: number | null
+          name?: string | null
+          phone?: string | null
           prototype_rating?: number | null
           ui_navigation_rating?: number | null
         }

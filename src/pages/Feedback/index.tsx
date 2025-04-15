@@ -156,13 +156,14 @@ const Feedback = () => {
 
           <div className="space-y-4">
             <h2 className="text-base md:text-lg font-medium">Voulez-vous communiquer vos contacts afin de nous aider à améliorer la fonctionnalité ?</h2>
-            <div className="grid gap-4">
+            <div className="grid gap-4 max-w-md">
               <div className="flex items-center gap-2">
                 <User className="w-5 h-5 text-muted-foreground" />
                 <Input
                   placeholder="Prénom et nom"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  className="border-transparent focus:ring-0 focus:border-transparent"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -172,6 +173,7 @@ const Feedback = () => {
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="border-transparent focus:ring-0 focus:border-transparent"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -181,6 +183,7 @@ const Feedback = () => {
                   placeholder="Numéro de téléphone"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  className="border-transparent focus:ring-0 focus:border-transparent"
                 />
               </div>
             </div>
