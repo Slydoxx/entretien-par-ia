@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -118,7 +118,7 @@ const Feedback = () => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="comment" className="font-medium">Avez-vous des commentaires ou des suggestions ?</Label>
+            <Label htmlFor="comment" className="text-base md:text-lg font-medium">Avez-vous des commentaires ou des suggestions ?</Label>
             <Textarea 
               id="comment"
               placeholder="Partagez vos suggestions"
@@ -129,33 +129,33 @@ const Feedback = () => {
           </div>
 
           <div className="space-y-4 md:space-y-6">
-            <h3 className="text-base md:text-lg font-medium">Sur une échelle de 1 à 5, évaluez les points suivants :</h3>
+            <h2 className="text-base md:text-lg font-medium">Sur une échelle de 1 à 5, évaluez les points suivants :</h2>
 
             <div className="space-y-5 md:space-y-6">
               <div className="space-y-2">
-                <Label className="font-medium text-sm md:text-base">Les questions étaient-elles adaptées au métier sélectionné ?</Label>
+                <Label className="text-base md:text-base">Les questions étaient-elles adaptées au métier sélectionné ?</Label>
                 <StarRating rating={jobRelevanceRating} onChange={setJobRelevanceRating} size={isMobile ? 20 : 24} />
               </div>
 
               <div className="space-y-2">
-                <Label className="font-medium text-sm md:text-base">Le feedback de l'IA était-il utile pour vous améliorer ?</Label>
+                <Label className="text-base md:text-base">Le feedback de l'IA était-il utile pour vous améliorer ?</Label>
                 <StarRating rating={aiFeedbackRating} onChange={setAiFeedbackRating} size={isMobile ? 20 : 24} />
               </div>
 
               <div className="space-y-2">
-                <Label className="font-medium text-sm md:text-base">Quelle note donneriez-vous au prototype dans l'état actuel ?</Label>
+                <Label className="text-base md:text-base">Quelle note donneriez-vous au prototype dans l'état actuel ?</Label>
                 <StarRating rating={prototypeRating} onChange={setPrototypeRating} size={isMobile ? 20 : 24} />
               </div>
 
               <div className="space-y-2">
-                <Label className="font-medium text-sm md:text-base">Dans quelle mesure l'interface est-elle facile à naviguer ?</Label>
+                <Label className="text-base md:text-base">Dans quelle mesure l'interface est-elle facile à naviguer ?</Label>
                 <StarRating rating={uiNavigationRating} onChange={setUiNavigationRating} size={isMobile ? 20 : 24} />
               </div>
             </div>
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-base md:text-lg font-medium">Voulez-vous communiquer vos contacts afin de nous aider à améliorer la fonctionnalité ?</h3>
+            <h2 className="text-base md:text-lg font-medium">Voulez-vous communiquer vos contacts afin de nous aider à améliorer la fonctionnalité ?</h2>
             <div className="grid gap-4">
               <div className="flex items-center gap-2">
                 <User className="w-5 h-5 text-muted-foreground" />
