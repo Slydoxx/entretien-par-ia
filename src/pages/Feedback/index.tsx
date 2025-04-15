@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import StarRating from "@/components/StarRating";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +13,7 @@ import PageContainer from "../SelectQuestions/components/PageContainer";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { trackEvent } from "@/services/analyticsService";
+import { Mail, Phone, User } from "lucide-react";
 
 const Feedback = () => {
   const navigate = useNavigate();
@@ -26,6 +29,11 @@ const Feedback = () => {
   const [prototypeRating, setPrototypeRating] = useState(0);
   const [uiNavigationRating, setUiNavigationRating] = useState(0);
 
+  // New contact fields
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
@@ -37,7 +45,10 @@ const Feedback = () => {
           ai_feedback_rating: aiFeedbackRating || null,
           prototype_rating: prototypeRating || null,
           ui_navigation_rating: uiNavigationRating || null,
-          comment: comment || null
+          comment: comment || null,
+          email: email || null,
+          phone: phone || null,
+          name: name || null
         });
       
       if (error) {
@@ -53,7 +64,8 @@ const Feedback = () => {
           ai_feedback_rating: aiFeedbackRating,
           prototype_rating: prototypeRating,
           ui_navigation_rating: uiNavigationRating,
-          has_comment: !!comment
+          has_comment: !!comment,
+          has_contact_info: !!(email || phone || name)
         }
       });
       
@@ -136,8 +148,40 @@ const Feedback = () => {
               </div>
 
               <div className="space-y-2">
-                <Label className="font-medium text-sm md:text-base">Sur une échelle de 1 à 5, dans quelle mesure l'interface est-elle facile à naviguer ?</Label>
+                <Label className="font-medium text-sm md:text-base">Dans quelle mesure l'interface est-elle facile à naviguer ?</Label>
                 <StarRating rating={uiNavigationRating} onChange={setUiNavigationRating} size={isMobile ? 20 : 24} />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-base md:text-lg font-medium">Voulez-vous communiquer vos contacts afin de nous aider à améliorer la fonctionnalité ?</h3>
+            <div className="grid gap-4">
+              <div className="flex items-center gap-2">
+                <User className="w-5 h-5 text-muted-foreground" />
+                <Input
+                  placeholder="Prénom et nom"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-muted-foreground" />
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="w-5 h-5 text-muted-foreground" />
+                <Input
+                  type="tel"
+                  placeholder="Numéro de téléphone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
               </div>
             </div>
           </div>
