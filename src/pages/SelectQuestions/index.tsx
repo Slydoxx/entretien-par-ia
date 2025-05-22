@@ -10,18 +10,21 @@ import useQuestionGeneration from "./hooks/useQuestionGeneration";
 import { useQuestionSelection } from "./hooks/useQuestionSelection";
 import { trackEvent } from "@/services/analyticsService";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, AlertCircle } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 const SelectQuestions = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { job, description, jobOffer } = location.state || {};
   const [retryAttempt, setRetryAttempt] = useState(0);
+  const { toast } = useToast();
   
   const { 
     questionThemes, 
     isLoading, 
-    generateQuestions 
+    generateQuestions,
+    error
   } = useQuestionGeneration(job, description, jobOffer);
 
   const {
@@ -54,6 +57,10 @@ const SelectQuestions = () => {
   }, [description, navigate, generateQuestions, job, jobOffer, retryAttempt]);
 
   const handleRetry = () => {
+    toast({
+      title: "Génération de nouvelles questions",
+      description: "Nous générons un nouvel ensemble de questions pour vous...",
+    });
     setRetryAttempt(prev => prev + 1);
   };
 
@@ -85,6 +92,23 @@ const SelectQuestions = () => {
       <SelectionHeader onBack={() => navigate('/')} />
 
       <QuestionBox title="Sélectionnez jusqu'à 3 questions d'entretien">
+        {error && (
+          <div className="flex items-center gap-2 p-3 mb-4 rounded-md bg-amber-50 border border-amber-200 text-amber-700">
+            <AlertCircle className="h-4 w-4" />
+            <p className="text-sm">
+              Les questions générées sont des exemples génériques. 
+              <Button 
+                variant="link" 
+                size="sm" 
+                onClick={handleRetry} 
+                className="p-0 h-auto text-sm font-medium underline text-amber-700 hover:text-amber-900"
+              >
+                Réessayez de générer des questions personnalisées
+              </Button>
+            </p>
+          </div>
+        )}
+        
         <QuestionList 
           questionThemes={questionThemes}
           selectedQuestions={selectedQuestions}
@@ -99,8 +123,9 @@ const SelectQuestions = () => {
               size="sm" 
               onClick={handleRetry} 
               className="flex items-center gap-1"
+              disabled={isLoading}
             >
-              <RefreshCw className="h-3.5 w-3.5" />
+              <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
               <span>Générer d'autres questions</span>
             </Button>
           </div>

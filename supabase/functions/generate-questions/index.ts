@@ -18,6 +18,7 @@ serve(async (req) => {
   try {
     // Validate API key first
     if (!openAIApiKey) {
+      console.error('OpenAI API key is missing');
       throw new Error('OpenAI API key is missing. Please set the OPENAI_API_KEY environment variable.');
     }
 
@@ -98,9 +99,16 @@ Renvoie tes résultats au format JSON structuré comme ceci:
 N'inclus aucun autre texte ou explication en dehors de ce JSON.
 `;
 
-    // Implement retry logic for OpenAI API calls
-    const callOpenAI = async (retryCount = 0, maxRetries = 2) => {
+    // Implement retry logic for OpenAI API calls with improved error handling
+    const callOpenAI = async (retryCount = 0, maxRetries = 3) => {
       try {
+        console.log(`Making OpenAI API call, attempt ${retryCount + 1}/${maxRetries + 1}`);
+        
+        // Check for API key before making the request
+        if (!openAIApiKey || openAIApiKey.trim() === "") {
+          throw new Error('OpenAI API key is missing or invalid');
+        }
+        
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -121,7 +129,16 @@ N'inclus aucun autre texte ou explication en dehors de ce JSON.
           const errorData = await response.json();
           console.error(`OpenAI API error (status ${response.status}):`, errorData);
           
-          // If we get a rate limit error (429) or server error (5xx), retry
+          // Enhanced error handling with specific statuses
+          if (response.status === 401) {
+            throw new Error(`Erreur d'authentification: clé API OpenAI invalide ou expirée`);
+          } else if (response.status === 429) {
+            throw new Error(`Limite de l'API atteinte: quota dépassé ou trop de requêtes`);
+          } else if (response.status >= 500) {
+            throw new Error(`Erreur serveur OpenAI: service temporairement indisponible`);
+          }
+          
+          // If we get rate limit error (429) or server error (5xx), retry with exponential backoff
           if ((response.status === 429 || response.status >= 500) && retryCount < maxRetries) {
             // Exponential backoff: wait longer between retries
             const delay = 1000 * Math.pow(2, retryCount);
@@ -137,19 +154,33 @@ N'inclus aucun autre texte ou explication en dehors de ce JSON.
       } catch (error) {
         console.error(`OpenAI API call failed (attempt ${retryCount + 1}):`, error);
         
-        // Retry on network errors
-        if (retryCount < maxRetries && !(error.message && error.message.includes('API key'))) {
+        // Improved error categorization
+        let errorMessage = error.message || 'Unknown error';
+        
+        // Retry on network errors and most API errors, but not on authentication errors
+        if (retryCount < maxRetries && 
+            !errorMessage.includes('API key is missing') && 
+            !errorMessage.includes('API key is invalid') &&
+            !errorMessage.includes('unauthorized')) {
           const delay = 1000 * Math.pow(2, retryCount);
-          console.log(`Retrying after network error in ${delay}ms... (${retryCount + 1}/${maxRetries})`);
+          console.log(`Retrying after error in ${delay}ms... (${retryCount + 1}/${maxRetries})`);
           await new Promise(resolve => setTimeout(resolve, delay));
           return callOpenAI(retryCount + 1, maxRetries);
         }
         
-        throw error;
+        // Rethrow with more specific message based on the error type
+        if (errorMessage.includes('API key')) {
+          throw new Error(`Erreur d'authentification: ${errorMessage}`);
+        } else if (errorMessage.includes('rate limit') || errorMessage.includes('quota')) {
+          throw new Error(`Limite d'API: ${errorMessage}`);
+        } else {
+          throw error;
+        }
       }
     };
 
-    // Call OpenAI with retry logic
+    // Call OpenAI with improved retry logic
+    console.log("Starting OpenAI API call process");
     const data = await callOpenAI();
     let result;
 
@@ -248,6 +279,9 @@ N'inclus aucun autre texte ou explication en dehors de ce JSON.
     } else if (errorMessage.includes('rate limit') || errorMessage.includes('quota')) {
       errorMessage = "Limite d'utilisation de l'API OpenAI atteinte";
       statusCode = 429;
+    } else if (errorMessage.includes('timed out') || errorMessage.includes('timeout')) {
+      errorMessage = "Délai d'attente dépassé lors de la communication avec l'API OpenAI";
+      statusCode = 408;
     }
     
     return new Response(JSON.stringify({ 

@@ -8,13 +8,14 @@ export type QuestionTheme = {
   questions: string[];
 };
 
-const MAX_RETRIES = 2;
-const RETRY_DELAY = 1500; // 1.5 seconds
+const MAX_RETRIES = 3; // Augmenté à 3 pour plus de fiabilité
+const RETRY_DELAY = 2000; // 2 secondes entre chaque retry
 
 const useQuestionGeneration = (job?: string, description?: string, jobOffer?: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const [generatedQuestions, setGeneratedQuestions] = useState<string[]>([]);
   const [questionThemes, setQuestionThemes] = useState<QuestionTheme[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const generateFallbackQuestions = () => {
@@ -46,6 +47,8 @@ const useQuestionGeneration = (job?: string, description?: string, jobOffer?: st
 
   const callGenerateQuestionsAPI = async (retryCount = 0): Promise<any> => {
     try {
+      console.log(`Tentative d'appel API (${retryCount + 1}/${MAX_RETRIES})`);
+      
       const { data, error } = await supabase.functions.invoke('generate-questions', {
         body: {
           jobTitle: job,
@@ -59,12 +62,13 @@ const useQuestionGeneration = (job?: string, description?: string, jobOffer?: st
         throw error;
       }
 
+      console.log("API call successful:", data);
       return data;
     } catch (error) {
       console.error(`Error generating questions (attempt ${retryCount + 1}):`, error);
       
       // If we haven't reached max retries yet, try again after a delay
-      if (retryCount < MAX_RETRIES) {
+      if (retryCount < MAX_RETRIES - 1) {
         console.log(`Retrying... (${retryCount + 1}/${MAX_RETRIES})`);
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
         return callGenerateQuestionsAPI(retryCount + 1);
@@ -79,6 +83,7 @@ const useQuestionGeneration = (job?: string, description?: string, jobOffer?: st
     if (!description) return;
     
     setIsLoading(true);
+    setError(null);
     try {
       const data = await callGenerateQuestionsAPI();
 
@@ -103,6 +108,7 @@ const useQuestionGeneration = (job?: string, description?: string, jobOffer?: st
       }
     } catch (error) {
       console.error('Error generating questions after retries:', error);
+      setError('Erreur lors de la génération des questions');
       
       // Provide fallback questions in case of API failure
       generateFallbackQuestions();
@@ -119,6 +125,8 @@ const useQuestionGeneration = (job?: string, description?: string, jobOffer?: st
           errorMessage = "Délai d'attente dépassé. Des questions génériques ont été chargées.";
         } else if (errorString.includes("quota") || errorString.includes("rate limit")) {
           errorMessage = "Limite de l'API atteinte. Des questions génériques ont été chargées.";
+        } else if (errorString.includes("auth_subrequest_error") || errorString.includes("internal server error")) {
+          errorMessage = "Erreur d'authentification avec l'API. Vérifiez que la clé API est valide. Des questions génériques ont été chargées.";
         }
       }
       
@@ -132,7 +140,13 @@ const useQuestionGeneration = (job?: string, description?: string, jobOffer?: st
     }
   }, [job, description, jobOffer, toast]);
 
-  return { generatedQuestions, questionThemes, isLoading, generateQuestions };
+  return { 
+    generatedQuestions, 
+    questionThemes, 
+    isLoading, 
+    generateQuestions,
+    error
+  };
 };
 
 export default useQuestionGeneration;
