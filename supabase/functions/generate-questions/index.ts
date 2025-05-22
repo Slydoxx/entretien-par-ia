@@ -16,6 +16,11 @@ serve(async (req) => {
   }
 
   try {
+    // Validate API key first
+    if (!openAIApiKey) {
+      throw new Error('OpenAI API key is missing. Please set the OPENAI_API_KEY environment variable.');
+    }
+
     const { jobTitle, jobDescription, jobOffer } = await req.json();
 
     if (!jobTitle && !jobDescription) {
@@ -93,28 +98,59 @@ Renvoie tes résultats au format JSON structuré comme ceci:
 N'inclus aucun autre texte ou explication en dehors de ce JSON.
 `;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: 'Tu es un assistant spécialisé dans les entretiens professionnels pour étudiants en alternance. Tu formules tes questions de façon naturelle et conversationnelle.' },
-          { role: 'user', content: promptContent }
-        ],
-        temperature: 0.7,
-      }),
-    });
+    // Implement retry logic for OpenAI API calls
+    const callOpenAI = async (retryCount = 0, maxRetries = 2) => {
+      try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAIApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+              { role: 'system', content: 'Tu es un assistant spécialisé dans les entretiens professionnels pour étudiants en alternance. Tu formules tes questions de façon naturelle et conversationnelle.' },
+              { role: 'user', content: promptContent }
+            ],
+            temperature: 0.7,
+          }),
+        });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`OpenAI API error: ${JSON.stringify(errorData)}`);
-    }
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error(`OpenAI API error (status ${response.status}):`, errorData);
+          
+          // If we get a rate limit error (429) or server error (5xx), retry
+          if ((response.status === 429 || response.status >= 500) && retryCount < maxRetries) {
+            // Exponential backoff: wait longer between retries
+            const delay = 1000 * Math.pow(2, retryCount);
+            console.log(`Retrying OpenAI API call in ${delay}ms... (${retryCount + 1}/${maxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return callOpenAI(retryCount + 1, maxRetries);
+          }
+          
+          throw new Error(`OpenAI API error: ${JSON.stringify(errorData)}`);
+        }
 
-    const data = await response.json();
+        return await response.json();
+      } catch (error) {
+        console.error(`OpenAI API call failed (attempt ${retryCount + 1}):`, error);
+        
+        // Retry on network errors
+        if (retryCount < maxRetries && !(error.message && error.message.includes('API key'))) {
+          const delay = 1000 * Math.pow(2, retryCount);
+          console.log(`Retrying after network error in ${delay}ms... (${retryCount + 1}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return callOpenAI(retryCount + 1, maxRetries);
+        }
+        
+        throw error;
+      }
+    };
+
+    // Call OpenAI with retry logic
+    const data = await callOpenAI();
     let result;
 
     try {
@@ -201,8 +237,24 @@ N'inclus aucun autre texte ou explication en dehors de ce JSON.
     });
   } catch (error) {
     console.error('Error in generate-questions function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+    
+    let statusCode = 500;
+    let errorMessage = error.message || "Une erreur inconnue s'est produite";
+    
+    // Provide more specific error messages
+    if (errorMessage.includes('API key')) {
+      errorMessage = "Erreur d'authentification avec l'API OpenAI: clé API invalide ou manquante";
+      statusCode = 401;
+    } else if (errorMessage.includes('rate limit') || errorMessage.includes('quota')) {
+      errorMessage = "Limite d'utilisation de l'API OpenAI atteinte";
+      statusCode = 429;
+    }
+    
+    return new Response(JSON.stringify({ 
+      error: errorMessage,
+      detail: error.toString()
+    }), {
+      status: statusCode,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

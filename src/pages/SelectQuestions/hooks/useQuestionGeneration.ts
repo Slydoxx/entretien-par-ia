@@ -8,16 +8,43 @@ export type QuestionTheme = {
   questions: string[];
 };
 
+const MAX_RETRIES = 2;
+const RETRY_DELAY = 1500; // 1.5 seconds
+
 const useQuestionGeneration = (job?: string, description?: string, jobOffer?: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const [generatedQuestions, setGeneratedQuestions] = useState<string[]>([]);
   const [questionThemes, setQuestionThemes] = useState<QuestionTheme[]>([]);
   const { toast } = useToast();
 
-  const generateQuestions = useCallback(async () => {
-    if (!description) return;
+  const generateFallbackQuestions = () => {
+    const fallbackQuestions = [
+      "Pouvez-vous me parler de votre parcours professionnel ?",
+      "Quelles sont vos principales compétences techniques ?",
+      "Comment gérez-vous les situations de stress au travail ?",
+      "Décrivez un projet difficile que vous avez mené à bien.",
+      "Quelles sont vos méthodes pour résoudre les problèmes complexes ?",
+      "Comment travaillez-vous en équipe ?",
+      "Quels sont vos points forts et points à améliorer ?",
+      "Pourquoi êtes-vous intéressé par ce poste ?",
+      "Comment vous tenez-vous informé des évolutions de votre domaine ?",
+      "Où vous voyez-vous dans 5 ans ?",
+      "Quelle a été votre plus grande réussite professionnelle ?",
+      "Comment gérez-vous les conflits au sein d'une équipe ?"
+    ];
     
-    setIsLoading(true);
+    setGeneratedQuestions(fallbackQuestions);
+    
+    // Create fallback themes
+    setQuestionThemes([
+      { name: "Compétences techniques", questions: fallbackQuestions.slice(0, 3) },
+      { name: "Formation et projets académiques", questions: fallbackQuestions.slice(3, 6) },
+      { name: "Soft skills", questions: fallbackQuestions.slice(6, 9) },
+      { name: "Motivation", questions: fallbackQuestions.slice(9, 12) }
+    ]);
+  };
+
+  const callGenerateQuestionsAPI = async (retryCount = 0): Promise<any> => {
     try {
       const { data, error } = await supabase.functions.invoke('generate-questions', {
         body: {
@@ -31,6 +58,29 @@ const useQuestionGeneration = (job?: string, description?: string, jobOffer?: st
         console.error('Questions generation error:', error);
         throw error;
       }
+
+      return data;
+    } catch (error) {
+      console.error(`Error generating questions (attempt ${retryCount + 1}):`, error);
+      
+      // If we haven't reached max retries yet, try again after a delay
+      if (retryCount < MAX_RETRIES) {
+        console.log(`Retrying... (${retryCount + 1}/${MAX_RETRIES})`);
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        return callGenerateQuestionsAPI(retryCount + 1);
+      }
+      
+      // We've exhausted our retries
+      throw error;
+    }
+  };
+
+  const generateQuestions = useCallback(async () => {
+    if (!description) return;
+    
+    setIsLoading(true);
+    try {
+      const data = await callGenerateQuestionsAPI();
 
       if (!data || !data.questions || !Array.isArray(data.questions)) {
         throw new Error('Format de réponse invalide');
@@ -52,36 +102,29 @@ const useQuestionGeneration = (job?: string, description?: string, jobOffer?: st
         ]);
       }
     } catch (error) {
-      console.error('Error generating questions:', error);
-      // Provide some fallback questions in case of API failure
-      const fallbackQuestions = [
-        "Pouvez-vous me parler de votre parcours professionnel ?",
-        "Quelles sont vos principales compétences techniques ?",
-        "Comment gérez-vous les situations de stress au travail ?",
-        "Décrivez un projet difficile que vous avez mené à bien.",
-        "Quelles sont vos méthodes pour résoudre les problèmes complexes ?",
-        "Comment travaillez-vous en équipe ?",
-        "Quels sont vos points forts et points à améliorer ?",
-        "Pourquoi êtes-vous intéressé par ce poste ?",
-        "Comment vous tenez-vous informé des évolutions de votre domaine ?",
-        "Où vous voyez-vous dans 5 ans ?",
-        "Quelle a été votre plus grande réussite professionnelle ?",
-        "Comment gérez-vous les conflits au sein d'une équipe ?"
-      ];
+      console.error('Error generating questions after retries:', error);
       
-      setGeneratedQuestions(fallbackQuestions);
+      // Provide fallback questions in case of API failure
+      generateFallbackQuestions();
       
-      // Create fallback themes
-      setQuestionThemes([
-        { name: "Compétences techniques", questions: fallbackQuestions.slice(0, 3) },
-        { name: "Formation et projets académiques", questions: fallbackQuestions.slice(3, 6) },
-        { name: "Soft skills", questions: fallbackQuestions.slice(6, 9) },
-        { name: "Motivation", questions: fallbackQuestions.slice(9, 12) }
-      ]);
+      // Show more specific error message based on the error type
+      let errorMessage = "Impossible de générer des questions personnalisées. Des questions génériques ont été chargées.";
+      
+      if (error instanceof Error) {
+        const errorString = error.toString().toLowerCase();
+        
+        if (errorString.includes("openai") || errorString.includes("api key")) {
+          errorMessage = "Erreur d'authentification avec l'API OpenAI. Des questions génériques ont été chargées.";
+        } else if (errorString.includes("timeout") || errorString.includes("timed out")) {
+          errorMessage = "Délai d'attente dépassé. Des questions génériques ont été chargées.";
+        } else if (errorString.includes("quota") || errorString.includes("rate limit")) {
+          errorMessage = "Limite de l'API atteinte. Des questions génériques ont été chargées.";
+        }
+      }
       
       toast({
         title: "Erreur de génération",
-        description: "Impossible de générer des questions personnalisées. Des questions génériques ont été chargées.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

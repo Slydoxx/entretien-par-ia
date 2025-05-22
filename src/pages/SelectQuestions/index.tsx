@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PageContainer from "./components/PageContainer";
 import QuestionBox from "./components/QuestionBox";
@@ -8,11 +9,14 @@ import SelectionFooter from "./components/SelectionFooter";
 import useQuestionGeneration from "./hooks/useQuestionGeneration";
 import { useQuestionSelection } from "./hooks/useQuestionSelection";
 import { trackEvent } from "@/services/analyticsService";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 const SelectQuestions = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { job, description, jobOffer } = location.state || {};
+  const [retryAttempt, setRetryAttempt] = useState(0);
   
   const { 
     questionThemes, 
@@ -36,7 +40,8 @@ const SelectQuestions = () => {
         event_type: 'questions_generation_started',
         event_data: {
           job,
-          has_job_offer: !!jobOffer
+          has_job_offer: !!jobOffer,
+          retry_attempt: retryAttempt
         }
       });
       
@@ -46,7 +51,11 @@ const SelectQuestions = () => {
         jobOffer
       }));
     }
-  }, [description, navigate, generateQuestions, job, jobOffer]);
+  }, [description, navigate, generateQuestions, job, jobOffer, retryAttempt]);
+
+  const handleRetry = () => {
+    setRetryAttempt(prev => prev + 1);
+  };
 
   const handleContinue = () => {
     if (!validateSelection()) return;
@@ -82,6 +91,20 @@ const SelectQuestions = () => {
           toggleSelection={toggleQuestionSelection}
           isLoading={isLoading}
         />
+        
+        {!isLoading && questionThemes.length > 0 && questionThemes[0].questions.length > 0 && (
+          <div className="flex justify-center mb-4">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRetry} 
+              className="flex items-center gap-1"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              <span>Générer d'autres questions</span>
+            </Button>
+          </div>
+        )}
         
         <SelectionFooter 
           selectedCount={selectedQuestions.length} 
