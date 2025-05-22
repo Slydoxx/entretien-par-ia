@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import StarRating from "@/components/StarRating";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +19,8 @@ const Feedback = () => {
   
   const [overallRating, setOverallRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
@@ -36,13 +40,13 @@ const Feedback = () => {
         .insert({
           prototype_rating: overallRating,
           comment: comment || null,
+          name: name || null,
+          email: email || null,
           // Keeping these fields in the schema but setting them to null
           job_relevance_rating: null,
           ai_feedback_rating: null,
           ui_navigation_rating: null,
-          email: null,
           phone: null,
-          name: null,
           general_feedback: null
         });
       
@@ -55,7 +59,8 @@ const Feedback = () => {
         event_type: 'feedback_submitted',
         event_data: {
           overall_rating: overallRating,
-          has_comment: !!comment
+          has_comment: !!comment,
+          has_contact_info: !!(name || email)
         }
       });
       
@@ -93,15 +98,44 @@ const Feedback = () => {
           </div>
           
           {overallRating > 0 && (
-            <div className="space-y-2">
-              <p className="text-base">Qu'est-ce qui vous a le plus plu ou déplu ?</p>
-              <Textarea 
-                placeholder="Partagez votre expérience (facultatif)"
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                className="min-h-[80px] border-transparent focus:ring-0 focus:border-transparent"
-              />
-            </div>
+            <>
+              <div className="space-y-2">
+                <p className="text-base">Qu'est-ce qui vous a le plus plu ou déplu ?</p>
+                <Textarea 
+                  placeholder="Partagez votre expérience (facultatif)"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  className="min-h-[80px]"
+                />
+              </div>
+
+              <div className="space-y-3 pt-2 border-t border-gray-100">
+                <p className="text-sm text-muted-foreground">Souhaitez-vous être recontacté ? (facultatif)</p>
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="name" className="sr-only">Nom et prénom</Label>
+                    <Input
+                      id="name"
+                      placeholder="Nom et prénom"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="bg-background border-transparent focus:border-transparent focus:ring-0"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email" className="sr-only">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="bg-background border-transparent focus:border-transparent focus:ring-0"
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
           )}
 
           <div className="text-xs text-muted-foreground text-center">
