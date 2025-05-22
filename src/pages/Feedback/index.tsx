@@ -1,11 +1,7 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import StarRating from "@/components/StarRating";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -13,42 +9,41 @@ import PageContainer from "../SelectQuestions/components/PageContainer";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { trackEvent } from "@/services/analyticsService";
-import { Mail, Phone, User } from "lucide-react";
 
 const Feedback = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
-  const [generalFeedback, setGeneralFeedback] = useState<string | null>(null);
+  const [overallRating, setOverallRating] = useState(0);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const [jobRelevanceRating, setJobRelevanceRating] = useState(0);
-  const [aiFeedbackRating, setAiFeedbackRating] = useState(0);
-  const [prototypeRating, setPrototypeRating] = useState(0);
-  const [uiNavigationRating, setUiNavigationRating] = useState(0);
-
-  // New contact fields
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [name, setName] = useState("");
 
   const handleSubmit = async () => {
+    if (overallRating === 0) {
+      toast({
+        title: "Note requise",
+        description: "Veuillez donner une note avant d'envoyer.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
       const { error } = await supabase
         .from('user_feedback')
         .insert({
-          general_feedback: generalFeedback,
-          job_relevance_rating: jobRelevanceRating || null,
-          ai_feedback_rating: aiFeedbackRating || null,
-          prototype_rating: prototypeRating || null,
-          ui_navigation_rating: uiNavigationRating || null,
+          prototype_rating: overallRating,
           comment: comment || null,
-          email: email || null,
-          phone: phone || null,
-          name: name || null
+          // Keeping these fields in the schema but setting them to null
+          job_relevance_rating: null,
+          ai_feedback_rating: null,
+          ui_navigation_rating: null,
+          email: null,
+          phone: null,
+          name: null,
+          general_feedback: null
         });
       
       if (error) {
@@ -59,13 +54,8 @@ const Feedback = () => {
       trackEvent({
         event_type: 'feedback_submitted',
         event_data: {
-          general_feedback: generalFeedback,
-          job_relevance_rating: jobRelevanceRating,
-          ai_feedback_rating: aiFeedbackRating,
-          prototype_rating: prototypeRating,
-          ui_navigation_rating: uiNavigationRating,
-          has_comment: !!comment,
-          has_contact_info: !!(email || phone || name)
+          overall_rating: overallRating,
+          has_comment: !!comment
         }
       });
       
@@ -89,126 +79,51 @@ const Feedback = () => {
 
   return (
     <PageContainer>
-      <Card className="w-full max-w-4xl mx-auto animate-fade-in">
+      <Card className="w-full max-w-lg mx-auto animate-fade-in">
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl md:text-2xl font-bold text-center">Qu'en pensez-vous ?</CardTitle>
+          <CardTitle className="text-xl font-bold text-center">Qu'en pensez-vous ?</CardTitle>
         </CardHeader>
         
-        <CardContent className="space-y-6 md:space-y-8 px-3 md:px-6">
-          <div className="space-y-4">
-            <RadioGroup
-              value={generalFeedback || ""}
-              onValueChange={setGeneralFeedback}
-              className="flex flex-wrap justify-center gap-3"
-            >
-              <div className="flex flex-col items-center">
-                <div className={`rounded-md border border-input p-2 cursor-pointer transition-colors ${generalFeedback === "useful" ? "bg-prepera-blue text-white" : "bg-white"}`}>
-                  <RadioGroupItem value="useful" id="useful" className="hidden" />
-                  <Label htmlFor="useful" className="cursor-pointer px-3 py-1 whitespace-nowrap">C'est utile</Label>
-                </div>
-              </div>
-              
-              <div className="flex flex-col items-center">
-                <div className={`rounded-md border border-input p-2 cursor-pointer transition-colors ${generalFeedback === "wrong" ? "bg-prepera-blue text-white" : "bg-white"}`}>
-                  <RadioGroupItem value="wrong" id="wrong" className="hidden" />
-                  <Label htmlFor="wrong" className="cursor-pointer px-3 py-1 whitespace-nowrap">Quelque chose ne va pas</Label>
-                </div>
-              </div>
-            </RadioGroup>
+        <CardContent className="space-y-6 px-4">
+          <div className="space-y-3">
+            <p className="text-base font-medium">Sur une échelle de 1 à 5, comment évalueriez-vous votre expérience globale avec ce prototype ?</p>
+            <div className="flex justify-center">
+              <StarRating rating={overallRating} onChange={setOverallRating} size={isMobile ? 32 : 36} />
+            </div>
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="comment" className="text-base md:text-lg font-medium">Avez-vous des commentaires ou des suggestions ?</Label>
-            <Textarea 
-              id="comment"
-              placeholder="Partagez vos suggestions"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              className="min-h-[100px] md:min-h-[120px]"
-            />
-          </div>
-
-          <div className="space-y-4 md:space-y-6">
-            <h2 className="text-base md:text-lg font-medium">Sur une échelle de 1 à 5, évaluez les points suivants :</h2>
-
-            <div className="space-y-5 md:space-y-6">
-              <div className="space-y-2">
-                <Label className="text-base md:text-base">Les questions étaient-elles adaptées au métier sélectionné ?</Label>
-                <StarRating rating={jobRelevanceRating} onChange={setJobRelevanceRating} size={isMobile ? 20 : 24} />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-base md:text-base">Le feedback de l'IA était-il utile pour vous améliorer ?</Label>
-                <StarRating rating={aiFeedbackRating} onChange={setAiFeedbackRating} size={isMobile ? 20 : 24} />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-base md:text-base">Quelle note donneriez-vous au prototype dans l'état actuel ?</Label>
-                <StarRating rating={prototypeRating} onChange={setPrototypeRating} size={isMobile ? 20 : 24} />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-base md:text-base">Dans quelle mesure l'interface est-elle facile à naviguer ?</Label>
-                <StarRating rating={uiNavigationRating} onChange={setUiNavigationRating} size={isMobile ? 20 : 24} />
-              </div>
+          {overallRating > 0 && (
+            <div className="space-y-2">
+              <p className="text-base">Qu'est-ce qui vous a le plus plu ou déplu ?</p>
+              <Textarea 
+                placeholder="Partagez votre expérience (facultatif)"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                className="min-h-[80px] border-transparent focus:ring-0 focus:border-transparent"
+              />
             </div>
-          </div>
+          )}
 
-          <div className="space-y-4">
-            <h2 className="text-base md:text-lg font-medium">Voulez-vous communiquer vos contacts afin de nous aider à améliorer la fonctionnalité ?</h2>
-            <div className="grid gap-4 max-w-md">
-              <div className="flex items-center gap-2">
-                <User className="w-5 h-5 text-muted-foreground" />
-                <Input
-                  placeholder="Prénom et nom"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="border-transparent focus:ring-0 focus:border-transparent"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="w-5 h-5 text-muted-foreground" />
-                <Input
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="border-transparent focus:ring-0 focus:border-transparent"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-5 h-5 text-muted-foreground" />
-                <Input
-                  type="tel"
-                  placeholder="Numéro de téléphone"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="border-transparent focus:ring-0 focus:border-transparent"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="text-xs md:text-sm text-muted-foreground">
-            Les données que vous fournissez nous aident à améliorer notre plateforme.
+          <div className="text-xs text-muted-foreground text-center">
+            Votre avis nous aide à améliorer notre plateforme
           </div>
         </CardContent>
         
-        <CardFooter className="flex justify-between pt-2 px-3 md:px-6">
+        <CardFooter className="flex justify-between pt-2 px-4">
           <Button 
-            variant="outline"
+            variant="ghost"
             onClick={() => navigate("/")}
             disabled={isSubmitting}
-            className="text-sm md:text-base"
+            className="text-sm"
           >
-            Passer
+            Ignorer
           </Button>
           <Button 
             onClick={handleSubmit} 
-            disabled={isSubmitting}
-            className="text-sm md:text-base"
+            disabled={isSubmitting || overallRating === 0}
+            className="text-sm"
           >
-            {isSubmitting ? "Envoi en cours..." : "Soumettre"}
+            {isSubmitting ? "Envoi en cours..." : "Envoyer"}
           </Button>
         </CardFooter>
       </Card>
